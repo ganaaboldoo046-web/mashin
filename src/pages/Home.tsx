@@ -43,6 +43,8 @@ export default function Home() {
                 <Banner />
                 <Categories />
 
+                <FeaturedCars />
+
                 {/* Dynamically render category sections */}
                 {categories.map(category => (
                     <CategorySection
@@ -52,17 +54,6 @@ export default function Home() {
                     />
                 ))}
 
-                {/* Keep FeaturedCars as "New Listings" or similar if needed, or remove if redundant. 
-                    User asked to make "like New Listings", not replace it necessarily, but "New Listings" is just latest?
-                    FeaturedCars currently shows *all* active cars. 
-                    Let's keep FeaturedCars as "Шинэ зар" (New Listings) at the top or bottom?
-                    The user said "Make it appear on the main page *like* New Listings".
-                    Usually "New Listings" is a special section.
-                    I will keep FeaturedCars but maybe move it or rename it?
-                    Actually, FeaturedCars fetches its own data.
-                    Let's keep it for now as a general "New Arrivals" section.
-                */}
-                <FeaturedCars />
 
                 <NewsSection />
                 <Footer />
