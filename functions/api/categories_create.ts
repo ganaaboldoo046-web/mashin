@@ -14,6 +14,10 @@ export async function onRequest(context: any) {
             )
         `).run();
 
+        try {
+            await db.prepare("ALTER TABLE categories ADD COLUMN sort_order INTEGER DEFAULT 0").run();
+        } catch (e) { /* ignore if exists */ }
+
         const data = await request.json();
         const { id, name, icon, image } = data;
 

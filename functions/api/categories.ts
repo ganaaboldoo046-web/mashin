@@ -14,6 +14,11 @@ export async function onRequest(context: any) {
             )
         `).run();
 
+        // Migration: Add sort_order if missing
+        try {
+            await db.prepare("ALTER TABLE categories ADD COLUMN sort_order INTEGER DEFAULT 0").run();
+        } catch (e) { /* ignore if exists */ }
+
         const { results } = await db.prepare("SELECT * FROM categories ORDER BY sort_order ASC, id ASC").all();
         return new Response(JSON.stringify(results || []), {
             headers: { "Content-Type": "application/json" }

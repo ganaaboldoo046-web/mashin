@@ -7,6 +7,10 @@ export async function onRequest(context: any) {
     }
 
     try {
+        await db.prepare("ALTER TABLE categories ADD COLUMN sort_order INTEGER DEFAULT 0").run();
+    } catch (e) { /* ignore if exists */ }
+
+    try {
         const { ids } = await request.json();
         if (!Array.isArray(ids)) {
             return new Response(JSON.stringify({ error: "IDs array required" }), { status: 400 });

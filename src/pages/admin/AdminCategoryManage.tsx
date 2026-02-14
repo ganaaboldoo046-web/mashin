@@ -131,8 +131,8 @@ export default function AdminCategoryManage() {
         <div className="max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Ангилал удирдах</h2>
-                    <p className="text-sm text-slate-500 mt-1">Картуудыг чирж 순서를 өөрчилж болно</p>
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Ангилал удир닥</h2>
+                    <p className="text-sm text-slate-500 mt-1">Картуудыг чирж дарааллыг өөрчилж болно</p>
                 </div>
                 {!isAdding && (
                     <button
