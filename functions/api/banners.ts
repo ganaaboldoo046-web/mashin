@@ -1,4 +1,10 @@
-export async function onRequest(context: any) {
+import { D1Database, EventContext } from "@cloudflare/workers-types";
+
+interface Env {
+    DB: D1Database;
+}
+
+export async function onRequest(context: EventContext<Env>) {
     const { env, request } = context;
     const db = env.DB;
 

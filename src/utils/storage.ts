@@ -99,6 +99,10 @@ export const saveBanner = async (banner: Partial<Banner>) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(banner)
     });
+    if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to save banner');
+    }
     return res.json();
 };
 
@@ -108,6 +112,10 @@ export const deleteBanner = async (id: number) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id })
     });
+    if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to delete banner');
+    }
     return res.json();
 };
 
@@ -116,7 +124,7 @@ export const getCategories = async (): Promise<Category[]> => {
         const res = await fetch(`${API_BASE}/categories`);
         if (!res.ok) throw new Error('Failed to fetch categories');
         const data = await res.json();
-        return data;
+        return Array.isArray(data) ? data : [];
     } catch (e) {
         console.error(e);
         return [];
@@ -129,6 +137,10 @@ export const createCategory = async (category: Partial<Category>) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(category)
     });
+    if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to save category');
+    }
     return res.json();
 };
 
@@ -140,6 +152,10 @@ export const deleteCategory = async (id: number) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id })
     });
+    if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to delete category');
+    }
     return res.json();
 };
 
@@ -148,6 +164,7 @@ export const getProducts = async (): Promise<Product[]> => {
         const res = await fetch(`${API_BASE}/products`);
         if (!res.ok) throw new Error('Failed to fetch products');
         const data = await res.json();
+        if (!Array.isArray(data)) return [];
         return data.map((p: any) => ({
             ...p,
             images: typeof p.images === 'string' ? JSON.parse(p.images) : p.images,
@@ -166,6 +183,10 @@ export const saveProduct = async (product: Omit<Product, 'id'>) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(product)
     });
+    if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to save product');
+    }
     return res.json();
 };
 

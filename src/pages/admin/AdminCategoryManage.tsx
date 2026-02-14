@@ -70,9 +70,9 @@ export default function AdminCategoryManage() {
             const updated = await getCategories();
             setCategories(updated);
             handleCancel();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Save failed:', err);
-            alert('Хадгалахад алдаа гарлаа.');
+            alert(`Хадгалахад алдаа гарлаа: ${err.message || 'Тодорхойгүй алдаа'}`);
         } finally {
             setLoading(false);
         }

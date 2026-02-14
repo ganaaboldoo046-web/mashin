@@ -72,9 +72,9 @@ export default function AdminBannerManage() {
             const updated = await getBanners();
             setBanners(updated);
             handleCancel();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Save failed:', err);
-            alert('Хадгалахад алдаа гарлаа.');
+            alert(`Хадгалахад алдаа гарлаа: ${err.message || 'Тодорхойгүй алдаа'}`);
         } finally {
             setLoading(false);
         }
