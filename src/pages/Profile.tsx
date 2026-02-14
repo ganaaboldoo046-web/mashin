@@ -168,7 +168,7 @@ export default function Profile() {
         <div className="pb-24 min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-white flex flex-col items-center justify-center p-6">
             <div className="w-full max-w-sm">
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-primary mb-2">Somang</h1>
+                    <h1 className="text-3xl font-bold text-primary mb-2">Temmun</h1>
                     <p className="text-slate-500 dark:text-slate-400">Тавтай морилно уу</p>
                 </div>
 

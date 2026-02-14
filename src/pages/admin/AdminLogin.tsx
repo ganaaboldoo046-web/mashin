@@ -13,7 +13,7 @@ export default function AdminLogin() {
 
         // Simple mock authentication
         // In a real app, this would verify with a backend
-        if (email === 'admin@somang.com' && password === 'admin123') {
+        if (email === 'admin@temmun.com' && password === 'admin123') {
             localStorage.setItem('isAdmin', 'true');
             // Navigate to admin dashboard
             navigate('/admin');
@@ -26,7 +26,7 @@ export default function AdminLogin() {
         <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 px-4">
             <div className="max-w-md w-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8">
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-primary mb-2">Somang Admin</h1>
+                    <h1 className="text-3xl font-bold text-primary mb-2">Temmun Admin</h1>
                     <p className="text-slate-500 dark:text-slate-400">Нэвтрэх хэсэг</p>
                 </div>
 
@@ -46,7 +46,7 @@ export default function AdminLogin() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium"
-                            placeholder="admin@somang.com"
+                            placeholder="admin@temmun.com"
                             required
                         />
                     </div>

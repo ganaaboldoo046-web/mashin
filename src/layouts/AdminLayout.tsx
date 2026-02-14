@@ -34,7 +34,7 @@ export default function AdminLayout() {
                 flex
             `}>
                 <div className="h-16 flex items-center justify-between px-6 border-b border-slate-200 dark:border-slate-800">
-                    <h1 className="text-xl font-bold text-primary">Somang Admin</h1>
+                    <h1 className="text-xl font-bold text-primary">Temmun Admin</h1>
                     <button
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="md:hidden text-slate-500"
