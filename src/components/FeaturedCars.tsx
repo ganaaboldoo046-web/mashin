@@ -1,21 +1,35 @@
 import { useEffect, useState } from 'react';
 import { getProducts } from '../utils/storage';
-import type { Product } from '../utils/storage';
+import { getProducts, getCategories } from '../utils/storage'; // Added getCategories
+import type { Product, Category } from '../utils/storage'; // Added Category type
 
 export default function FeaturedCars() {
     const [cars, setCars] = useState<Product[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]); // Added categories state
 
     useEffect(() => {
-        const loadCars = () => {
-            // For now, just show all active products, formatted for display
-            // In a real app, you might filter by 'featured' flag or sort by date
-            const allProducts = getProducts();
+        const loadCars = async () => {
+            const allProducts = await getProducts();
             setCars(allProducts.filter(p => p.status === 'active'));
         };
 
         loadCars();
-        window.addEventListener('productsUpdated', loadCars);
-        return () => window.removeEventListener('productsUpdated', loadCars);
+        window.addEventListener('storageProducts', loadCars);
+        return () => window.removeEventListener('storageProducts', loadCars);
+    }, []);
+
+    // New useEffect block for loading categories
+    useEffect(() => {
+        const loadCategories = async () => {
+            const data = await getCategories();
+            setCategories(data);
+        };
+
+        loadCategories();
+
+        // Listen for updates from Admin panel
+        window.addEventListener('storageCategories', loadCategories);
+        return () => window.removeEventListener('storageCategories', loadCategories);
     }, []);
 
     if (cars.length === 0) return null;

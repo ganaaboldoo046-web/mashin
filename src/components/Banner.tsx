@@ -18,9 +18,9 @@ export default function Banner() {
     ];
 
     useEffect(() => {
-        const loadBanners = () => {
-            const allBanners = getBanners();
-            // If no banners in storage, use default for display (though getBanners usually handles this)
+        const loadBanners = async () => {
+            const allBanners = await getBanners();
+            // If no banners in storage, use default for display
             if (allBanners.length === 0) {
                 setBanners(defaultBanners);
             } else {
@@ -30,8 +30,8 @@ export default function Banner() {
 
         loadBanners();
 
-        window.addEventListener('bannersUpdated', loadBanners);
-        return () => window.removeEventListener('bannersUpdated', loadBanners);
+        window.addEventListener('storageBanners', loadBanners);
+        return () => window.removeEventListener('storageBanners', loadBanners);
     }, []);
 
     if (banners.length === 0) return null;

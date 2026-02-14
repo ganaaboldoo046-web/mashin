@@ -5,15 +5,16 @@ export default function Categories() {
     const [categories, setCategories] = useState<Category[]>([]);
 
     useEffect(() => {
-        const loadCategories = () => {
-            setCategories(getCategories());
+        const loadCategories = async () => {
+            const data = await getCategories();
+            setCategories(data);
         };
 
         loadCategories();
 
         // Listen for updates from Admin panel
-        window.addEventListener('categoriesUpdated', loadCategories);
-        return () => window.removeEventListener('categoriesUpdated', loadCategories);
+        window.addEventListener('storageCategories', loadCategories);
+        return () => window.removeEventListener('storageCategories', loadCategories);
     }, []);
 
     if (categories.length === 0) return null;
