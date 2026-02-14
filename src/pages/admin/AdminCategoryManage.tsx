@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getCategories, saveCategory, deleteCategory, uploadImage } from '../../utils/storage';
+import { getCategories, saveCategory, deleteCategory, uploadImage, reorderCategories } from '../../utils/storage';
 import type { Category } from '../../utils/storage';
 import { convertToWebP } from '../../utils/image';
 
@@ -10,11 +10,14 @@ export default function AdminCategoryManage() {
     const [newCategory, setNewCategory] = useState<Partial<Category>>({ name: '', icon: 'category', image: '' });
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
+    const [draggedItem, setDraggedItem] = useState<number | null>(null);
+
+    const fetchCategories = async () => {
+        const data = await getCategories();
+        setCategories(data);
+    };
 
     useEffect(() => {
-        const fetchCategories = async () => {
-            setCategories(await getCategories());
-        };
         fetchCategories();
     }, []);
 
@@ -67,8 +70,7 @@ export default function AdminCategoryManage() {
             };
 
             await saveCategory(editingId ? { ...categoryData, id: editingId } : categoryData);
-            const updated = await getCategories();
-            setCategories(updated);
+            await fetchCategories();
             handleCancel();
         } catch (err: any) {
             console.error('Save failed:', err);
@@ -82,12 +84,44 @@ export default function AdminCategoryManage() {
         if (window.confirm('Энэ ангиллыг устгахдаа итгэлтэй байна уу?')) {
             try {
                 await deleteCategory(id);
-                const updated = await getCategories();
-                setCategories(updated);
+                await fetchCategories();
             } catch (err) {
                 console.error('Delete failed:', err);
-                alert('Устгахад алдаа гарлаа.');
+                alert('Устгахад ал다а гарлаа.');
             }
+        }
+    };
+
+    // Drag and Drop Handlers
+    const onDragStart = (e: React.DragEvent, id: number) => {
+        setDraggedItem(id);
+        e.dataTransfer.effectAllowed = 'move';
+    };
+
+    const onDragOver = (e: React.DragEvent, id: number) => {
+        e.preventDefault();
+        if (draggedItem === null || draggedItem === id) return;
+
+        const draggedIdx = categories.findIndex(c => c.id === draggedItem);
+        const overIdx = categories.findIndex(c => c.id === id);
+
+        const newItems = [...categories];
+        const item = newItems.splice(draggedIdx, 1)[0];
+        newItems.splice(overIdx, 0, item);
+
+        setCategories(newItems);
+    };
+
+    const onDragEnd = async () => {
+        if (draggedItem === null) return;
+        setDraggedItem(null);
+
+        try {
+            const ids = categories.map(c => c.id);
+            await reorderCategories(ids);
+        } catch (err) {
+            console.error('Reorder failed:', err);
+            await fetchCategories(); // Revert to server state
         }
     };
 
@@ -96,7 +130,10 @@ export default function AdminCategoryManage() {
     return (
         <div className="max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Ангилал удирдах</h2>
+                <div>
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Ангилал удирдах</h2>
+                    <p className="text-sm text-slate-500 mt-1">Картуудыг чирж 순서를 өөрчилж болно</p>
+                </div>
                 {!isAdding && (
                     <button
                         onClick={() => setIsAdding(true)}
@@ -111,7 +148,7 @@ export default function AdminCategoryManage() {
             {isAdding && (
                 <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 mb-8">
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">
-                        {editingId ? 'Ангилал засах' : 'Шинэ ангилал нэмэх'}
+                        {editingId ? 'Ангилал засах' : 'Ш인э ангилал нэмэх'}
                     </h3>
                     <div className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -180,23 +217,30 @@ export default function AdminCategoryManage() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {categories.map(cat => (
-                    <div key={cat.id} className="bg-white dark:bg-slate-800 p-4 rounded-3xl border border-slate-100 dark:border-slate-700 group hover:border-primary transition-colors">
+                    <div
+                        key={cat.id}
+                        draggable
+                        onDragStart={(e) => onDragStart(e, cat.id)}
+                        onDragOver={(e) => onDragOver(e, cat.id)}
+                        onDragEnd={onDragEnd}
+                        className={`bg-white dark:bg-slate-800 p-4 rounded-3xl border ${draggedItem === cat.id ? 'border-primary border-2 opacity-50 scale-95 shadow-none' : 'border-slate-100 dark:border-slate-700'} group hover:border-primary transition-all cursor-move`}
+                    >
                         <div className="flex flex-col items-center text-center">
                             <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                 <span className="material-symbols-outlined text-3xl">{cat.icon}</span>
                             </div>
-                            <h4 className="font-bold text-slate-900 dark:text-white mb-1">{cat.name}</h4>
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{cat.count} машин</p>
+                            <h4 className="font-bold text-slate-900 dark:text-white mb-1 leading-tight">{cat.name}</h4>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{cat.count} машин</p>
 
                             <div className="flex items-center gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button
-                                    onClick={() => startEdit(cat)}
+                                    onClick={(e) => { e.stopPropagation(); startEdit(cat); }}
                                     className="p-2 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-400 hover:text-primary transition-colors"
                                 >
                                     <span className="material-symbols-outlined text-lg">edit</span>
                                 </button>
                                 <button
-                                    onClick={() => handleDelete(cat.id)}
+                                    onClick={(e) => { e.stopPropagation(); handleDelete(cat.id); }}
                                     className="p-2 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-400 hover:text-red-500 transition-colors"
                                 >
                                     <span className="material-symbols-outlined text-lg">delete</span>

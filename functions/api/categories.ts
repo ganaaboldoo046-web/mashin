@@ -9,11 +9,12 @@ export async function onRequest(context: any) {
                 name TEXT NOT NULL,
                 icon TEXT,
                 image TEXT,
-                count INTEGER DEFAULT 0
+                count INTEGER DEFAULT 0,
+                sort_order INTEGER DEFAULT 0
             )
         `).run();
 
-        const { results } = await db.prepare("SELECT * FROM categories").all();
+        const { results } = await db.prepare("SELECT * FROM categories ORDER BY sort_order ASC, id ASC").all();
         return new Response(JSON.stringify(results || []), {
             headers: { "Content-Type": "application/json" }
         });

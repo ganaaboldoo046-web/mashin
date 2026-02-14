@@ -9,7 +9,8 @@ export async function onRequest(context: any) {
                 name TEXT NOT NULL,
                 icon TEXT,
                 image TEXT,
-                count INTEGER DEFAULT 0
+                count INTEGER DEFAULT 0,
+                sort_order INTEGER DEFAULT 0
             )
         `).run();
 

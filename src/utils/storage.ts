@@ -144,6 +144,19 @@ export const createCategory = async (category: Partial<Category>) => {
     return res.json();
 };
 
+export const reorderCategories = async (ids: number[]) => {
+    const res = await fetch(`${API_BASE}/categories_reorder`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids })
+    });
+    if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to reorder categories');
+    }
+    return res.json();
+};
+
 export const saveCategory = createCategory;
 
 export const deleteCategory = async (id: number) => {
