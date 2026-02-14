@@ -17,23 +17,27 @@ export default function ProductDetail() {
         // Scroll to top when component mounts or id changes
         window.scrollTo(0, 0);
 
-        if (id) {
-            const products = getProducts();
-            const found = products.find(p => p.id === Number(id));
-            setProduct(found || null);
+        const loadData = async () => {
+            if (id) {
+                const products = await getProducts();
+                const found = products.find(p => p.id === Number(id));
+                setProduct(found || null);
 
-            if (found) {
-                // Add to recently viewed
-                addToRecentlyViewed(found.id);
+                if (found) {
+                    // Add to recently viewed
+                    addToRecentlyViewed(found.id);
 
-                // Find similar products: same category, not current product
-                const similar = products
-                    .filter(p => p.categoryId === found.categoryId && p.id !== found.id)
-                    .slice(0, 5); // Limit to 5 items
-                setSimilarProducts(similar);
+                    // Find similar products: same category, not current product
+                    const similar = products
+                        .filter(p => p.categoryId === found.categoryId && p.id !== found.id)
+                        .slice(0, 5); // Limit to 5 items
+                    setSimilarProducts(similar);
+                }
             }
-        }
-        setLoading(false);
+            setLoading(false);
+        };
+
+        loadData();
     }, [id]);
 
     if (loading) return <div className="h-screen flex items-center justify-center bg-white dark:bg-background-dark text-slate-500">Loading...</div>;
