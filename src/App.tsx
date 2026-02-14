@@ -6,6 +6,7 @@ import Saved from './pages/Saved';
 import Profile from './pages/Profile';
 import ProductDetail from './pages/ProductDetail';
 import CategoryDetail from './pages/CategoryDetail';
+import About from './pages/About';
 import AdminLayout from './layouts/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProductList from './pages/admin/AdminProductList';
@@ -24,6 +25,7 @@ function App() {
         <Route path="/sell" element={<Sell />} />
         <Route path="/saved" element={<Saved />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/about" element={<About />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/category/:id" element={<CategoryDetail />} />
 

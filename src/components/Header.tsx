@@ -9,7 +9,7 @@ export default function Header() {
             <header className="sticky top-0 z-50 flex items-center bg-white dark:bg-background-dark px-4 py-3 justify-between border-b border-slate-200 dark:border-slate-800">
                 {/* Logo Image */}
                 <div className="flex-1 flex items-center justify-start">
-                    <img src="/logo.png" alt="Temmun Trading" className="h-8 object-contain" />
+                    <img src="/logo.png" alt="Temmun Trading" className="h-10 object-contain" />
                 </div>
 
                 <div className="flex items-center gap-2">
