@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 import { getProducts } from '../utils/storage';
-import { getProducts, getCategories } from '../utils/storage'; // Added getCategories
-import type { Product, Category } from '../utils/storage'; // Added Category type
+import type { Product } from '../utils/storage';
 
 export default function FeaturedCars() {
     const [cars, setCars] = useState<Product[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]); // Added categories state
 
     useEffect(() => {
         const loadCars = async () => {
@@ -16,20 +14,6 @@ export default function FeaturedCars() {
         loadCars();
         window.addEventListener('storageProducts', loadCars);
         return () => window.removeEventListener('storageProducts', loadCars);
-    }, []);
-
-    // New useEffect block for loading categories
-    useEffect(() => {
-        const loadCategories = async () => {
-            const data = await getCategories();
-            setCategories(data);
-        };
-
-        loadCategories();
-
-        // Listen for updates from Admin panel
-        window.addEventListener('storageCategories', loadCategories);
-        return () => window.removeEventListener('storageCategories', loadCategories);
     }, []);
 
     if (cars.length === 0) return null;
