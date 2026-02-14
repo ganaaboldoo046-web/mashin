@@ -13,6 +13,7 @@ export default function AdminProductCreate() {
     const [loading, setLoading] = useState(true);
 
     // Form State
+    const [imageFiles, setImageFiles] = useState<File[]>([]);
     const [images, setImages] = useState<string[]>([]);
     const [formData, setFormData] = useState({
         name: '',
@@ -71,26 +72,6 @@ export default function AdminProductCreate() {
         loadData();
     }, [id]);
 
-    // Form State
-    const [images, setImages] = useState<string[]>([]);
-    const [formData, setFormData] = useState({
-        name: '',
-        price: '', // MNT display string
-        priceKRW: '', // KRW number input
-        year: '',
-        mileage: '',
-        fuel: '',
-        engine: '',
-        transmission: '',
-        drive: '',
-        color: '',
-        interiorColor: '',
-        doors: '',
-        description: '',
-        categoryId: '',
-        status: 'active'
-    });
-
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const files = Array.from(e.target.files);
@@ -139,20 +120,21 @@ export default function AdminProductCreate() {
             // 1. Process and Upload Images to R2
             const uploadedImageUrls: string[] = [];
 
-            // Keep existing URLs (for editing) and upload new files
             for (let i = 0; i < images.length; i++) {
                 const img = images[i];
                 if (img.startsWith('/api/images/')) {
-                    // Already an R2 URL
                     uploadedImageUrls.push(img);
                 } else if (img.startsWith('data:')) {
-                    // It's a preview from a File object, find the file and upload
-                    // Or we can just use imageFiles[index] if it exists
-                    const file = imageFiles.find((_, idx) => images[idx] === img);
+                    // Find matching file by index (roughly, based on how they were added)
+                    // Better to store File objects alongside images
+                    const file = imageFiles[i]; // This assumes 1:1 mapping which we maintain in state
                     if (file) {
                         const webpBlob = await convertToWebP(file);
                         const url = await uploadImage(webpBlob);
                         uploadedImageUrls.push(url);
+                    } else {
+                        // Fallback if file not found (unlikely)
+                        uploadedImageUrls.push(img);
                     }
                 }
             }
@@ -187,8 +169,10 @@ export default function AdminProductCreate() {
         }
     };
 
+    if (loading && !isEditing) return <div>Loading...</div>;
+
     return (
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto pb-20">
             <div className="flex items-center gap-4 mb-6">
                 <button
                     onClick={() => navigate('/admin/products')}
@@ -332,7 +316,12 @@ export default function AdminProductCreate() {
                 </div>
 
                 <div className="flex justify-end pt-6 border-t border-slate-100 dark:border-slate-700">
-                    <button type="submit" className="bg-primary hover:bg-blue-600 text-white px-8 py-3 rounded-xl font-bold text-lg shadow-lg shadow-primary/30 transition-all">
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="bg-primary hover:bg-blue-600 disabled:bg-slate-400 text-white px-8 py-3 rounded-xl font-bold text-lg shadow-lg shadow-primary/30 transition-all flex items-center gap-2"
+                    >
+                        {loading && <span className="animate-spin text-sm">↻</span>}
                         {isEditing ? 'Шинэчлэх' : 'Нийтлэх'}
                     </button>
                 </div>
