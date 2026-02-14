@@ -78,7 +78,7 @@ export default function AdminCategoryManage() {
         }
     };
 
-    const handleDelete = (id: number) => {
+    const handleDelete = (_id: number) => {
         // Implement delete category if needed
         alert('Category delete not implemented in D1 yet');
     };

@@ -80,7 +80,7 @@ export default function AdminBannerManage() {
         }
     };
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (_id: number) => {
         if (window.confirm('Энэ баннерыг устгахдаа итгэлтэй байна уу?')) {
             // Since there is no deleteBanner in storage.ts, we should probably add it or just ignore for now
             // For now, let's assume saveBanner handles it if we implement it, but banners are usually manageable.

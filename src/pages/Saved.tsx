@@ -8,8 +8,8 @@ export default function Saved() {
     const [savedProducts, setSavedProducts] = useState<Product[]>([]);
 
     useEffect(() => {
-        const loadSaved = () => {
-            const allProducts = getProducts();
+        const loadSaved = async () => {
+            const allProducts = await getProducts();
             const savedIds = getSavedIds();
             const filtered = allProducts.filter(p => savedIds.includes(p.id));
             setSavedProducts(filtered);

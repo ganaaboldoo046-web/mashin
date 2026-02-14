@@ -25,8 +25,8 @@ export default function Profile() {
         }
 
         // Load Tab Data
-        const loadTabData = () => {
-            const allProducts = getProducts();
+        const loadTabData = async () => {
+            const allProducts = await getProducts();
             const recentIds = getRecentlyViewedIds();
             const savedIds = getSavedIds();
 

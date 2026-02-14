@@ -10,32 +10,39 @@ export default function Search() {
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q') || '';
     const [results, setResults] = useState<Product[]>([]);
+    const [categories, setCategories] = useState<any[]>([]);
 
     const [savedIds, setSavedIds] = useState<number[]>([]);
 
     useEffect(() => {
-        const loadSaved = () => {
+        const loadSavedAndCategories = async () => {
             setSavedIds(getSavedIds());
+            const allCats = await getCategories();
+            setCategories(allCats);
         };
 
-        loadSaved();
-        window.addEventListener('storageSaved', loadSaved);
-        return () => window.removeEventListener('storageSaved', loadSaved);
+        loadSavedAndCategories();
+        window.addEventListener('storageSaved', loadSavedAndCategories);
+        return () => window.removeEventListener('storageSaved', loadSavedAndCategories);
     }, []);
 
     useEffect(() => {
-        const allProducts = getProducts();
-        if (query) {
-            const lowerQuery = query.toLowerCase();
-            const filtered = allProducts.filter(car =>
-                car.name.toLowerCase().includes(lowerQuery) ||
-                car.tags.some(tag => tag.toLowerCase().includes(lowerQuery)) ||
-                car.fuel.toLowerCase().includes(lowerQuery)
-            );
-            setResults(filtered);
-        } else {
-            setResults([]);
-        }
+        const filterProducts = async () => {
+            const allProducts = await getProducts();
+            if (query) {
+                const lowerQuery = query.toLowerCase();
+                const filtered = allProducts.filter(car =>
+                    car.name.toLowerCase().includes(lowerQuery) ||
+                    car.tags.some(tag => tag.toLowerCase().includes(lowerQuery)) ||
+                    car.fuel.toLowerCase().includes(lowerQuery)
+                );
+                setResults(filtered);
+            } else {
+                setResults([]);
+            }
+        };
+
+        filterProducts();
     }, [query]);
 
     return (
@@ -93,7 +100,7 @@ export default function Search() {
                             <>
                                 <h2 className="text-lg font-bold mb-4 px-2">Категори сонгох</h2>
                                 <div className="flex flex-wrap gap-3">
-                                    {getCategories().map((category) => (
+                                    {categories.map((category) => (
                                         <Link
                                             to={`/category/${category.id}`}
                                             key={category.id}
