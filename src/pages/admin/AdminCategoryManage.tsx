@@ -131,7 +131,7 @@ export default function AdminCategoryManage() {
         <div className="max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Ангилал удир닥</h2>
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Ангилал удирдлага</h2>
                     <p className="text-sm text-slate-500 mt-1">Картуудыг чирж дарааллыг өөрчилж болно</p>
                 </div>
                 {!isAdding && (
@@ -148,7 +148,7 @@ export default function AdminCategoryManage() {
             {isAdding && (
                 <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 mb-8">
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">
-                        {editingId ? 'Ангилал засах' : 'Ш인э ангилал нэмэх'}
+                        {editingId ? 'Ангилал засах' : 'Шинэ ангилал нэмэх'}
                     </h3>
                     <div className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
