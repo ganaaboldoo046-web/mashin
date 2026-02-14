@@ -1,44 +1,73 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getProducts, saveProducts, getCategories, getExchangeRate } from '../../utils/storage';
-import type { Product } from '../../utils/storage';
+import { getProducts, saveProduct, getCategories, getExchangeRate } from '../../utils/storage';
+import type { Product, Category } from '../../utils/storage';
 
 export default function AdminProductCreate() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const categories = getCategories();
+    const [categories, setCategories] = useState<Category[]>([]);
     const [exchangeRate, setExchangeRate] = useState(2.5);
     const [isEditing, setIsEditing] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    // Form State
+    const [images, setImages] = useState<string[]>([]);
+    const [formData, setFormData] = useState({
+        name: '',
+        price: '', // MNT display string
+        priceKRW: '', // KRW number input
+        year: '',
+        mileage: '',
+        fuel: '',
+        engine: '',
+        transmission: '',
+        drive: '',
+        color: '',
+        interiorColor: '',
+        doors: '',
+        description: '',
+        categoryId: '',
+        status: 'active'
+    });
 
     useEffect(() => {
-        const rate = getExchangeRate();
-        setExchangeRate(rate.krwToMnt);
+        const loadData = async () => {
+            const rate = getExchangeRate();
+            setExchangeRate(rate.krwToMnt);
 
-        if (id) {
-            setIsEditing(true);
-            const products = getProducts();
-            const productToEdit = products.find(p => p.id === Number(id));
-            if (productToEdit) {
-                setFormData({
-                    name: productToEdit.name,
-                    price: productToEdit.price,
-                    priceKRW: productToEdit.priceKRW ? productToEdit.priceKRW.toString() : '',
-                    year: productToEdit.year,
-                    mileage: productToEdit.mileage,
-                    fuel: productToEdit.fuel,
-                    engine: productToEdit.engine || '',
-                    transmission: productToEdit.transmission || '',
-                    drive: productToEdit.drive || '',
-                    color: productToEdit.color || '',
-                    interiorColor: productToEdit.interiorColor || '',
-                    doors: productToEdit.doors || '',
-                    description: productToEdit.description || '',
-                    categoryId: productToEdit.categoryId.toString(),
-                    status: productToEdit.status
-                });
-                setImages(productToEdit.images);
+            const allCategories = await getCategories();
+            setCategories(allCategories);
+
+            if (id) {
+                setIsEditing(true);
+                const products = await getProducts();
+                const productToEdit = products.find(p => p.id === Number(id));
+                if (productToEdit) {
+                    setFormData({
+                        name: productToEdit.name,
+                        price: productToEdit.price,
+                        priceKRW: productToEdit.priceKRW ? productToEdit.priceKRW.toString() : '',
+                        year: productToEdit.year,
+                        mileage: productToEdit.mileage,
+                        fuel: productToEdit.fuel,
+                        engine: productToEdit.engine || '',
+                        transmission: productToEdit.transmission || '',
+                        drive: productToEdit.drive || '',
+                        color: productToEdit.color || '',
+                        interiorColor: productToEdit.interiorColor || '',
+                        doors: productToEdit.doors || '',
+                        description: productToEdit.description || '',
+                        categoryId: productToEdit.categoryId.toString(),
+                        status: productToEdit.status
+                    });
+                    setImages(productToEdit.images);
+                }
             }
-        }
+            setLoading(false);
+        };
+
+        loadData();
     }, [id]);
 
     // Form State
@@ -97,11 +126,10 @@ export default function AdminProductCreate() {
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const productData: Product = {
-            id: isEditing ? Number(id) : Date.now(),
+        const productData: Omit<Product, 'id'> = {
             name: formData.name,
             price: formData.price,
             priceKRW: parseFloat(formData.priceKRW) || undefined,
@@ -121,16 +149,7 @@ export default function AdminProductCreate() {
             doors: formData.doors
         };
 
-        const products = getProducts();
-        let updatedProducts;
-
-        if (isEditing) {
-            updatedProducts = products.map(p => p.id === Number(id) ? productData : p);
-        } else {
-            updatedProducts = [productData, ...products];
-        }
-
-        saveProducts(updatedProducts);
+        await saveProduct(isEditing ? { ...productData, id: Number(id) } as Product : productData);
         navigate('/admin/products');
     };
 
