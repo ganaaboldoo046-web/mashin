@@ -4,12 +4,12 @@ compatibility_date = "2024-02-14"
 compatibility_flags = ["nodejs_compat"]
 
 # D1 Database
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "somang-db"
-# database_id = "your-database-id-here"
+[[d1_databases]]
+binding = "DB"
+database_name = "somang-db"
+database_id = "8dc651ff-a52b-4e79-9941-ca9da05b2c16"
 
 # R2 Storage
-# [[r2_buckets]]
-# binding = "BUCKET"
-# bucket_name = "somang-assets"
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "somang-assets"
