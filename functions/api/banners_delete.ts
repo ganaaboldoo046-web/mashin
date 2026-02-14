@@ -2,11 +2,18 @@ export async function onRequest(context: any) {
     const { env, request } = context;
     const db = env.DB;
 
-    if (request.method !== "POST") {
-        return new Response("Method Not Allowed", { status: 405 });
-    }
-
     try {
+        await db.prepare(`
+            CREATE TABLE IF NOT EXISTS banners (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT,
+                subtitle TEXT,
+                image TEXT,
+                bg TEXT,
+                active BOOLEAN DEFAULT 1
+            )
+        `).run();
+
         const { id } = await request.json();
         if (!id) {
             return new Response(JSON.stringify({ error: "ID required" }), { status: 400 });

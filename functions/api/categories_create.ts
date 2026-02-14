@@ -2,11 +2,17 @@ export async function onRequest(context: any) {
     const { env, request } = context;
     const db = env.DB;
 
-    if (request.method !== "POST") {
-        return new Response("Method Not Allowed", { status: 405 });
-    }
-
     try {
+        await db.prepare(`
+            CREATE TABLE IF NOT EXISTS categories (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                icon TEXT,
+                image TEXT,
+                count INTEGER DEFAULT 0
+            )
+        `).run();
+
         const data = await request.json();
         const { id, name, icon, image } = data;
 

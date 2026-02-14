@@ -14,7 +14,7 @@ export async function onRequest(context: any) {
         `).run();
 
         const { results } = await db.prepare("SELECT * FROM categories").all();
-        return new Response(JSON.stringify(results), {
+        return new Response(JSON.stringify(results || []), {
             headers: { "Content-Type": "application/json" }
         });
     } catch (err: any) {

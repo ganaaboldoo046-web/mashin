@@ -2,22 +2,26 @@ export async function onRequest(context: any) {
     const { env, request } = context;
     const db = env.DB;
 
+    // Ensure table exists for all methods (GET, POST, etc)
+    try {
+        await db.prepare(`
+            CREATE TABLE IF NOT EXISTS banners (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT,
+                subtitle TEXT,
+                image TEXT,
+                bg TEXT,
+                active BOOLEAN DEFAULT 1
+            )
+        `).run();
+    } catch (e: any) {
+        console.error("Table creation failed:", e);
+    }
+
     if (request.method === "GET") {
         try {
-            // Defensive: Create table if it doesn't exist
-            await db.prepare(`
-                CREATE TABLE IF NOT EXISTS banners (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    title TEXT,
-                    subtitle TEXT,
-                    image TEXT,
-                    bg TEXT,
-                    active BOOLEAN DEFAULT 1
-                )
-            `).run();
-
             const { results } = await db.prepare("SELECT * FROM banners").all();
-            return new Response(JSON.stringify(results), {
+            return new Response(JSON.stringify(results || []), {
                 headers: { "Content-Type": "application/json" }
             });
         } catch (err: any) {
