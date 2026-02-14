@@ -12,6 +12,12 @@ CREATE TABLE products (
   status TEXT DEFAULT 'active',
   images TEXT, -- 이미지 URL 배열 (JSON 문자열)
   isFeatured BOOLEAN DEFAULT 0,
+  engine TEXT,
+  transmission TEXT,
+  drive TEXT,
+  color TEXT,
+  interiorColor TEXT,
+  doors TEXT,
   created_at INTEGER DEFAULT (strftime('%s', 'now'))
 );
 

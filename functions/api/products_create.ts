@@ -6,7 +6,7 @@ export async function onRequest(context: any) {
         return new Response("Method Not Allowed", { status: 405 });
     }
 
-    // Defensive: Create table if missing
+    // Defensive: Create table if missing & ensure all columns exist
     try {
         await db.prepare(`
             CREATE TABLE IF NOT EXISTS products (
@@ -25,18 +25,57 @@ export async function onRequest(context: any) {
                 created_at INTEGER DEFAULT (strftime('%s', 'now'))
             )
         `).run();
+
+        // Migration: Add missing columns if they don't exist
+        const columns = ['engine', 'transmission', 'drive', 'color', 'interiorColor', 'doors'];
+        for (const col of columns) {
+            try {
+                await db.prepare(`ALTER TABLE products ADD COLUMN ${col} TEXT`).run();
+            } catch (e) {
+                // Column probably already exists
+            }
+        }
     } catch (e: any) {
-        console.error("Product table creation failed:", e);
+        console.error("Product table initialization/migration failed:", e);
     }
 
     try {
         const data = await request.json();
-        const { name, price, priceKRW, year, mileage, fuel, description, categoryId, status, images, isFeatured } = data;
+        const {
+            id, name, price, priceKRW, year, mileage, fuel,
+            description, categoryId, status, images, isFeatured,
+            engine, transmission, drive, color, interiorColor, doors
+        } = data;
 
-        await db.prepare(`
-            INSERT INTO products (name, price, priceKRW, year, mileage, fuel, description, categoryId, status, images, isFeatured)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).bind(name, price, priceKRW, year, mileage, fuel, description, categoryId, status, JSON.stringify(images), isFeatured ? 1 : 0).run();
+        if (id) {
+            // Update existing product
+            await db.prepare(`
+                UPDATE products SET
+                    name = ?, price = ?, priceKRW = ?, year = ?, mileage = ?, fuel = ?, 
+                    description = ?, categoryId = ?, status = ?, images = ?, isFeatured = ?,
+                    engine = ?, transmission = ?, drive = ?, color = ?, interiorColor = ?, doors = ?
+                WHERE id = ?
+            `).bind(
+                name, price, priceKRW, year, mileage, fuel,
+                description, categoryId, status, JSON.stringify(images), isFeatured ? 1 : 0,
+                engine || null, transmission || null, drive || null, color || null, interiorColor || null, doors || null,
+                id
+            ).run();
+        } else {
+            // Insert new product
+            await db.prepare(`
+                INSERT INTO products (
+                    name, price, priceKRW, year, mileage, fuel, 
+                    description, categoryId, status, images, isFeatured,
+                    engine, transmission, drive, color, interiorColor, doors
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `).bind(
+                name, price, priceKRW, year, mileage, fuel,
+                description, categoryId, status, JSON.stringify(images), isFeatured ? 1 : 0,
+                engine || null, transmission || null, drive || null, color || null, interiorColor || null, doors || null
+            ).run();
+        }
 
         return new Response(JSON.stringify({ success: true }), {
             headers: { "Content-Type": "application/json" }

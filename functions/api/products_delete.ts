@@ -6,7 +6,7 @@ export async function onRequest(context: any) {
         return new Response("Method Not Allowed", { status: 405 });
     }
 
-    // Defensive: Create table if missing
+    // Defensive: Create table if missing & ensure all columns exist
     try {
         await db.prepare(`
             CREATE TABLE IF NOT EXISTS products (
@@ -25,8 +25,18 @@ export async function onRequest(context: any) {
                 created_at INTEGER DEFAULT (strftime('%s', 'now'))
             )
         `).run();
+
+        // Migration: Add missing columns if they don't exist
+        const columns = ['engine', 'transmission', 'drive', 'color', 'interiorColor', 'doors'];
+        for (const col of columns) {
+            try {
+                await db.prepare(`ALTER TABLE products ADD COLUMN ${col} TEXT`).run();
+            } catch (e) {
+                // Column probably already exists
+            }
+        }
     } catch (e: any) {
-        console.error("Product table creation failed:", e);
+        console.error("Product table initialization/migration failed:", e);
     }
 
     try {
