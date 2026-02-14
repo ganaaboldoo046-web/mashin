@@ -148,6 +148,9 @@ export const saveProduct = async (product: Omit<Product, 'id'>) => {
     return res.json();
 };
 
+// Alias for plural for backward compatibility if needed by mistake, but better to fix callers
+export const saveProducts = saveProduct;
+
 export const deleteProduct = async (id: number) => {
     const res = await fetch(`${API_BASE}/products_delete`, {
         method: 'POST',

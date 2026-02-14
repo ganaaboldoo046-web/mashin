@@ -1,33 +1,58 @@
-
+import { useEffect, useState } from 'react';
+import { getProducts } from '../../utils/storage';
+import type { Product } from '../../utils/storage';
 
 export default function AdminDashboard() {
+    const [stats, setStats] = useState({
+        totalProducts: 0,
+        newOrders: 3, // Mock for now if no orders table
+        totalVisits: 1234, // Mock
+        revenue: '₮45.2M' // Mock
+    });
+    const [recentProducts, setRecentProducts] = useState<Product[]>([]);
+
+    useEffect(() => {
+        const loadDashboardData = async () => {
+            const allProducts = await getProducts();
+            setStats(prev => ({ ...prev, totalProducts: allProducts.length }));
+            setRecentProducts(allProducts.slice(0, 5));
+        };
+        loadDashboardData();
+    }, []);
+
     return (
         <div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Хяналтын самбар</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                <StatCard title="Нийт автомашин" value="42" icon="directions_car" color="bg-blue-500" />
-                <StatCard title="Шинэ захиалга" value="3" icon="shopping_cart" color="bg-green-500" />
-                <StatCard title="Нийт хандалт" value="1,234" icon="visibility" color="bg-purple-500" />
-                <StatCard title="Орлого" value="₮45.2M" icon="payments" color="bg-orange-500" />
+                <StatCard title="Нийт автомашин" value={stats.totalProducts.toString()} icon="directions_car" color="bg-blue-500" />
+                <StatCard title="Шинэ захиалга" value={stats.newOrders.toString()} icon="shopping_cart" color="bg-green-500" />
+                <StatCard title="Нийт хандалт" value={stats.totalVisits.toLocaleString()} icon="visibility" color="bg-purple-500" />
+                <StatCard title="Орлого" value={stats.revenue} icon="payments" color="bg-orange-500" />
             </div>
 
             <div className="grid grid-cols-1 gap-8">
                 <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-700">
                     <h3 className="font-bold text-lg mb-4 text-slate-900 dark:text-white">Сүүлд нэмэгдсэн</h3>
                     <div className="space-y-4">
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="flex items-center gap-4 pb-4 border-b border-slate-100 dark:border-slate-700 last:border-0 last:pb-0">
+                        {recentProducts.map(p => (
+                            <div key={p.id} className="flex items-center gap-4 pb-4 border-b border-slate-100 dark:border-slate-700 last:border-0 last:pb-0">
                                 <div className="w-16 h-12 bg-slate-200 rounded-lg overflow-hidden">
-                                    <img src={`https://source.unsplash.com/random/200x200?car&sig=${i}`} className="w-full h-full object-cover" alt="Car" />
+                                    <img src={p.images[0]} className="w-full h-full object-cover" alt={p.name} />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-sm text-slate-900 dark:text-white">Hyundai Santa Fe 2023</h4>
-                                    <p className="text-xs text-slate-500">2024-02-14 15:30</p>
+                                    <h4 className="font-bold text-sm text-slate-900 dark:text-white">{p.name}</h4>
+                                    <p className="text-xs text-slate-500">{p.year} • {p.fuel}</p>
                                 </div>
-                                <span className="ml-auto text-xs font-bold px-2 py-1 bg-green-100 text-green-700 rounded-full">Бэлэн</span>
+                                <span className={`ml-auto text-xs font-bold px-2 py-1 rounded-full ${p.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'
+                                    }`}>
+                                    {p.status === 'active' ? 'Бэлэн' : p.status}
+                                </span>
                             </div>
                         ))}
+                        {recentProducts.length === 0 && (
+                            <p className="text-center text-slate-500 py-4">Мэдээлэл байхгүй байна</p>
+                        )}
                     </div>
                 </div>
             </div>

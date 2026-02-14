@@ -1,34 +1,53 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getProducts, saveProducts } from '../../utils/storage';
+import { getProducts, saveProduct, deleteProduct as apiDeleteProduct } from '../../utils/storage';
 import type { Product } from '../../utils/storage';
 
 export default function AdminProductList() {
     const navigate = useNavigate();
     const [products, setProducts] = useState<Product[]>([]);
 
-    useEffect(() => {
-        setProducts(getProducts());
+    // Function to load products
+    const loadProducts = async () => {
+        const data = await getProducts();
+        setProducts(data);
+    };
 
-        const handleUpdate = () => setProducts(getProducts());
-        window.addEventListener('productsUpdated', handleUpdate);
-        return () => window.removeEventListener('productsUpdated', handleUpdate);
+    useEffect(() => {
+        loadProducts(); // Initial load
+
+        // Listen for changes in storage
+        window.addEventListener('storageProducts', loadProducts);
+        return () => window.removeEventListener('storageProducts', loadProducts);
     }, []);
 
-    const handleDelete = (id: number) => {
+    const deleteProduct = async (id: number) => {
+        await apiDeleteProduct(id);
+        window.dispatchEvent(new Event('storageProducts'));
+    };
+
+    const handleSaveStatus = async (id: number, newStatus: Product['status']) => {
+        const product = products.find(p => p.id === id);
+        if (!product) return;
+
+        const updatedProduct = { ...product, status: newStatus };
+        await saveProduct(updatedProduct);
+        window.dispatchEvent(new Event('storageProducts'));
+    };
+
+    const handleDelete = async (id: number) => {
         if (window.confirm('Та энэ машиныг устгахдаа итгэлтэй байна уу?')) {
-            const updated = products.filter(p => p.id !== id);
-            saveProducts(updated);
-            setProducts(updated);
+            await deleteProduct(id);
+            // The loadProducts function will be called via the event listener,
+            // or we can call it directly if we don't want to rely on the event.
+            // For immediate UI update, calling it directly is often better.
+            await loadProducts();
         }
     };
 
-    const handleStatusChange = (id: number, newStatus: Product['status']) => {
-        const updated = products.map(p =>
-            p.id === id ? { ...p, status: newStatus } : p
-        );
-        saveProducts(updated);
-        setProducts(updated);
+    const handleStatusChange = async (id: number, newStatus: Product['status']) => {
+        await handleSaveStatus(id, newStatus);
+        await loadProducts(); // Reload products to reflect the change
     };
 
     return (

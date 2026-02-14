@@ -6,15 +6,15 @@ export default function FeaturedListings() {
     const [cars, setCars] = useState<Product[]>([]);
 
     useEffect(() => {
-        const loadCars = () => {
-            const allProducts = getProducts();
+        const loadCars = async () => {
+            const allProducts = await getProducts();
             // Filter by isFeatured and active status
             setCars(allProducts.filter(p => p.status === 'active' && p.isFeatured));
         };
 
         loadCars();
-        window.addEventListener('productsUpdated', loadCars);
-        return () => window.removeEventListener('productsUpdated', loadCars);
+        window.addEventListener('storageProducts', loadCars);
+        return () => window.removeEventListener('storageProducts', loadCars);
     }, []);
 
     if (cars.length === 0) return null;
