@@ -1,34 +1,42 @@
+```
 import React, { useState, useEffect } from 'react';
-import { getBanners, saveBanners } from '../../utils/storage';
-import type { Banner } from '../../utils/storage';
+import { getCategories, createCategory, uploadImage } from '../../utils/storage';
+import type { Category } from '../../utils/storage';
+import { convertToWebP } from '../../utils/image';
 
-export default function AdminBannerManage() {
-    const [banners, setBanners] = useState<Banner[]>([]);
+export default function AdminCategoryManage() {
+    const [categories, setCategories] = useState<Category[]>([]);
     const [isAdding, setIsAdding] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
-    const [newBanner, setNewBanner] = useState<Partial<Banner>>({ title: '', subtitle: '', image: '' });
+    const [newCategory, setNewCategory] = useState<Partial<Category>>({ name: '', icon: 'category', image: '' });
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        setBanners(getBanners());
+        const fetchCategories = async () => {
+            setCategories(await getCategories());
+        };
+        fetchCategories();
     }, []);
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
+            setSelectedFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
-                setNewBanner({ ...newBanner, image: reader.result as string });
+                setNewCategory({ ...newCategory, image: reader.result as string });
             };
             reader.readAsDataURL(file);
         }
     };
 
-    const startEdit = (banner: Banner) => {
-        setEditingId(banner.id);
-        setNewBanner({
-            title: banner.title,
-            subtitle: banner.subtitle,
-            image: banner.image
+    const startEdit = (category: Category) => {
+        setEditingId(category.id);
+        setNewCategory({
+            name: category.name,
+            icon: category.icon,
+            image: category.image
         });
         setIsAdding(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -37,35 +45,38 @@ export default function AdminBannerManage() {
     const handleCancel = () => {
         setIsAdding(false);
         setEditingId(null);
-        setNewBanner({ title: '', subtitle: '', image: '' });
+        setNewCategory({ name: '', icon: 'category', image: '' });
+        setSelectedFile(null);
     };
 
-    const handleSave = () => {
-        if (!newBanner.image) return;
+    const handleSave = async () => {
+        if (!newCategory.name) return;
+        setLoading(true);
 
-        let updatedBanners;
-        if (editingId) {
-            updatedBanners = banners.map(b => b.id === editingId ? {
-                ...b,
-                title: newBanner.title || 'Гарчиггүй',
-                subtitle: newBanner.subtitle || '',
-                image: newBanner.image || b.image
-            } : b);
-        } else {
-            const banner: Banner = {
-                id: Date.now(),
-                title: newBanner.title || 'Гарчиггүй',
-                subtitle: newBanner.subtitle || '',
-                image: newBanner.image,
-                active: true,
-                bg: 'from-black/60'
+        try {
+            let imageUrl = newCategory.image || '';
+
+            if (selectedFile) {
+                const webpBlob = await convertToWebP(selectedFile);
+                imageUrl = await uploadImage(webpBlob);
+            }
+
+            const categoryData: Omit<Category, 'id' | 'count'> = {
+                name: newCategory.name,
+                icon: newCategory.icon || 'category',
+                image: imageUrl
             };
-            updatedBanners = [banner, ...banners];
-        }
 
-        setBanners(updatedBanners);
-        saveBanners(updatedBanners);
-        handleCancel();
+            await createCategory(editingId ? { ...categoryData, id: editingId } as any : categoryData);
+            const updated = await getCategories();
+            setCategories(updated);
+            handleCancel();
+        } catch (err) {
+            console.error('Save failed:', err);
+            alert('Хадгалахад алдаа гарлаа.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleDelete = (id: number) => {
@@ -189,7 +200,7 @@ export default function AdminBannerManage() {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => toggleActive(banner.id)}
-                                className={`p-2 rounded-lg transition-colors ${banner.active ? 'text-green-500 hover:bg-green-50' : 'text-slate-400 hover:bg-slate-100'}`}
+                                className={`p - 2 rounded - lg transition - colors ${ banner.active ? 'text-green-500 hover:bg-green-50' : 'text-slate-400 hover:bg-slate-100' } `}
                                 title={banner.active ? "Идэвхгүй болгох" : "Идэвхжүүлэх"}
                             >
                                 <span className="material-symbols-outlined">{banner.active ? 'toggle_on' : 'toggle_off'}</span>

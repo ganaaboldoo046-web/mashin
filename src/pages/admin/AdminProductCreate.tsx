@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getProducts, saveProduct, getCategories, getExchangeRate } from '../../utils/storage';
+import { getProducts, saveProduct, getCategories, getExchangeRate, uploadImage } from '../../utils/storage';
 import type { Product, Category } from '../../utils/storage';
+import { convertToWebP } from '../../utils/image';
 
 export default function AdminProductCreate() {
     const { id } = useParams<{ id: string }>();
@@ -92,7 +93,10 @@ export default function AdminProductCreate() {
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
-            Array.from(e.target.files).forEach(file => {
+            const files = Array.from(e.target.files);
+            setImageFiles(prev => [...prev, ...files]);
+
+            files.forEach(file => {
                 const reader = new FileReader();
                 reader.onloadend = () => {
                     if (reader.result) {
@@ -106,6 +110,7 @@ export default function AdminProductCreate() {
 
     const removeImage = (index: number) => {
         setImages(images.filter((_, i) => i !== index));
+        setImageFiles(imageFiles.filter((_, i) => i !== index));
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -128,29 +133,58 @@ export default function AdminProductCreate() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLoading(true);
 
-        const productData: Omit<Product, 'id'> = {
-            name: formData.name,
-            price: formData.price,
-            priceKRW: parseFloat(formData.priceKRW) || undefined,
-            year: formData.year,
-            mileage: formData.mileage,
-            fuel: formData.fuel,
-            images: images,
-            tags: [formData.year, formData.fuel],
-            status: formData.status as 'active' | 'sold' | 'pending' | 'discounted',
-            description: formData.description,
-            categoryId: Number(formData.categoryId) || 0,
-            engine: formData.engine,
-            transmission: formData.transmission,
-            drive: formData.drive,
-            color: formData.color,
-            interiorColor: formData.interiorColor,
-            doors: formData.doors
-        };
+        try {
+            // 1. Process and Upload Images to R2
+            const uploadedImageUrls: string[] = [];
 
-        await saveProduct(isEditing ? { ...productData, id: Number(id) } as Product : productData);
-        navigate('/admin/products');
+            // Keep existing URLs (for editing) and upload new files
+            for (let i = 0; i < images.length; i++) {
+                const img = images[i];
+                if (img.startsWith('/api/images/')) {
+                    // Already an R2 URL
+                    uploadedImageUrls.push(img);
+                } else if (img.startsWith('data:')) {
+                    // It's a preview from a File object, find the file and upload
+                    // Or we can just use imageFiles[index] if it exists
+                    const file = imageFiles.find((_, idx) => images[idx] === img);
+                    if (file) {
+                        const webpBlob = await convertToWebP(file);
+                        const url = await uploadImage(webpBlob);
+                        uploadedImageUrls.push(url);
+                    }
+                }
+            }
+
+            const productData: Omit<Product, 'id'> = {
+                name: formData.name,
+                price: formData.price,
+                priceKRW: parseFloat(formData.priceKRW) || undefined,
+                year: formData.year,
+                mileage: formData.mileage,
+                fuel: formData.fuel,
+                images: uploadedImageUrls,
+                tags: [formData.year, formData.fuel],
+                status: formData.status as 'active' | 'sold' | 'pending' | 'discounted',
+                description: formData.description,
+                categoryId: Number(formData.categoryId) || 0,
+                engine: formData.engine,
+                transmission: formData.transmission,
+                drive: formData.drive,
+                color: formData.color,
+                interiorColor: formData.interiorColor,
+                doors: formData.doors
+            };
+
+            await saveProduct(isEditing ? { ...productData, id: Number(id) } as Product : productData);
+            navigate('/admin/products');
+        } catch (err) {
+            console.error('Save failed:', err);
+            alert('Хадгалахад алдаа гарлаа.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
