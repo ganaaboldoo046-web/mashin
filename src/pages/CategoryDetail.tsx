@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
 import { getProducts, getCategories, type Product, type Category } from '../utils/storage';
@@ -172,8 +172,8 @@ export default function CategoryDetail() {
                                                     setShowSortMenu(false);
                                                 }}
                                                 className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between ${sortBy === opt.value
-                                                        ? 'bg-primary/10 text-primary font-bold'
-                                                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                                                    ? 'bg-primary/10 text-primary font-bold'
+                                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                                                     }`}
                                             >
                                                 {opt.label}
