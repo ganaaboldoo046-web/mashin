@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getBanners, saveBanner, uploadImage } from '../../utils/storage';
+import { getBanners, saveBanner, deleteBanner, uploadImage } from '../../utils/storage';
 import type { Banner } from '../../utils/storage';
 import { convertToWebP } from '../../utils/image';
 
@@ -80,11 +80,16 @@ export default function AdminBannerManage() {
         }
     };
 
-    const handleDelete = async (_id: number) => {
+    const handleDelete = async (id: number) => {
         if (window.confirm('Энэ баннерыг устгахдаа итгэлтэй байна уу?')) {
-            // Since there is no deleteBanner in storage.ts, we should probably add it or just ignore for now
-            // For now, let's assume saveBanner handles it if we implement it, but banners are usually manageable.
-            alert('Banner delete not implemented in D1 yet');
+            try {
+                await deleteBanner(id);
+                const updated = await getBanners();
+                setBanners(updated);
+            } catch (err) {
+                console.error('Delete failed:', err);
+                alert('Устгахад алдаа гарлаа.');
+            }
         }
     };
 

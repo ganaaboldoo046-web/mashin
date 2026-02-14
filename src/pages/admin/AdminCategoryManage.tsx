@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getCategories, createCategory, uploadImage } from '../../utils/storage';
+import { getCategories, saveCategory, deleteCategory, uploadImage } from '../../utils/storage';
 import type { Category } from '../../utils/storage';
 import { convertToWebP } from '../../utils/image';
 
@@ -66,7 +66,7 @@ export default function AdminCategoryManage() {
                 image: imageUrl
             };
 
-            await createCategory(editingId ? { ...categoryData, id: editingId } as any : categoryData);
+            await saveCategory(editingId ? { ...categoryData, id: editingId } : categoryData);
             const updated = await getCategories();
             setCategories(updated);
             handleCancel();
@@ -78,9 +78,17 @@ export default function AdminCategoryManage() {
         }
     };
 
-    const handleDelete = (_id: number) => {
-        // Implement delete category if needed
-        alert('Category delete not implemented in D1 yet');
+    const handleDelete = async (id: number) => {
+        if (window.confirm('Энэ ангиллыг устгахдаа итгэлтэй байна уу?')) {
+            try {
+                await deleteCategory(id);
+                const updated = await getCategories();
+                setCategories(updated);
+            } catch (err) {
+                console.error('Delete failed:', err);
+                alert('Устгахад алдаа гарлаа.');
+            }
+        }
     };
 
     const icons = ['category', 'directions_car', 'electric_car', 'local_shipping', 'sports_motorsports', 'airport_shuttle', 'agriculture', 'moped'];

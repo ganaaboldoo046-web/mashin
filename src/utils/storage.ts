@@ -82,21 +82,31 @@ export const getBanners = async (): Promise<Banner[]> => {
         const res = await fetch(`${API_BASE}/banners`);
         if (!res.ok) throw new Error('Failed to fetch banners');
         const data = await res.json();
-        return data.length > 0 ? data.map((b: any) => ({
+        // Return empty array if DB is empty, don't fallback to initialBanners after first setup
+        return data.map((b: any) => ({
             ...b,
             active: b.active === 1
-        })) : initialBanners;
+        }));
     } catch (e) {
         console.error(e);
-        return initialBanners;
+        return [];
     }
 };
 
-export const saveBanner = async (banner: Omit<Banner, 'id'>) => {
+export const saveBanner = async (banner: Partial<Banner>) => {
     const res = await fetch(`${API_BASE}/banners`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(banner)
+    });
+    return res.json();
+};
+
+export const deleteBanner = async (id: number) => {
+    const res = await fetch(`${API_BASE}/banners_delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
     });
     return res.json();
 };
@@ -106,18 +116,29 @@ export const getCategories = async (): Promise<Category[]> => {
         const res = await fetch(`${API_BASE}/categories`);
         if (!res.ok) throw new Error('Failed to fetch categories');
         const data = await res.json();
-        return data.length > 0 ? data : initialCategories;
+        return data;
     } catch (e) {
         console.error(e);
-        return initialCategories;
+        return [];
     }
 };
 
-export const createCategory = async (category: Omit<Category, 'id' | 'count'>) => {
+export const createCategory = async (category: Partial<Category>) => {
     const res = await fetch(`${API_BASE}/categories_create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(category)
+    });
+    return res.json();
+};
+
+export const saveCategory = createCategory;
+
+export const deleteCategory = async (id: number) => {
+    const res = await fetch(`${API_BASE}/categories_delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
     });
     return res.json();
 };

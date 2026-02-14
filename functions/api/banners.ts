@@ -1,4 +1,4 @@
-export async function onRequest(context) {
+export async function onRequest(context: any) {
     const { env, request } = context;
     const db = env.DB;
 
@@ -16,12 +16,19 @@ export async function onRequest(context) {
     if (request.method === "POST") {
         try {
             const data = await request.json();
-            const { title, subtitle, image, bg, active } = data;
+            const { id, title, subtitle, image, bg, active } = data;
 
-            await db.prepare(`
-        INSERT INTO banners (title, subtitle, image, bg, active)
-        VALUES (?, ?, ?, ?, ?)
-      `).bind(title, subtitle, image, bg, active ? 1 : 0).run();
+            if (id) {
+                await db.prepare(`
+                    UPDATE banners SET title = ?, subtitle = ?, image = ?, bg = ?, active = ?
+                    WHERE id = ?
+                `).bind(title, subtitle, image, bg, active ? 1 : 0, id).run();
+            } else {
+                await db.prepare(`
+                    INSERT INTO banners (title, subtitle, image, bg, active)
+                    VALUES (?, ?, ?, ?, ?)
+                `).bind(title, subtitle, image, bg, active ? 1 : 0).run();
+            }
 
             return new Response(JSON.stringify({ success: true }), {
                 headers: { "Content-Type": "application/json" }

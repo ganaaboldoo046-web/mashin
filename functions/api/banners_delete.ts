@@ -7,20 +7,12 @@ export async function onRequest(context: any) {
     }
 
     try {
-        const data = await request.json();
-        const { id, name, icon, image } = data;
-
-        if (id) {
-            await db.prepare(`
-                UPDATE categories SET name = ?, icon = ?, image = ?
-                WHERE id = ?
-            `).bind(name, icon, image, id).run();
-        } else {
-            await db.prepare(`
-                INSERT INTO categories (name, icon, image)
-                VALUES (?, ?, ?)
-            `).bind(name, icon, image).run();
+        const { id } = await request.json();
+        if (!id) {
+            return new Response(JSON.stringify({ error: "ID required" }), { status: 400 });
         }
+
+        await db.prepare("DELETE FROM banners WHERE id = ?").bind(id).run();
 
         return new Response(JSON.stringify({ success: true }), {
             headers: { "Content-Type": "application/json" }
