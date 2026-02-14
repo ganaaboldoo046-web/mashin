@@ -60,27 +60,53 @@ export default function ProductDetail() {
             {/* Scrollable Content Area */}
             <main className="flex-1 overflow-y-auto pb-32 scroll-smooth">
                 {/* Image Gallery */}
-                <div className="relative w-full aspect-[4/3] bg-black">
-                    {product.images && product.images.length > 0 ? (
-                        <img
-                            src={product.images[activeImage]}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                        />
-                    ) : (
-                        <div className="w-full h-full flex items-center justify-center text-slate-500 bg-slate-200 dark:bg-slate-800">
-                            <span className="material-symbols-outlined text-4xl">image_not_supported</span>
-                        </div>
-                    )}
+                <div className="relative w-full aspect-[4/3] bg-black group">
+                    <div
+                        id="image-gallery-container"
+                        className="w-full h-full overflow-x-auto snap-x snap-mandatory flex scrollbar-hide"
+                        onScroll={(e) => {
+                            const container = e.currentTarget;
+                            const scrollPosition = container.scrollLeft;
+                            const width = container.clientWidth;
+                            const newIndex = Math.round(scrollPosition / width);
+                            setActiveImage(newIndex);
+                        }}
+                    >
+                        {product.images && product.images.length > 0 ? (
+                            product.images.map((img, idx) => (
+                                <div key={idx} className="w-full h-full flex-shrink-0 snap-center relative">
+                                    <img
+                                        src={img}
+                                        alt={`${product.name} - ${idx + 1}`}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            ))
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center text-slate-500 bg-slate-200 dark:bg-slate-800 flex-shrink-0 snap-center">
+                                <span className="material-symbols-outlined text-4xl">image_not_supported</span>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Image Navigation Dots */}
                     {product.images && product.images.length > 1 && (
-                        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+                        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
                             {product.images.map((_, idx) => (
                                 <button
                                     key={idx}
-                                    onClick={() => setActiveImage(idx)}
-                                    className={`w-2 h-2 rounded-full transition-all ${idx === activeImage ? 'bg-white w-4' : 'bg-white/50'
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        const container = document.getElementById('image-gallery-container');
+                                        if (container) {
+                                            container.scrollTo({
+                                                left: container.clientWidth * idx,
+                                                behavior: 'smooth'
+                                            });
+                                        }
+                                    }}
+                                    className={`w-2 h-2 rounded-full transition-all shadow-sm ${idx === activeImage ? 'bg-white w-4' : 'bg-white/50 hover:bg-white/80'
                                         }`}
                                 />
                             ))}
