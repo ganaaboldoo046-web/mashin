@@ -4,7 +4,7 @@ export default function Footer() {
     return (
         <footer className="mt-12 bg-white dark:bg-background-dark px-4 pt-8 pb-12 border-t border-slate-200 dark:border-slate-800">
             <div className="mb-6">
-                <h2 className="text-primary font-bold text-lg mb-4">Somang Trading</h2>
+                <h2 className="text-primary font-bold text-lg mb-4">Temmun Trading</h2>
                 <p className="text-xs text-slate-500 leading-relaxed">
                     Солонгос улсаас чанартай автомашин нийлүүлэгч.<br />
                     Хаяг: БНСУ, Сөүл хот, Каннам дүүрэг...<br />

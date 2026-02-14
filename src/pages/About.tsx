@@ -8,12 +8,12 @@ export default function About() {
             <Header />
 
             <main className="container mx-auto px-4 py-6 max-w-lg md:max-w-2xl">
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Бидний тухай</h1>
+                {/* Header Removed */}
 
                 <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm overflow-hidden mb-6">
-                    <img src="/about.jpg" alt="About Somang Trading" className="w-full h-auto object-cover" />
+                    <img src="/about.jpg" alt="About Temmun Trading" className="w-full h-auto object-cover" />
                     <div className="p-6">
-                        <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Somang Trading</h2>
+                        {/* Title Removed */}
                         <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-4">
                             Бид Солонгос улсаас чанартай автомашинуудыг найдвартай, хурдан шуурхай нийлүүлдэг.
                         </p>
@@ -51,8 +51,8 @@ export default function About() {
                         </div>
                         <div className="flex items-center gap-3">
                             <span className="material-symbols-outlined text-slate-400">mail</span>
-                            <a href="mailto:info@somangtrading.com" className="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
-                                info@somangtrading.com
+                            <a href="mailto:info@temmuntrading.com" className="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
+                                info@temmuntrading.com
                             </a>
                         </div>
                     </div>
