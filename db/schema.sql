@@ -21,7 +21,8 @@ CREATE TABLE categories (
   name TEXT NOT NULL,
   icon TEXT,
   image TEXT,
-  count INTEGER DEFAULT 0
+  count INTEGER DEFAULT 0,
+  sort_order INTEGER DEFAULT 0
 );
 
 -- Banners (배너) 테이블
