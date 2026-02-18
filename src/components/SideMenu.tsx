@@ -57,14 +57,6 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
                     <MenuItem icon="favorite" label="Хадгалсан" onClick={() => handleNavigate('/saved')} />
                     <MenuItem icon="person" label="Профайл" onClick={() => handleNavigate('/profile')} />
 
-                    <div className="my-2 border-t border-slate-100 dark:border-slate-800"></div>
-
-                    <MenuItem icon="support_agent" label="Тусламж" onClick={() => handleNavigate('/support')} />
-                    <MenuItem icon="settings" label="Тохиргоо" onClick={() => handleNavigate('/settings')} />
-
-                    {/* Admin Link (Hidden typically, but useful for now) */}
-                    <div className="mt-auto"></div>
-                    <MenuItem icon="admin_panel_settings" label="Админ" onClick={() => handleNavigate('/admin/login')} />
                 </div>
 
                 <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
