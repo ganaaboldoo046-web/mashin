@@ -33,7 +33,7 @@ export default function CategorySection({ category, products }: CategorySectionP
                         key={product.id}
                         className="min-w-[200px] w-[200px] block bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 snap-start"
                     >
-                        <div className="w-full h-32 relative group">
+                        <div className="w-full aspect-video relative group">
                             <img
                                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                                 src={product.images[0]}

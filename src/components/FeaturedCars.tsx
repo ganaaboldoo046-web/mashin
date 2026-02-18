@@ -27,7 +27,7 @@ export default function FeaturedCars() {
             <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
                 {cars.slice(0, 6).map((car) => (
                     <a href={`/product/${car.id}`} key={car.id} className="min-w-[200px] block bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800">
-                        <div className="w-full h-32 relative">
+                        <div className="w-full aspect-video relative">
                             <img className="w-full h-full object-cover" src={car.images[0]} alt={car.name} />
                         </div>
                         <div className="p-3">

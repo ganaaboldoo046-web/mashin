@@ -209,7 +209,7 @@ export default function ProductDetail() {
             {/* Scrollable Content Area */}
             <main className="flex-1 overflow-y-auto pb-32 scroll-smooth">
                 {/* Image Gallery */}
-                <div className="relative w-full h-[60vh] md:h-[70vh] bg-black group">
+                <div className="relative w-full aspect-video bg-black group">
                     <div
                         id="image-gallery-container"
                         className="w-full h-full overflow-x-auto snap-x snap-mandatory flex scrollbar-hide"
