@@ -18,14 +18,13 @@ export default function CategorySection({ category, products }: CategorySectionP
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     {category.name}
                 </h2>
-                {showViewAll && (
-                    <Link
-                        to={`/category/${category.id}`}
-                        className="text-primary text-sm font-semibold hover:opacity-80 transition-opacity"
-                    >
-                        Бүгдийг харах
-                    </Link>
-                )}
+                <Link
+                    to={`/category/${category.id}`}
+                    className="text-primary text-sm font-semibold hover:opacity-80 transition-opacity flex items-center gap-1"
+                >
+                    <span>Бүгдийг харах</span>
+                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                </Link>
             </div>
 
             <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 snap-x">
