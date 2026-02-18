@@ -352,7 +352,7 @@ export default function ProductDetail() {
             {/* Action Bar & Bottom Nav - Fixed at bottom */}
             <div className="flex-none z-40 relative">
                 {/* Floating Action Bar */}
-                <div className="absolute bottom-[72px] left-0 right-0 px-4 pointer-events-none">
+                <div className="fixed bottom-[80px] left-0 right-0 px-4 pointer-events-none z-50">
                     {/* Chat Floating Button */}
                     <button
                         onClick={() => window.open('https://www.facebook.com/temmun.trading', '_blank')}
