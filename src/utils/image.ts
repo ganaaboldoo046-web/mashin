@@ -5,14 +5,30 @@ export async function convertToWebP(file: File): Promise<Blob> {
             const img = new Image();
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
+                let width = img.width;
+                let height = img.height;
+                const MAX_SIZE = 1200;
+
+                if (width > height) {
+                    if (width > MAX_SIZE) {
+                        height *= MAX_SIZE / width;
+                        width = MAX_SIZE;
+                    }
+                } else {
+                    if (height > MAX_SIZE) {
+                        width *= MAX_SIZE / height;
+                        height = MAX_SIZE;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
                 const ctx = canvas.getContext('2d');
                 if (!ctx) {
                     reject(new Error('Failed to get canvas context'));
                     return;
                 }
-                ctx.drawImage(img, 0, 0);
+                ctx.drawImage(img, 0, 0, width, height);
                 canvas.toBlob((blob) => {
                     if (blob) {
                         resolve(blob);
