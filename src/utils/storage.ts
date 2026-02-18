@@ -25,6 +25,7 @@ export interface Product {
     mileage: string;
     fuel: string;
     images: string[];
+    options?: string[];
     tags: string[];
     status: 'active' | 'sold' | 'pending' | 'discounted';
     description: string;
@@ -181,6 +182,7 @@ export const getProducts = async (): Promise<Product[]> => {
         return data.map((p: any) => ({
             ...p,
             images: typeof p.images === 'string' ? JSON.parse(p.images) : p.images,
+            options: p.options ? (typeof p.options === 'string' ? JSON.parse(p.options) : p.options) : [],
             isFeatured: p.isFeatured === 1,
             tags: [p.year, p.fuel].filter(Boolean)
         }));

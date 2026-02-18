@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getProducts, saveProduct, getCategories, getExchangeRate, uploadImage } from '../../utils/storage';
 import type { Product, Category } from '../../utils/storage';
 import { convertToWebP } from '../../utils/image';
+import { VEHICLE_OPTIONS, OPTION_CATEGORIES } from '../../constants/vehicleOptions';
 
 export default function AdminProductCreate() {
     const { id } = useParams<{ id: string }>();
@@ -32,6 +33,7 @@ export default function AdminProductCreate() {
         categoryId: '',
         status: 'active'
     });
+    const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
     useEffect(() => {
         const loadData = async () => {
@@ -64,6 +66,7 @@ export default function AdminProductCreate() {
                         status: productToEdit.status
                     });
                     setImages(productToEdit.images);
+                    setSelectedOptions(productToEdit.options || []);
                 }
             }
             setLoading(false);
@@ -112,6 +115,14 @@ export default function AdminProductCreate() {
         }
     };
 
+    const handleOptionToggle = (optionId: string) => {
+        setSelectedOptions(prev =>
+            prev.includes(optionId)
+                ? prev.filter(id => id !== optionId)
+                : [...prev, optionId]
+        );
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -156,7 +167,8 @@ export default function AdminProductCreate() {
                 drive: formData.drive,
                 color: formData.color,
                 interiorColor: formData.interiorColor,
-                doors: formData.doors
+                doors: formData.doors,
+                options: selectedOptions
             };
 
             await saveProduct(isEditing ? { ...productData, id: Number(id) } as Product : productData);
@@ -170,6 +182,12 @@ export default function AdminProductCreate() {
     };
 
     if (loading && !isEditing) return <div>Loading...</div>;
+
+    const groupedOptions = VEHICLE_OPTIONS.reduce((acc, option) => {
+        if (!acc[option.category]) acc[option.category] = [];
+        acc[option.category].push(option);
+        return acc;
+    }, {} as Record<string, typeof VEHICLE_OPTIONS>);
 
     return (
         <div className="max-w-4xl mx-auto pb-20">
@@ -299,6 +317,46 @@ export default function AdminProductCreate() {
                             <span className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1 block">Хаалга (Doors)</span>
                             <input name="doors" value={formData.doors} onChange={handleChange} type="text" className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary" placeholder="5" />
                         </label>
+                    </div>
+                </div>
+
+                {/* Option Selection (Icons) */}
+                <div className="mb-8">
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Машины опци (Vehicle Options)</h3>
+                    <div className="space-y-6">
+                        {Object.entries(OPTION_CATEGORIES).map(([catKey, catLabel]) => {
+                            const opts = groupedOptions[catKey] || [];
+                            if (opts.length === 0) return null;
+
+                            return (
+                                <div key={catKey}>
+                                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 border-b border-slate-100 dark:border-slate-700 pb-1">{catLabel}</h4>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        {opts.map(opt => (
+                                            <label key={opt.id} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${selectedOptions.includes(opt.id)
+                                                ? 'bg-primary/5 border-primary ring-1 ring-primary'
+                                                : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                                }`}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedOptions.includes(opt.id)}
+                                                    onChange={() => handleOptionToggle(opt.id)}
+                                                    className="w-4 h-4 rounded text-primary focus:ring-primary border-slate-300"
+                                                />
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`material-symbols-outlined text-xl ${selectedOptions.includes(opt.id) ? 'text-primary' : 'text-slate-400'}`}>
+                                                        {opt.icon}
+                                                    </span>
+                                                    <span className={`text-xs font-medium ${selectedOptions.includes(opt.id) ? 'text-slate-900 dark:text-white' : 'text-slate-500'}`}>
+                                                        {opt.label}
+                                                    </span>
+                                                </div>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 

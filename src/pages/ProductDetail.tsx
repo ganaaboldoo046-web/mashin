@@ -5,6 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
 import { getProducts, addToRecentlyViewed, isSaved, toggleSaved } from '../utils/storage';
 import type { Product } from '../utils/storage';
+import { VEHICLE_OPTIONS } from '../constants/vehicleOptions';
 
 export default function ProductDetail() {
     const { id } = useParams<{ id: string }>();
@@ -306,6 +307,25 @@ export default function ProductDetail() {
                             <SpecItem icon="sensor_door" label="Хаалга" value={product.doors || "-"} />
                         </div>
                     </div>
+
+                    {/* Vehicle Options */}
+                    {product.options && product.options.length > 0 && (
+                        <div className="mb-8">
+                            <h3 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">Нэмэлт тоноглол</h3>
+                            <div className="grid grid-cols-2 gap-3">
+                                {product.options.map(optId => {
+                                    const opt = VEHICLE_OPTIONS.find(o => o.id === optId);
+                                    if (!opt) return null;
+                                    return (
+                                        <div key={opt.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50">
+                                            <span className="material-symbols-outlined text-primary text-xl">{opt.icon}</span>
+                                            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{opt.label}</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Description */}
                     <div className="mb-8">

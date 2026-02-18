@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS products (
   categoryId INTEGER,
   status TEXT DEFAULT 'active',
   images TEXT, -- 이미지 URL 배열 (JSON 문자열)
+  options TEXT, -- 차량 옵션 ID 배열 (JSON 문자열)
   isFeatured BOOLEAN DEFAULT 0,
   engine TEXT,
   transmission TEXT,
