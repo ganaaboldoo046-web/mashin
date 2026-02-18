@@ -1,0 +1,165 @@
+{
+  "routes": [
+    {
+      "routePath": "/api/images/:name",
+      "mountPath": "/api/images",
+      "method": "",
+      "module": [
+        "api/images/[name].ts:onRequest"
+      ]
+    },
+    {
+      "routePath": "/api/admin_stats",
+      "mountPath": "/api",
+      "method": "GET",
+      "module": [
+        "api/admin_stats.ts:onRequestGet"
+      ]
+    },
+    {
+      "routePath": "/api/exchange_rate",
+      "mountPath": "/api",
+      "method": "GET",
+      "module": [
+        "api/exchange_rate.ts:onRequestGet"
+      ]
+    },
+    {
+      "routePath": "/api/exchange_rate",
+      "mountPath": "/api",
+      "method": "POST",
+      "module": [
+        "api/exchange_rate.ts:onRequestPost"
+      ]
+    },
+    {
+      "routePath": "/api/reservations_create",
+      "mountPath": "/api",
+      "method": "POST",
+      "module": [
+        "api/reservations_create.ts:onRequestPost"
+      ]
+    },
+    {
+      "routePath": "/api/reservations_delete",
+      "mountPath": "/api",
+      "method": "DELETE",
+      "module": [
+        "api/reservations_delete.ts:onRequestDelete"
+      ]
+    },
+    {
+      "routePath": "/api/reservations_list",
+      "mountPath": "/api",
+      "method": "GET",
+      "module": [
+        "api/reservations_list.ts:onRequestGet"
+      ]
+    },
+    {
+      "routePath": "/api/reservations_update",
+      "mountPath": "/api",
+      "method": "POST",
+      "module": [
+        "api/reservations_update.ts:onRequestPost"
+      ]
+    },
+    {
+      "routePath": "/api/reviews_create",
+      "mountPath": "/api",
+      "method": "POST",
+      "module": [
+        "api/reviews_create.ts:onRequestPost"
+      ]
+    },
+    {
+      "routePath": "/api/reviews_list",
+      "mountPath": "/api",
+      "method": "GET",
+      "module": [
+        "api/reviews_list.ts:onRequestGet"
+      ]
+    },
+    {
+      "routePath": "/api/banners",
+      "mountPath": "/api",
+      "method": "",
+      "module": [
+        "api/banners.ts:onRequest"
+      ]
+    },
+    {
+      "routePath": "/api/banners_delete",
+      "mountPath": "/api",
+      "method": "",
+      "module": [
+        "api/banners_delete.ts:onRequest"
+      ]
+    },
+    {
+      "routePath": "/api/categories",
+      "mountPath": "/api",
+      "method": "",
+      "module": [
+        "api/categories.ts:onRequest"
+      ]
+    },
+    {
+      "routePath": "/api/categories_create",
+      "mountPath": "/api",
+      "method": "",
+      "module": [
+        "api/categories_create.ts:onRequest"
+      ]
+    },
+    {
+      "routePath": "/api/categories_delete",
+      "mountPath": "/api",
+      "method": "",
+      "module": [
+        "api/categories_delete.ts:onRequest"
+      ]
+    },
+    {
+      "routePath": "/api/categories_reorder",
+      "mountPath": "/api",
+      "method": "",
+      "module": [
+        "api/categories_reorder.ts:onRequest"
+      ]
+    },
+    {
+      "routePath": "/api/products",
+      "mountPath": "/api",
+      "method": "",
+      "module": [
+        "api/products.ts:onRequest"
+      ]
+    },
+    {
+      "routePath": "/api/products_create",
+      "mountPath": "/api",
+      "method": "",
+      "module": [
+        "api/products_create.ts:onRequest"
+      ]
+    },
+    {
+      "routePath": "/api/products_delete",
+      "mountPath": "/api",
+      "method": "",
+      "module": [
+        "api/products_delete.ts:onRequest"
+      ]
+    },
+    {
+      "routePath": "/api/upload",
+      "mountPath": "/api",
+      "method": "",
+      "module": [
+        "api/upload.ts:onRequest"
+      ]
+    }
+  ],
+  "baseURL": "/"
+}

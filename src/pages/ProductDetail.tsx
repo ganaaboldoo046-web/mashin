@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import emailjs from '@emailjs/browser';
 import { useParams, useNavigate } from 'react-router-dom';
 // import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
@@ -94,6 +95,7 @@ export default function ProductDetail() {
     };
 
 
+    const [isCallModalOpen, setIsCallModalOpen] = useState(false);
     const [isReservationModalOpen, setIsReservationModalOpen] = useState(false);
     const [reservationForm, setReservationForm] = useState({
         userName: '',
@@ -119,6 +121,31 @@ export default function ProductDetail() {
             });
 
             if (response.ok) {
+                // --- EmailJS Integration Start ---
+                try {
+                    // NOTE: Replace these with your actual EmailJS keys
+                    const SERVICE_ID = 'YOUR_SERVICE_ID';
+                    const TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
+                    const PUBLIC_KEY = 'YOUR_PUBLIC_KEY';
+
+                    const templateParams = {
+                        product_name: product?.name,
+                        product_price: product?.price,
+                        user_name: reservationForm.userName,
+                        user_phone: reservationForm.phone,
+                        user_facebook: reservationForm.facebookId,
+                        user_email: user?.email || 'Guest',
+                        date: new Date().toLocaleString()
+                    };
+
+                    await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY);
+                    console.log('Email sent successfully');
+                } catch (emailError) {
+                    console.error('Failed to send email:', emailError);
+                    // We don't block the success state even if email fails
+                }
+                // --- EmailJS Integration End ---
+
                 setReservationStatus('success');
                 setTimeout(() => {
                     setIsReservationModalOpen(false);
@@ -337,7 +364,7 @@ export default function ProductDetail() {
                     </button>
 
                     <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-2 flex gap-2 items-center max-w-md mx-auto pointer-events-auto">
-                        <button onClick={() => window.location.href = 'tel:01057279927'} className="flex-1 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 font-bold h-12 rounded-xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-700">
+                        <button onClick={() => setIsCallModalOpen(true)} className="flex-1 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 font-bold h-12 rounded-xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-700">
                             <span className="material-symbols-outlined">call</span>
                             Залгах
                         </button>
@@ -350,6 +377,44 @@ export default function ProductDetail() {
 
                 <BottomNav />
             </div>
+
+            {/* Call Selection Modal */}
+            {isCallModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setIsCallModalOpen(false)}>
+                    <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden animate-slide-up" onClick={e => e.stopPropagation()}>
+                        <div className="p-6">
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Холбогдох дугаар</h3>
+                                <button onClick={() => setIsCallModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                                    <span className="material-symbols-outlined">close</span>
+                                </button>
+                            </div>
+
+                            <div className="space-y-3">
+                                <a href="tel:01057279927" className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-100 dark:border-slate-700">
+                                    <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
+                                        <span className="material-symbols-outlined">call</span>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-slate-500 font-medium">Солонгос дугаар</p>
+                                        <p className="text-lg font-bold text-slate-900 dark:text-white">010 5727 9927</p>
+                                    </div>
+                                </a>
+
+                                <a href="tel:99001979" className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-100 dark:border-slate-700">
+                                    <div className="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0">
+                                        <span className="material-symbols-outlined">call</span>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-slate-500 font-medium">Монгол дугаар</p>
+                                        <p className="text-lg font-bold text-slate-900 dark:text-white">9900 1979</p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Reservation Modal */}
             {isReservationModalOpen && (

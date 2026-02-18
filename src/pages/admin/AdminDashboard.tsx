@@ -13,9 +13,22 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         const loadDashboardData = async () => {
-            const allProducts = await getProducts();
-            setStats(prev => ({ ...prev, totalProducts: allProducts.length }));
-            setRecentProducts(allProducts.slice(0, 5));
+            try {
+                // Fetch Stats
+                const statsRes = await fetch('/api/admin_stats');
+                if (statsRes.ok) {
+                    const statsData = await statsRes.json();
+                    setStats(statsData);
+                }
+
+                // Fetch Recent Products
+                const allProducts = await getProducts();
+                // Sort by ID desc (newest first) if not already
+                const sortedProducts = allProducts.sort((a, b) => b.id - a.id);
+                setRecentProducts(sortedProducts.slice(0, 5));
+            } catch (error) {
+                console.error("Failed to load dashboard data", error);
+            }
         };
         loadDashboardData();
     }, []);
