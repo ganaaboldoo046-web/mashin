@@ -1,4 +1,5 @@
 import React from 'react';
+import { useGoogleLogin } from '@react-oauth/google';
 import BottomNav from '../components/BottomNav';
 import { getProducts, getSavedIds, getRecentlyViewedIds } from '../utils/storage';
 import type { Product } from '../utils/storage';
@@ -23,6 +24,14 @@ export default function Profile() {
         const storedUser = localStorage.getItem('somang_user');
         if (storedUser) {
             const parsedUser = JSON.parse(storedUser);
+
+            // Clear legacy mock data if detected
+            if (parsedUser.email === 'user@gmail.com' && parsedUser.name === 'Google User') {
+                localStorage.removeItem('somang_user');
+                setUser(null);
+                return;
+            }
+
             setUser(parsedUser);
 
             // Fetch My Orders
@@ -71,15 +80,37 @@ export default function Profile() {
         };
     }, []);
 
+    const login = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+                });
+                const userData = await res.json();
+
+                // Format user data to match app structure
+                const appUser = {
+                    email: userData.email,
+                    name: userData.name,
+                    avatar: userData.picture,
+                    googleId: userData.sub
+                };
+
+                localStorage.setItem('somang_user', JSON.stringify(appUser));
+                setUser(appUser);
+            } catch (error) {
+                console.error("Failed to fetch user info:", error);
+                alert("로그인 정보를 가져오는데 실패했습니다.");
+            }
+        },
+        onError: () => {
+            console.error("Login Failed");
+            alert("로그인에 실패했습니다.");
+        }
+    });
+
     const handleGoogleLogin = () => {
-        // Mock Google Auth
-        const mockUser = {
-            email: 'user@gmail.com',
-            name: 'Google User',
-            avatar: 'https://lh3.googleusercontent.com/a/default-user=s96-c' // Generic avatar
-        };
-        localStorage.setItem('somang_user', JSON.stringify(mockUser));
-        setUser(mockUser);
+        login();
     };
 
     const handleLogout = () => {
