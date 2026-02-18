@@ -10,7 +10,6 @@ export default function CategorySection({ category, products }: CategorySectionP
     if (products.length === 0) return null;
 
     const displayProducts = products.slice(0, 6);
-    const showViewAll = products.length > 6;
 
     return (
         <section className="mt-8 px-4">
