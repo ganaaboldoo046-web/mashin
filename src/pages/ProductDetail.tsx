@@ -308,6 +308,16 @@ export default function ProductDetail() {
                         </div>
                     </div>
 
+
+
+                    {/* Description */}
+                    <div className="mb-8">
+                        <h2 className="font-bold text-lg mb-3">Тайлбар</h2>
+                        <p className="text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
+                            {product.description || "Тайлбар байхгүй байна."}
+                        </p>
+                    </div>
+
                     {/* Vehicle Options */}
                     {product.options && product.options.length > 0 && (
                         <div className="mb-8">
@@ -326,14 +336,6 @@ export default function ProductDetail() {
                             </div>
                         </div>
                     )}
-
-                    {/* Description */}
-                    <div className="mb-8">
-                        <h2 className="font-bold text-lg mb-3">Тайлбар</h2>
-                        <p className="text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-                            {product.description || "Тайлбар байхгүй байна."}
-                        </p>
-                    </div>
 
                     {/* Similar Products */}
                     {similarProducts.length > 0 && (
