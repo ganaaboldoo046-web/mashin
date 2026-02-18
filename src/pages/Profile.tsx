@@ -3,25 +3,45 @@ import BottomNav from '../components/BottomNav';
 import { getProducts, getSavedIds, getRecentlyViewedIds } from '../utils/storage';
 import type { Product } from '../utils/storage';
 
+// Import login background images
+import img1 from '../assets/login/img1.jpg';
+import img2 from '../assets/login/img2.jpg';
+import img3 from '../assets/login/img3.jpg';
+import img4 from '../assets/login/img4.jpg';
+import img5 from '../assets/login/img5.jpg';
+
 export default function Profile() {
     const [user, setUser] = React.useState<any>(null);
-    const [isLogin, setIsLogin] = React.useState(true);
-    const [email, setEmail] = React.useState('');
-    const [password, setPassword] = React.useState('');
-    const [name, setName] = React.useState('');
-    const [phone, setPhone] = React.useState('');
-    const [confirmPassword, setConfirmPassword] = React.useState('');
-    const [error, setError] = React.useState('');
 
     // Tabs State
-    const [activeTab, setActiveTab] = React.useState<'recent' | 'saved'>('recent');
+    const [activeTab, setActiveTab] = React.useState<'recent' | 'saved' | 'orders'>('recent');
     const [recentProducts, setRecentProducts] = React.useState<Product[]>([]);
     const [savedProducts, setSavedProducts] = React.useState<Product[]>([]);
+    const [myOrders, setMyOrders] = React.useState<any[]>([]);
 
     React.useEffect(() => {
         const storedUser = localStorage.getItem('somang_user');
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            const parsedUser = JSON.parse(storedUser);
+            setUser(parsedUser);
+
+            // Fetch My Orders
+            const fetchMyOrders = async () => {
+                try {
+                    // Use email or phone as identifier
+                    const userId = parsedUser.email || parsedUser.phone;
+                    if (!userId) return;
+
+                    const res = await fetch(`/api/reservations_list?userId=${encodeURIComponent(userId)}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        setMyOrders(data as any[]);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch orders", error);
+                }
+            };
+            fetchMyOrders();
         }
 
         // Load Tab Data
@@ -50,42 +70,6 @@ export default function Profile() {
             window.removeEventListener('storageSaved', loadTabData);
         };
     }, []);
-
-    const handleAuth = (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-
-        if (isLogin) {
-            // Mock Login Logic
-            const mockUser = {
-                email: email,
-                name: email.split('@')[0],
-                avatar: null
-            };
-            localStorage.setItem('somang_user', JSON.stringify(mockUser));
-            setUser(mockUser);
-        } else {
-            // Signup Validation
-            if (password.length < 6) {
-                setError('Нууц үг хэтэрхий богино байна.');
-                return;
-            }
-            if (password !== confirmPassword) {
-                setError('Нууц үг тохирохгүй байна.');
-                return;
-            }
-
-            // Mock Signup Logic
-            const mockUser = {
-                email: email,
-                name: name,
-                phone: phone,
-                avatar: null
-            };
-            localStorage.setItem('somang_user', JSON.stringify(mockUser));
-            setUser(mockUser);
-        }
-    };
 
     const handleGoogleLogin = () => {
         // Mock Google Auth
@@ -132,12 +116,21 @@ export default function Profile() {
                             </button>
                             <button
                                 onClick={() => setActiveTab('saved')}
-                                className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'saved'
+                                className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap px-4 ${activeTab === 'saved'
                                     ? 'border-primary text-primary'
                                     : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                                     }`}
                             >
                                 Хадгалсан
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('orders')}
+                                className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap px-4 ${activeTab === 'orders'
+                                    ? 'border-primary text-primary'
+                                    : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                                    }`}
+                            >
+                                Миний захиалга
                             </button>
                         </div>
 
@@ -147,6 +140,9 @@ export default function Profile() {
                             )}
                             {activeTab === 'saved' && (
                                 <ProductList products={savedProducts} emptyMessage="Хадгалсан зар байхгүй байна." />
+                            )}
+                            {activeTab === 'orders' && (
+                                <OrderList orders={myOrders} emptyMessage="Захиалгын түүх байхгүй байна." />
                             )}
                         </div>
 
@@ -165,105 +161,58 @@ export default function Profile() {
     }
 
     return (
-        <div className="pb-24 min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-white flex flex-col items-center justify-center p-6">
-            <div className="w-full max-w-sm">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-primary mb-2">Temmun</h1>
-                    <p className="text-slate-500 dark:text-slate-400">Тавтай морилно уу</p>
+        <div className="relative min-h-screen bg-black overflow-hidden flex flex-col justify-center items-center">
+            {/* Background Marquee Container */}
+            <div className="fixed inset-0 z-0 bg-black">
+                <div className="absolute inset-0 flex gap-4 opacity-60">
+                    {/* Column 1 - Downward Marquee */}
+                    <div className="flex-1 min-w-[33%] animate-marquee-vertical-slow flex flex-col gap-4">
+                        {[img1, img2, img3, img4, img5, img1, img2, img3].map((img, idx) => (
+                            <img key={idx} src={img} className="w-full h-auto rounded-lg aspect-[3/4] object-cover" alt="" />
+                        ))}
+                    </div>
+                    {/* Column 2 - Upward Marquee (slower) */}
+                    <div className="flex-1 min-w-[33%] animate-marquee-vertical-reverse flex flex-col gap-4 pt-20">
+                        {[img3, img4, img5, img1, img2, img3, img4, img5].map((img, idx) => (
+                            <img key={idx} src={img} className="w-full h-auto rounded-lg aspect-[3/4] object-cover" alt="" />
+                        ))}
+                    </div>
+                    {/* Column 3 - Downward Marquee */}
+                    <div className="flex-1 min-w-[33%] animate-marquee-vertical flex flex-col gap-4">
+                        {[img5, img1, img2, img3, img4, img5, img1, img2].map((img, idx) => (
+                            <img key={idx} src={img} className="w-full h-auto rounded-lg aspect-[3/4] object-cover" alt="" />
+                        ))}
+                    </div>
                 </div>
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/90 z-10" />
+            </div>
 
-                <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl mb-8">
-                    <button
-                        className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${isLogin ? 'bg-white dark:bg-slate-700 shadow text-primary' : 'text-slate-500'}`}
-                        onClick={() => { setIsLogin(true); setError(''); }}
-                    >
-                        Нэвтрэх
-                    </button>
-                    <button
-                        className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${!isLogin ? 'bg-white dark:bg-slate-700 shadow text-primary' : 'text-slate-500'}`}
-                        onClick={() => { setIsLogin(false); setError(''); }}
-                    >
-                        Бүртгүүлэх
-                    </button>
-                </div>
-
-                <form onSubmit={handleAuth} className="space-y-4">
-                    {!isLogin && (
-                        <>
-                            <input
-                                type="text"
-                                placeholder="Нэр"
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
-                            />
-                            <input
-                                type="tel"
-                                placeholder="Утасны дугаар"
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                required
-                            />
-                        </>
-                    )}
-
-                    <input
-                        type="email"
-                        placeholder="Имэйл хаяг"
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                    <input
-                        type="password"
-                        placeholder="Нууц үг"
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-
-                    {!isLogin && (
-                        <input
-                            type="password"
-                            placeholder="Нууц үг давтах"
-                            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            required
-                        />
-                    )}
-
-                    {error && (
-                        <div className="p-3 bg-red-100 text-red-600 rounded-xl text-sm font-bold flex items-center gap-2">
-                            <span className="material-symbols-outlined text-lg">error</span>
-                            {error}
-                        </div>
-                    )}
-
-                    <button type="submit" className="w-full py-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 active:scale-95 transition-all">
-                        {isLogin ? 'Нэвтрэх' : 'Бүртгүүлэх'}
-                    </button>
-                </form>
-
-                <div className="my-8 flex items-center gap-4">
-                    <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1" />
-                    <span className="text-xs text-slate-400 font-bold uppercase">Эсвэл</span>
-                    <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1" />
-                </div>
+            {/* Login Content */}
+            <div className="relative z-20 w-full max-w-md px-6 text-center text-white flex flex-col items-center justify-center min-h-[80vh]">
+                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 drop-shadow-lg">
+                    TEMMUN <br /> TRADING
+                </h1>
+                <p className="text-lg md:text-xl font-medium text-slate-200 mb-12 drop-shadow-md leading-relaxed whitespace-pre-line">
+                    Бүх төрлийн АВТО МАШИН захиалга авч <br />түргэн шуурхай найдвартай нийлүүлсээр байна
+                </p>
 
                 <button
                     onClick={handleGoogleLogin}
-                    className="w-full py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl flex items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                    className="w-full max-w-xs py-4 bg-white text-slate-900 border border-slate-200 font-bold rounded-full flex items-center justify-center gap-3 hover:bg-slate-50 transition-transform active:scale-95 shadow-xl group"
                 >
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6 group-hover:scale-110 transition-transform" alt="Google" />
                     <span>Google-ээр нэвтрэх</span>
                 </button>
+
+                <p className="mt-6 text-xs text-slate-400">
+                    Үйлчилгээний нөхцөл болон нууцлалын бодлогыг зөвшөөрч байна.
+                </p>
             </div>
-            <BottomNav />
+
+            <div className="relative z-20 mt-auto w-full">
+                <BottomNav />
+            </div>
         </div>
     );
 }
@@ -290,6 +239,50 @@ function ProductList({ products, emptyMessage }: { products: Product[], emptyMes
                         <p className="text-primary font-bold text-sm mt-1">{product.price}</p>
                     </div>
                 </a>
+            ))}
+        </div>
+    );
+}
+
+function OrderList({ orders, emptyMessage }: { orders: any[], emptyMessage: string }) {
+    if (!orders || orders.length === 0) {
+        return (
+            <div className="text-center py-10 text-slate-500">
+                <span className="material-symbols-outlined text-4xl mb-2 opacity-50">receipt_long</span>
+                <p>{emptyMessage}</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-3">
+            {orders.map((order) => (
+                <div key={order.id} className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-slate-800">
+                    <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-bold text-slate-900 dark:text-white">{order.product_name}</h3>
+                        <span className={`text-xs font-bold px-2 py-1 rounded-full ${order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                            order.status === 'confirmed' ? 'bg-blue-100 text-blue-700' :
+                                order.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                    'bg-red-100 text-red-700'
+                            }`}>
+                            {order.status === 'pending' ? 'Хүлээгдэж буй' :
+                                order.status === 'confirmed' ? 'Баталгаажсан' :
+                                    order.status === 'completed' ? 'Дууссан' : 'Цуцлагдсан'}
+                        </span>
+                    </div>
+                    <div className="text-sm text-slate-500 space-y-1">
+                        <p className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-base">calendar_today</span>
+                            {new Date(order.created_at * 1000).toLocaleDateString()}
+                        </p>
+                        {order.phone && (
+                            <p className="flex items-center gap-2">
+                                <span className="material-symbols-outlined text-base">call</span>
+                                {order.phone}
+                            </p>
+                        )}
+                    </div>
+                </div>
             ))}
         </div>
     );

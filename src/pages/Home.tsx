@@ -4,7 +4,7 @@ import SearchSection from '../components/SearchSection';
 import Banner from '../components/Banner';
 import Categories from '../components/Categories';
 import FeaturedCars from '../components/FeaturedCars';
-import NewsSection from '../components/NewsSection';
+import CustomerReviews from '../components/CustomerReviews';
 import Footer from '../components/Footer';
 import BottomNav from '../components/BottomNav';
 import CategorySection from '../components/CategorySection';
@@ -55,7 +55,7 @@ export default function Home() {
                 ))}
 
 
-                <NewsSection />
+                <CustomerReviews />
                 <Footer />
             </main>
             <BottomNav />

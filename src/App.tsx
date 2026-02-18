@@ -7,12 +7,15 @@ import Profile from './pages/Profile';
 import ProductDetail from './pages/ProductDetail';
 import CategoryDetail from './pages/CategoryDetail';
 import About from './pages/About';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
 import AdminLayout from './layouts/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProductList from './pages/admin/AdminProductList';
 import AdminProductCreate from './pages/admin/AdminProductCreate';
 import AdminBannerManage from './pages/admin/AdminBannerManage';
 import AdminCategoryManage from './pages/admin/AdminCategoryManage';
+import AdminOrderManage from './pages/admin/AdminOrderManage';
 import AdminExchangeRate from './pages/admin/AdminExchangeRate';
 import AdminLogin from './pages/admin/AdminLogin';
 
@@ -28,6 +31,8 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/category/:id" element={<CategoryDetail />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
 
         {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
@@ -38,6 +43,7 @@ function App() {
           <Route path="products/edit/:id" element={<AdminProductCreate />} />
           <Route path="banners" element={<AdminBannerManage />} />
           <Route path="categories" element={<AdminCategoryManage />} />
+          <Route path="orders" element={<AdminOrderManage />} />
           <Route path="exchange-rate" element={<AdminExchangeRate />} />
         </Route>
       </Routes>

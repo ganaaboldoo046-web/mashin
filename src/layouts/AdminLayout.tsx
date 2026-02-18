@@ -45,6 +45,7 @@ export default function AdminLayout() {
                 <nav className="flex-1 p-4 space-y-1">
                     <AdminNavLink to="/admin" end icon="dashboard" onClick={() => setIsMobileMenuOpen(false)}>Хяналтын самбар</AdminNavLink>
                     <AdminNavLink to="/admin/products" icon="directions_car" onClick={() => setIsMobileMenuOpen(false)}>Автомашин</AdminNavLink>
+                    <AdminNavLink to="/admin/orders" icon="list_alt" onClick={() => setIsMobileMenuOpen(false)}>Захиалга</AdminNavLink>
                     <AdminNavLink to="/admin/banners" icon="collections" onClick={() => setIsMobileMenuOpen(false)}>Баннер</AdminNavLink>
                     <AdminNavLink to="/admin/categories" icon="category" onClick={() => setIsMobileMenuOpen(false)}>Ангилал</AdminNavLink>
                     <AdminNavLink to="/admin/exchange-rate" icon="currency_exchange" onClick={() => setIsMobileMenuOpen(false)}>Ханш</AdminNavLink>

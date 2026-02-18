@@ -51,3 +51,39 @@ CREATE TABLE users (
   avatar TEXT,
   created_at INTEGER DEFAULT (strftime('%s', 'now'))
 );
+
+-- Reservations (예약) 테이블
+CREATE TABLE reservations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  product_name TEXT NOT NULL,
+  user_id TEXT, -- 로그인한 사용자 ID (email 등)
+  user_name TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  facebook_id TEXT,
+  status TEXT DEFAULT 'pending', -- pending, confirmed, completed, cancelled
+  created_at INTEGER DEFAULT (strftime('%s', 'now')),
+  status_updated_at INTEGER,
+  FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+-- Settings (설정 - 환율 등) 테이블
+CREATE TABLE settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL,
+  updated_at INTEGER DEFAULT (strftime('%s', 'now'))
+);
+
+INSERT OR IGNORE INTO settings (key, value) VALUES ('exchange_rate', '2.5');
+
+-- Reviews (후기) 테이블
+CREATE TABLE reviews (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id TEXT NOT NULL,
+  user_name TEXT NOT NULL,
+  car_model TEXT,
+  comment TEXT NOT NULL,
+  rating INTEGER DEFAULT 5,
+  gender TEXT DEFAULT 'male',
+  created_at INTEGER DEFAULT (strftime('%s', 'now'))
+);

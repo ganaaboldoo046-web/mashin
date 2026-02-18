@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getExchangeRate, saveExchangeRate, type ExchangeRate } from '../../utils/storage';
+import { saveExchangeRate } from '../../utils/storage';
 
 export default function AdminExchangeRate() {
     const [rate, setRate] = useState<number>(0);
@@ -8,24 +8,42 @@ export default function AdminExchangeRate() {
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
     useEffect(() => {
-        const currentRate = getExchangeRate();
-        setRate(currentRate.krwToMnt);
-        setLastUpdated(currentRate.lastUpdated);
+        const fetchRate = async () => {
+            try {
+                const res = await fetch('/api/exchange_rate');
+                if (res.ok) {
+                    const data = await res.json();
+                    setRate(data.rate);
+                    // setLastUpdated(data.updated_at); // Optional if API returns it
+                }
+            } catch (e) {
+                console.error("Failed to fetch rate", e);
+            }
+        };
+        fetchRate();
     }, []);
 
-    const handleSave = (e: React.FormEvent) => {
+    const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setMessage(null);
 
         try {
-            const newRateData: ExchangeRate = {
-                krwToMnt: rate,
-                lastUpdated: new Date().toISOString()
-            };
-            saveExchangeRate(newRateData);
-            setLastUpdated(newRateData.lastUpdated);
-            setMessage({ type: 'success', text: 'Ханш амжилттай шинэчлэгдлээ! Бүх машины үнэ автоматаар шинэчлэгдсэн.' });
+            const res = await fetch('/api/exchange_rate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rate })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                setMessage({ type: 'success', text: `Ханш амжилттай шинэчлэгдлээ! ${data.updatedProducts} машины үнэ шинэчлэгдсэн.` });
+                setLastUpdated(new Date().toISOString());
+                // Update local storage for other components if they still use it, or trigger event
+                saveExchangeRate({ krwToMnt: rate, lastUpdated: new Date().toISOString() });
+            } else {
+                throw new Error('Failed to save');
+            }
         } catch (error) {
             setMessage({ type: 'error', text: 'Хадгалахад алдаа гарлаа.' });
         } finally {

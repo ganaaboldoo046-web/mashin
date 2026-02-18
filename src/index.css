@@ -15,3 +15,25 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+@layer utilities {
+  .animate-marquee-vertical {
+    animation: marquee-vertical 20s linear infinite;
+  }
+  .animate-marquee-vertical-slow {
+    animation: marquee-vertical 30s linear infinite;
+  }
+  .animate-marquee-vertical-reverse {
+    animation: marquee-vertical-reverse 25s linear infinite;
+  }
+
+  @keyframes marquee-vertical {
+    from { transform: translateY(0); }
+    to { transform: translateY(-50%); }
+  }
+  
+  @keyframes marquee-vertical-reverse {
+    from { transform: translateY(-50%); }
+    to { transform: translateY(0); }
+  }
+}
