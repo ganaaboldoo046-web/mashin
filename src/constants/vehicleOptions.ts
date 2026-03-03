@@ -7,25 +7,25 @@ export interface VehicleOption {
 
 export const VEHICLE_OPTIONS: VehicleOption[] = [
     // --- Exterior / Interior (Гадаад / Дотоод) ---
-    { id: 'sunroof', label: 'Сэнлүүф', icon: 'roofing', category: 'exterior' }, // or 'wb_sunny'
+    { id: 'sunroof', label: 'Лүүк', icon: 'roofing', category: 'exterior' }, // originally Сэнлүүф
     { id: 'led_headlight', label: 'Урд гэрэл (HID, LED)', icon: 'light', category: 'exterior' },
-    { id: 'power_trunk', label: 'Цахилгаан арын тээш', icon: 'sensor_door', category: 'exterior' },
-    { id: 'soft_close', label: 'Смарт хаалга хаагч', icon: 'sensor_window', category: 'exterior' },
-    { id: 'power_folding_mirrors', label: 'Цахилгаан эвхэгддэг толь', icon: 'mirror', category: 'exterior' }, // custom?
+    { id: 'power_trunk', label: 'Автомат багаажны хаалга', icon: 'sensor_door', category: 'exterior' },
+    { id: 'soft_close', label: 'Хаалга сорогч', icon: 'sensor_window', category: 'exterior' }, // originally Смарт хаалга хаагч
+    { id: 'power_folding_mirrors', label: 'Цахилгаан эвхэгддэг толь', icon: 'flip', category: 'exterior' }, // custom?
     { id: 'alloy_wheels', label: 'Хайлшин обуд', icon: 'tire_repair', category: 'exterior' },
     { id: 'roof_rail', label: 'Дээврийн рейл', icon: 'check_box_outline_blank', category: 'exterior' }, // generic rail
-    { id: 'heated_steering', label: 'Халаалттай жолоо', icon: 'sports_motorsports', category: 'exterior' },
+    { id: 'heated_steering', label: 'Руль халаагч', icon: 'sports_motorsports', category: 'exterior' },
     { id: 'adjustable_steering', label: 'Өндөр/нам тохируулга', icon: 'settings_accessibility', category: 'exterior' },
     { id: 'paddle_shift', label: 'Падл шифт', icon: 'tune', category: 'exterior' },
     { id: 'steering_controls', label: 'Жолооны удирдлага', icon: 'gamepad', category: 'exterior' },
     { id: 'auto_door_lock', label: 'Автомат түгжээ', icon: 'lock', category: 'exterior' },
     { id: 'high_pass', label: 'High-pass шүүлтүүр', icon: 'wysiwyg', category: 'exterior' },
-    { id: 'power_steering', label: 'Цахилгаан жолоо', icon: 'toys', category: 'exterior' },
+    { id: 'power_steering', label: 'Автомат', icon: 'toys', category: 'exterior' },
     { id: 'auto_window', label: 'Автомат цонх', icon: 'calendar_view_day', category: 'exterior' },
     { id: 'ecm_mirror', label: 'ECM толь', icon: 'nightlight', category: 'exterior' },
 
     // --- Safety (Аюулгүй байдал) ---
-    { id: 'airbag_driver', label: 'Агаарын дэр (жолооч)', icon: 'airline_seat_recline_normal', category: 'safety' },
+    { id: 'airbag_driver', label: 'Airbag (жолооч, зорчигч)', icon: 'airline_seat_recline_normal', category: 'safety' },
     { id: 'airbag_side', label: 'Хажуугийн агаарын дэр', icon: 'airline_seat_recline_extra', category: 'safety' },
     { id: 'airbag_curtain', label: 'Хөшиг агаарын дэр', icon: 'curtains', category: 'safety' },
     { id: 'abs', label: 'ABS тоормос', icon: 'verified_user', category: 'safety' },
@@ -61,10 +61,11 @@ export const VEHICLE_OPTIONS: VehicleOption[] = [
     { id: 'leather_seat', label: 'Арьсан суудал', icon: 'chair', category: 'seat' },
     { id: 'power_seat_front', label: 'Цахилгаан суудал (Урд)', icon: 'airline_seat_recline_normal', category: 'seat' },
     { id: 'power_seat_rear', label: 'Цахилгаан суудал (Арын)', icon: 'airline_seat_recline_extra', category: 'seat' },
-    { id: 'heated_seat', label: 'Суудлын халаалт', icon: 'mode_heat', category: 'seat' }, // Custom handling for heat needed maybe
+    { id: 'heated_seat_front', label: 'Суудал халаагч (урд)', icon: 'mode_heat', category: 'seat' },
+    { id: 'heated_seat_rear', label: 'Суудал халаагч (хойд)', icon: 'mode_heat', category: 'seat' },
+    { id: 'vent_seat_front', label: 'Суудал сэрүүцүүлэгч (урд)', icon: 'air', category: 'seat' },
+    { id: 'vent_seat_rear', label: 'Суудал сэрүүцүүлэгч (хойд)', icon: 'air', category: 'seat' },
     { id: 'memory_seat', label: 'Санах ойтой суудал', icon: 'memory', category: 'seat' },
-    { id: 'vent_seat_front', label: 'Агааржуулалт (Урд)', icon: 'air', category: 'seat' },
-    { id: 'vent_seat_rear', label: 'Агааржуулалт (Арын)', icon: 'air', category: 'seat' },
     { id: 'massage_seat', label: 'Массажтай суудал', icon: 'spa', category: 'seat' },
 ];
 
