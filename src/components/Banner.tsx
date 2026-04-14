@@ -44,7 +44,7 @@ export default function Banner() {
                     // Removing min-w, using fixed width + flex-shrink-0 to ensure exact sizing
                     <div
                         key={banner.id}
-                        className="relative w-[85%] md:w-[60%] h-48 md:h-80 rounded-2xl overflow-hidden shadow-lg snap-center shrink-0 flex-none bg-slate-200 dark:bg-slate-800"
+                        className="relative w-[85%] h-48 rounded-2xl overflow-hidden shadow-lg snap-center shrink-0 flex-none bg-slate-200 dark:bg-slate-800"
                     >
                         <Image
                             className="w-full h-full object-cover"
@@ -54,8 +54,8 @@ export default function Banner() {
                             priority={true}
                         />
                         <div className={`absolute inset-0 bg-gradient-to-t ${banner.bg || 'from-black/60'} to-transparent flex flex-col justify-end p-5`}>
-                            <h2 className="text-white text-xl md:text-3xl font-bold mb-1">{banner.title}</h2>
-                            <p className="text-white/80 text-xs md:text-sm">{banner.subtitle}</p>
+                            <h2 className="text-white text-xl font-bold mb-1">{banner.title}</h2>
+                            <p className="text-white/80 text-xs">{banner.subtitle}</p>
                         </div>
                     </div>
                 ))}
