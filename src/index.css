@@ -4,7 +4,13 @@
 
 @layer base {
   body {
-    @apply font-sans antialiased bg-background-light text-slate-900 dark:bg-background-dark dark:text-slate-100;
+    /* PC 데스크탑 환경 외부 여백 배경색 (어둡게/회색) */
+    @apply font-sans antialiased bg-slate-100 text-slate-900 dark:bg-black dark:text-slate-100 flex justify-center min-h-screen;
+  }
+
+  #root {
+    /* 모바일 뷰어 프레임 (최대 너비 고정 480px) */
+    @apply w-full max-w-[480px] min-h-screen bg-background-light dark:bg-background-dark shadow-2xl relative overflow-x-hidden border-x border-slate-200 dark:border-slate-800;
   }
 }
 
