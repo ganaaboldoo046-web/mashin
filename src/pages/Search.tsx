@@ -3,6 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import SearchSection from '../components/SearchSection';
 import BottomNav from '../components/BottomNav';
+import Image from '../components/Image';
 import { getProducts, getCategories, toggleSaved, getSavedIds } from '../utils/storage';
 import type { Product } from '../utils/storage';
 
@@ -58,7 +59,7 @@ export default function Search() {
                         {results.map((car) => (
                             <Link to={`/product/${car.id}`} key={car.id} className="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-sm border border-slate-100 dark:border-slate-700 flex gap-4">
                                 <div className="w-32 h-24 rounded-xl overflow-hidden shrink-0 relative">
-                                    <img src={car.images[0]} alt={car.name} className="w-full h-full object-cover" />
+                                    <Image src={car.images[0]} alt={car.name} className="w-full h-full object-cover" size="thumbnail" />
                                     <button
                                         onClick={(e) => {
                                             e.preventDefault();
@@ -108,7 +109,7 @@ export default function Search() {
                                         >
                                             <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary overflow-hidden">
                                                 {category.image ? (
-                                                    <img src={category.image} alt={category.name} className="w-full h-full object-cover" />
+                                                    <Image src={category.image} alt={category.name} className="w-full h-full object-cover" size="thumbnail" />
                                                 ) : (
                                                     <span className="material-symbols-outlined text-sm">{category.icon}</span>
                                                 )}

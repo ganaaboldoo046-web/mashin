@@ -76,22 +76,45 @@ export const STORAGE_KEYS = {
     RECENT: 'somang_recent',
 };
 
+// --- Caches ---
+let cachedBanners: Banner[] | null = null;
+let bannersPromise: Promise<Banner[]> | null = null;
+
+let cachedCategories: Category[] | null = null;
+let categoriesPromise: Promise<Category[]> | null = null;
+
+let cachedProducts: Product[] | null = null;
+let productsPromise: Promise<Product[]> | null = null;
+
+export const clearBannersCache = () => { cachedBanners = null; bannersPromise = null; };
+export const clearCategoriesCache = () => { cachedCategories = null; categoriesPromise = null; };
+export const clearProductsCache = () => { cachedProducts = null; productsPromise = null; };
+
 // --- API Functions (Async) ---
 
-export const getBanners = async (): Promise<Banner[]> => {
-    try {
-        const res = await fetch(`${API_BASE}/banners`);
-        if (!res.ok) throw new Error('Failed to fetch banners');
-        const data = await res.json();
-        // Return empty array if DB is empty, don't fallback to initialBanners after first setup
-        return data.map((b: any) => ({
-            ...b,
-            active: b.active === 1
-        }));
-    } catch (e) {
-        console.error(e);
-        return [];
-    }
+export const getBanners = async (force: boolean = false): Promise<Banner[]> => {
+    if (!force && cachedBanners) return cachedBanners;
+    if (!force && bannersPromise) return bannersPromise;
+
+    bannersPromise = (async () => {
+        try {
+            const res = await fetch(`${API_BASE}/banners`);
+            if (!res.ok) throw new Error('Failed to fetch banners');
+            const data = await res.json();
+            // Return empty array if DB is empty, don't fallback to initialBanners after first setup
+            cachedBanners = data.map((b: any) => ({
+                ...b,
+                active: b.active === 1
+            }));
+            return cachedBanners as Banner[];
+        } catch (e) {
+            console.error(e);
+            return [];
+        } finally {
+            bannersPromise = null;
+        }
+    })();
+    return bannersPromise;
 };
 
 export const saveBanner = async (banner: Partial<Banner>) => {
@@ -104,6 +127,7 @@ export const saveBanner = async (banner: Partial<Banner>) => {
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.error || 'Failed to save banner');
     }
+    clearBannersCache();
     return res.json();
 };
 
@@ -117,19 +141,29 @@ export const deleteBanner = async (id: number) => {
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.error || 'Failed to delete banner');
     }
+    clearBannersCache();
     return res.json();
 };
 
-export const getCategories = async (): Promise<Category[]> => {
-    try {
-        const res = await fetch(`${API_BASE}/categories`);
-        if (!res.ok) throw new Error('Failed to fetch categories');
-        const data = await res.json();
-        return Array.isArray(data) ? data : [];
-    } catch (e) {
-        console.error(e);
-        return [];
-    }
+export const getCategories = async (force: boolean = false): Promise<Category[]> => {
+    if (!force && cachedCategories) return cachedCategories;
+    if (!force && categoriesPromise) return categoriesPromise;
+
+    categoriesPromise = (async () => {
+        try {
+            const res = await fetch(`${API_BASE}/categories`);
+            if (!res.ok) throw new Error('Failed to fetch categories');
+            const data = await res.json();
+            cachedCategories = Array.isArray(data) ? data : [];
+            return cachedCategories;
+        } catch (e) {
+            console.error(e);
+            return [];
+        } finally {
+            categoriesPromise = null;
+        }
+    })();
+    return categoriesPromise;
 };
 
 export const createCategory = async (category: Partial<Category>) => {
@@ -142,6 +176,7 @@ export const createCategory = async (category: Partial<Category>) => {
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.error || 'Failed to save category');
     }
+    clearCategoriesCache();
     return res.json();
 };
 
@@ -155,6 +190,7 @@ export const reorderCategories = async (ids: number[]) => {
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.error || 'Failed to reorder categories');
     }
+    clearCategoriesCache();
     return res.json();
 };
 
@@ -170,26 +206,39 @@ export const deleteCategory = async (id: number) => {
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.error || 'Failed to delete category');
     }
+    clearCategoriesCache();
     return res.json();
 };
 
-export const getProducts = async (): Promise<Product[]> => {
-    try {
-        const res = await fetch(`${API_BASE}/products`);
-        if (!res.ok) throw new Error('Failed to fetch products');
-        const data = await res.json();
-        if (!Array.isArray(data)) return [];
-        return data.map((p: any) => ({
-            ...p,
-            images: typeof p.images === 'string' ? JSON.parse(p.images) : p.images,
-            options: p.options ? (typeof p.options === 'string' ? JSON.parse(p.options) : p.options) : [],
-            isFeatured: p.isFeatured === 1,
-            tags: [p.year, p.fuel].filter(Boolean)
-        }));
-    } catch (e) {
-        console.error(e);
-        return [];
-    }
+export const getProducts = async (force: boolean = false): Promise<Product[]> => {
+    if (!force && cachedProducts) return cachedProducts;
+    if (!force && productsPromise) return productsPromise;
+
+    productsPromise = (async () => {
+        try {
+            const res = await fetch(`${API_BASE}/products`);
+            if (!res.ok) throw new Error('Failed to fetch products');
+            const data = await res.json();
+            if (!Array.isArray(data)) {
+                cachedProducts = [];
+                return [];
+            }
+            cachedProducts = data.map((p: any) => ({
+                ...p,
+                images: typeof p.images === 'string' ? JSON.parse(p.images) : p.images,
+                options: p.options ? (typeof p.options === 'string' ? JSON.parse(p.options) : p.options) : [],
+                isFeatured: p.isFeatured === 1,
+                tags: [p.year, p.fuel].filter(Boolean)
+            }));
+            return cachedProducts;
+        } catch (e) {
+            console.error(e);
+            return [];
+        } finally {
+            productsPromise = null;
+        }
+    })();
+    return productsPromise;
 };
 
 export const saveProduct = async (product: Omit<Product, 'id'>) => {
@@ -202,6 +251,7 @@ export const saveProduct = async (product: Omit<Product, 'id'>) => {
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.error || 'Failed to save product');
     }
+    clearProductsCache();
     return res.json();
 };
 
@@ -214,6 +264,7 @@ export const deleteProduct = async (id: number) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id })
     });
+    clearProductsCache();
     return res.json();
 };
 

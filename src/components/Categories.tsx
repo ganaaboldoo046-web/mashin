@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo } from 'react';
+import Image from './Image';
 import { type Category, getCategories } from '../utils/storage';
 
-export default function Categories() {
+const Categories = memo(function Categories() {
     const [categories, setCategories] = useState<Category[]>([]);
 
     useEffect(() => {
@@ -29,7 +30,7 @@ export default function Categories() {
                 >
                     <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary overflow-hidden">
                         {category.image ? (
-                            <img src={category.image} alt={category.name} className="w-full h-full object-cover" />
+                            <Image src={category.image} alt={category.name} className="w-full h-full object-cover" size="thumbnail" />
                         ) : (
                             <span className="material-symbols-outlined text-sm">{category.icon}</span>
                         )}
@@ -39,4 +40,6 @@ export default function Categories() {
             ))}
         </div>
     );
-}
+});
+
+export default Categories;

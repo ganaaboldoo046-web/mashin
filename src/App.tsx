@@ -1,28 +1,41 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import Search from './pages/Search';
-import Sell from './pages/Sell';
-import Saved from './pages/Saved';
-import Profile from './pages/Profile';
-import ProductDetail from './pages/ProductDetail';
-import CategoryDetail from './pages/CategoryDetail';
-import About from './pages/About';
-import Terms from './pages/Terms';
-import Privacy from './pages/Privacy';
-import AdminLayout from './layouts/AdminLayout';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminProductList from './pages/admin/AdminProductList';
-import AdminProductCreate from './pages/admin/AdminProductCreate';
-import AdminBannerManage from './pages/admin/AdminBannerManage';
-import AdminCategoryManage from './pages/admin/AdminCategoryManage';
-import AdminOrderManage from './pages/admin/AdminOrderManage';
-import AdminExchangeRate from './pages/admin/AdminExchangeRate';
-import AdminLogin from './pages/admin/AdminLogin';
+import { lazy, Suspense } from 'react';
+import ErrorBoundary from './components/ErrorBoundary';
+
+// Lazy loaded pages for Code Splitting
+const Home = lazy(() => import('./pages/Home'));
+const Search = lazy(() => import('./pages/Search'));
+const Sell = lazy(() => import('./pages/Sell'));
+const Saved = lazy(() => import('./pages/Saved'));
+const Profile = lazy(() => import('./pages/Profile'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const CategoryDetail = lazy(() => import('./pages/CategoryDetail'));
+const About = lazy(() => import('./pages/About'));
+const Terms = lazy(() => import('./pages/Terms'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+
+const AdminLayout = lazy(() => import('./layouts/AdminLayout'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminProductList = lazy(() => import('./pages/admin/AdminProductList'));
+const AdminProductCreate = lazy(() => import('./pages/admin/AdminProductCreate'));
+const AdminBannerManage = lazy(() => import('./pages/admin/AdminBannerManage'));
+const AdminCategoryManage = lazy(() => import('./pages/admin/AdminCategoryManage'));
+const AdminOrderManage = lazy(() => import('./pages/admin/AdminOrderManage'));
+const AdminExchangeRate = lazy(() => import('./pages/admin/AdminExchangeRate'));
+const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
+
+const LoadingFallback = () => (
+    <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
+        <div className="w-10 h-10 border-4 border-slate-200 dark:border-slate-800 border-t-primary rounded-full animate-spin"></div>
+    </div>
+);
 
 function App() {
   return (
-    <Router>
-      <Routes>
+    <ErrorBoundary>
+      <Router>
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<Search />} />
         <Route path="/sell" element={<Sell />} />
@@ -46,8 +59,10 @@ function App() {
           <Route path="orders" element={<AdminOrderManage />} />
           <Route path="exchange-rate" element={<AdminExchangeRate />} />
         </Route>
-      </Routes>
-    </Router>
+          </Routes>
+        </Suspense>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

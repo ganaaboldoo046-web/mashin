@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Image from './Image';
 import { getProducts } from '../utils/storage';
 import type { Product } from '../utils/storage';
 
@@ -29,7 +30,7 @@ export default function FeaturedListings() {
                 {cars.map((car) => (
                     <a href={`/product/${car.id}`} key={car.id} className="block bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800">
                         <div className="w-full h-32 relative">
-                            <img className="w-full h-full object-cover" src={car.images[0]} alt={car.name} />
+                            <Image className="w-full h-full object-cover" src={car.images[0]} alt={car.name} size="thumbnail" />
                             <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full">
                                 FEATURED
                             </div>

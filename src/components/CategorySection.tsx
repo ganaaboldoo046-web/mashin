@@ -1,4 +1,6 @@
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
+import Image from './Image';
 import type { Category, Product } from '../utils/storage';
 
 interface CategorySectionProps {
@@ -6,7 +8,7 @@ interface CategorySectionProps {
     products: Product[];
 }
 
-export default function CategorySection({ category, products }: CategorySectionProps) {
+const CategorySection = memo(function CategorySection({ category, products }: CategorySectionProps) {
     if (products.length === 0) return null;
 
     const displayProducts = products.slice(0, 6);
@@ -34,10 +36,11 @@ export default function CategorySection({ category, products }: CategorySectionP
                         className="min-w-[200px] w-[200px] block bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-800 snap-start"
                     >
                         <div className="w-full aspect-video relative group">
-                            <img
+                            <Image
                                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                                 src={product.images[0]}
                                 alt={product.name}
+                                size="thumbnail"
                             />
                             {product.status === 'sold' && (
                                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -59,4 +62,6 @@ export default function CategorySection({ category, products }: CategorySectionP
             </div>
         </section>
     );
-}
+});
+
+export default CategorySection;

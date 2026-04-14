@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Image from './Image';
 import { type Banner as BannerType, getBanners } from '../utils/storage';
 
 export default function Banner() {
@@ -45,14 +46,12 @@ export default function Banner() {
                         key={banner.id}
                         className="relative w-[85%] md:w-[60%] h-48 md:h-80 rounded-2xl overflow-hidden shadow-lg snap-center shrink-0 flex-none bg-slate-200 dark:bg-slate-800"
                     >
-                        <img
+                        <Image
                             className="w-full h-full object-cover"
                             src={banner.image}
                             alt={banner.title}
-                            onError={(e) => {
-                                // Fallback if image fails to load
-                                e.currentTarget.src = "https://via.placeholder.com/800x400?text=No+Image";
-                            }}
+                            size="medium"
+                            priority={true}
                         />
                         <div className={`absolute inset-0 bg-gradient-to-t ${banner.bg || 'from-black/60'} to-transparent flex flex-col justify-end p-5`}>
                             <h2 className="text-white text-xl md:text-3xl font-bold mb-1">{banner.title}</h2>

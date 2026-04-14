@@ -12,8 +12,8 @@ export default {
         "background-dark": "#101622",
       },
       fontFamily: {
-        "display": ["Inter", "sans-serif"],
-        "sans": ["Inter", "sans-serif"],
+        "display": ["Inter", "ui-sans-serif", "system-ui", "sans-serif", '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"'],
+        "sans": ["Inter", "ui-sans-serif", "system-ui", "sans-serif", '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"'],
       },
     },
   },

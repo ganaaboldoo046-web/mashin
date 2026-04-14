@@ -3,6 +3,7 @@ import emailjs from '@emailjs/browser';
 import { useParams, useNavigate } from 'react-router-dom';
 // import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
+import Image from '../components/Image';
 import { getProducts, addToRecentlyViewed, isSaved, toggleSaved } from '../utils/storage';
 import type { Product } from '../utils/storage';
 import { VEHICLE_OPTIONS } from '../constants/vehicleOptions';
@@ -224,10 +225,12 @@ export default function ProductDetail() {
                         {product.images && product.images.length > 0 ? (
                             product.images.map((img, idx) => (
                                 <div key={idx} className="w-full h-full flex-shrink-0 snap-center relative flex items-center justify-center">
-                                    <img
+                                    <Image
                                         src={img}
                                         alt={`${product.name} - ${idx + 1}`}
                                         className="max-w-full max-h-full object-contain"
+                                        size="full"
+                                        priority={idx === 0}
                                     />
                                 </div>
                             ))
@@ -349,7 +352,7 @@ export default function ProductDetail() {
                                         className="min-w-[160px] w-[160px] bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 shrink-0 active:scale-95 transition-transform"
                                     >
                                         <div className="aspect-[4/3] bg-slate-200 dark:bg-slate-700 relative">
-                                            <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover" />
+                                            <Image src={item.images[0]} alt={item.name} className="w-full h-full object-cover" size="thumbnail" />
                                             {item.status !== 'active' && (
                                                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                                                     <span className="text-white text-xs font-bold px-2 py-1 bg-black/50 rounded-lg backdrop-blur-sm">

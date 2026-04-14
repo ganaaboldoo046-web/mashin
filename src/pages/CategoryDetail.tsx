@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
+import Image from '../components/Image';
 import { getProducts, getCategories, type Product, type Category } from '../utils/storage';
 
 type SortOption = 'newest' | 'price-asc' | 'price-desc' | 'year-desc';
@@ -201,10 +202,11 @@ export default function CategoryDetail() {
                                     className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm flex flex-col p-2 cursor-pointer border border-slate-100 dark:border-slate-700 active:scale-[0.98] transition-all"
                                 >
                                     <div className="relative aspect-square w-full mb-2">
-                                        <img
+                                        <Image
                                             alt={product.name}
                                             className="w-full h-full object-cover rounded-lg"
                                             src={product.images?.[0] || 'https://via.placeholder.com/300?text=No+Image'}
+                                            size="thumbnail"
                                         />
                                         <button
                                             onClick={(e) => {
