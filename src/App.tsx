@@ -33,8 +33,9 @@ const LoadingFallback = () => (
 function App() {
   return (
     <ErrorBoundary>
-      <Router>
-        <Suspense fallback={<LoadingFallback />}>
+      <div className="w-full max-w-[480px] mx-auto min-h-screen bg-background-light dark:bg-background-dark relative shadow-2xl overflow-x-hidden border-x border-slate-200 dark:border-slate-800">
+        <Router>
+          <Suspense fallback={<LoadingFallback />}>
           <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<Search />} />
@@ -61,7 +62,8 @@ function App() {
         </Route>
           </Routes>
         </Suspense>
-      </Router>
+        </Router>
+      </div>
     </ErrorBoundary>
   );
 }
