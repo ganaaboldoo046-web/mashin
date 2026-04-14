@@ -377,7 +377,7 @@ export default function ProductDetail() {
             {/* Action Bar & Bottom Nav - Fixed at bottom */}
             <div className="flex-none z-40 relative">
                 {/* Floating Action Bar */}
-                <div className="fixed bottom-[80px] left-1/2 -translate-x-1/2 w-full max-w-[480px] px-4 pointer-events-none z-50">
+                <div className="fixed bottom-[80px] left-1/2 -translate-x-1/2 w-full max-w-[430px] px-4 pointer-events-none z-50">
                     {/* Chat Floating Button */}
                     <button
                         onClick={() => window.open('https://www.facebook.com/temmun.trading', '_blank')}
@@ -405,7 +405,7 @@ export default function ProductDetail() {
 
             {/* Call Selection Modal */}
             {isCallModalOpen && (
-                <div className="fixed inset-y-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setIsCallModalOpen(false)}>
+                <div className="fixed inset-y-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setIsCallModalOpen(false)}>
                     <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden animate-slide-up" onClick={e => e.stopPropagation()}>
                         <div className="p-6">
                             <div className="flex justify-between items-center mb-6">
@@ -443,7 +443,7 @@ export default function ProductDetail() {
 
             {/* Reservation Modal */}
             {isReservationModalOpen && (
-                <div className="fixed inset-y-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+                <div className="fixed inset-y-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
                     <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
                         <div className="p-6">
                             <div className="flex justify-between items-center mb-6">

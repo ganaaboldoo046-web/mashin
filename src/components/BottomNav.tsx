@@ -8,7 +8,7 @@ export default function BottomNav() {
     };
 
     return (
-        <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 px-6 pb-6 pt-2">
+        <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 px-6 pb-6 pt-2">
             <div className="flex justify-between items-center max-w-md mx-auto">
                 <Link to="/" className={`flex flex-col items-center gap-1 ${isActive('/')}`}>
                     <span className="material-symbols-outlined fill-1">home</span>

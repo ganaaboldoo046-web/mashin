@@ -33,7 +33,7 @@ const LoadingFallback = () => (
 function App() {
   return (
     <ErrorBoundary>
-      <div className="w-full max-w-[480px] mx-auto min-h-screen bg-background-light dark:bg-background-dark relative shadow-2xl overflow-x-hidden border-x border-slate-200 dark:border-slate-800">
+      <div className="w-full max-w-[430px] mx-auto min-h-screen bg-background-light dark:bg-background-dark relative shadow-2xl overflow-x-hidden border-x border-slate-200 dark:border-slate-800">
         <Router>
           <Suspense fallback={<LoadingFallback />}>
           <Routes>

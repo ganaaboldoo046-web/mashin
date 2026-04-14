@@ -35,7 +35,7 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-y-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-[60] flex justify-end overflow-hidden">
+        <div className="fixed inset-y-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-[60] flex justify-end overflow-hidden">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/50 transition-opacity animate-fade-in"
