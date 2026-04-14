@@ -1,4 +1,5 @@
-import { Component, ErrorInfo, ReactNode } from 'react';
+import { Component } from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
 
 interface Props {
     children?: ReactNode;
@@ -40,7 +41,7 @@ class ErrorBoundary extends Component<Props, State> {
                         <span className="material-symbols-outlined">refresh</span>
                         Дахин ачаалах
                     </button>
-                    {process.env.NODE_ENV === 'development' && (
+                    {import.meta.env.DEV && (
                         <div className="mt-8 p-4 bg-red-50 text-red-800 text-left rounded-lg text-xs max-w-full overflow-auto inline-block border border-red-200">
                             <strong>{this.state.error?.toString()}</strong>
                         </div>
