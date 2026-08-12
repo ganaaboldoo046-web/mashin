@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Header from '../components/Header';
+import TopTicker from '../components/TopTicker';
 import SearchSection from '../components/SearchSection';
 import Banner from '../components/Banner';
 import Categories from '../components/Categories';
@@ -16,48 +17,38 @@ export default function Home() {
     const [products, setProducts] = useState<Product[]>([]);
 
     useEffect(() => {
-        const loadHbData = async () => {
-            const [cats, prods] = await Promise.all([
-                getCategories(),
-                getProducts()
-            ]);
+        const loadHomeData = async () => {
+            const [cats, prods] = await Promise.all([getCategories(), getProducts()]);
             setCategories(cats);
-            setProducts(prods.filter(p => p.status === 'active' || p.status === 'pending')); // Hide sold? or keep them? Usually active.
+            setProducts(prods.filter((p) => p.status === 'active' || p.status === 'pending'));
         };
 
-        loadHbData();
-        window.addEventListener('storageProducts', loadHbData); // Listen for updates
-        return () => window.removeEventListener('storageProducts', loadHbData);
+        loadHomeData();
+        window.addEventListener('storageProducts', loadHomeData);
+        return () => window.removeEventListener('storageProducts', loadHomeData);
     }, []);
 
-    // Helper to get products for a category
-    const getCategoryProducts = (categoryId: number) => {
-        return products.filter(p => p.categoryId === categoryId);
-    };
+    const getCategoryProducts = (categoryId: number) => products.filter((p) => p.categoryId === categoryId);
 
     return (
-        <div className="pb-24 min-h-screen bg-background-light dark:bg-background-dark">
+        <div className="min-h-screen bg-canvas pb-24 lg:pb-0">
             <Header />
-            <main>
+            <TopTicker />
+
+            <main className="lg:max-w-shell lg:mx-auto lg:px-6 lg:pt-7 lg:pb-20">
                 <SearchSection />
                 <Banner />
                 <Categories />
-
                 <FeaturedCars />
 
-                {/* Dynamically render category sections */}
-                {categories.map(category => (
-                    <CategorySection
-                        key={category.id}
-                        category={category}
-                        products={getCategoryProducts(category.id)}
-                    />
+                {categories.map((category) => (
+                    <CategorySection key={category.id} category={category} products={getCategoryProducts(category.id)} />
                 ))}
 
-
                 <CustomerReviews />
-                <Footer />
             </main>
+
+            <Footer />
             <BottomNav />
         </div>
     );

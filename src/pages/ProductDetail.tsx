@@ -1,51 +1,56 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { FormEvent } from 'react';
 import emailjs from '@emailjs/browser';
-import { useParams, useNavigate } from 'react-router-dom';
-// import Header from '../components/Header';
-import BottomNav from '../components/BottomNav';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import Header from '../components/Header';
+import TopTicker from '../components/TopTicker';
 import Image from '../components/Image';
+import CarCard from '../components/CarCard';
+import Footer from '../components/Footer';
 import { getProducts, addToRecentlyViewed, isSaved, toggleSaved } from '../utils/storage';
 import type { Product } from '../utils/storage';
+import { carMeta, formatKRW, fuelLabel, STATUS_LABELS } from '../utils/format';
+import { useUser } from '../hooks/useUser';
 import { VEHICLE_OPTIONS } from '../constants/vehicleOptions';
+
+const OPTION_GROUPS: { key: string; title: string }[] = [
+    { key: 'exterior', title: 'Гадаад / Дотоод' },
+    { key: 'safety', title: 'Аюулгүй байдал' },
+    { key: 'convenience', title: 'Тав тух / Мультимедиа' },
+    { key: 'seat', title: 'Суудал' },
+];
 
 export default function ProductDetail() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const user = useUser();
+
     const [product, setProduct] = useState<Product | null>(null);
     const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
     const [activeImage, setActiveImage] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isProductSaved, setIsProductSaved] = useState(false);
-    const [user, setUser] = useState<any>(null);
+
+    const [isCallModalOpen, setIsCallModalOpen] = useState(false);
+    const [isReservationModalOpen, setIsReservationModalOpen] = useState(false);
+    const [reservationForm, setReservationForm] = useState({ userName: '', phone: '', facebookId: '' });
+    const [reservationStatus, setReservationStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
     useEffect(() => {
-        // Scroll to top when component mounts or id changes
         window.scrollTo(0, 0);
-
-        // Check user login status
-        const storedUser = localStorage.getItem('somang_user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
 
         const loadData = async () => {
             if (id) {
                 const products = await getProducts();
-                const found = products.find(p => p.id === Number(id));
+                const found = products.find((p) => p.id === Number(id));
                 setProduct(found || null);
 
                 if (found) {
-                    // Check saved status
                     setIsProductSaved(isSaved(found.id));
-
-                    // Add to recently viewed
                     addToRecentlyViewed(found.id);
-
-                    // Find similar products: same category, not current product
-                    const similar = products
-                        .filter(p => p.categoryId === found.categoryId && p.id !== found.id)
-                        .slice(0, 5); // Limit to 5 items
-                    setSimilarProducts(similar);
+                    setSimilarProducts(
+                        products.filter((p) => p.categoryId === found.categoryId && p.id !== found.id).slice(0, 4)
+                    );
                 }
             }
             setLoading(false);
@@ -54,20 +59,36 @@ export default function ProductDetail() {
         loadData();
     }, [id]);
 
-    const handleBack = () => {
-        navigate(-1);
-    };
+    useEffect(() => {
+        const open = isCallModalOpen || isReservationModalOpen;
+        document.body.style.overflow = open ? 'hidden' : '';
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isCallModalOpen, isReservationModalOpen]);
+
+    const optionGroups = useMemo(() => {
+        const owned = new Set(product?.options || []);
+        return OPTION_GROUPS.map((group) => {
+            const items = VEHICLE_OPTIONS.filter((o) => o.category === group.key).map((o) => ({
+                label: o.label,
+                on: owned.has(o.id),
+            }));
+            return { ...group, items, on: items.filter((i) => i.on).length };
+        }).filter((group) => group.items.length > 0);
+    }, [product]);
+
+    const optionSummary = useMemo(() => {
+        const total = optionGroups.reduce((sum, g) => sum + g.items.length, 0);
+        const have = optionGroups.reduce((sum, g) => sum + g.on, 0);
+        return total > 0 ? `${have} / ${total} тоноглол` : '';
+    }, [optionGroups]);
 
     const handleShare = async () => {
-        if (!user) {
-            alert('Гүүгл хаягаар нэвтэрч байж хуваалцана уу.');
-            return;
-        }
-
         const shareData = {
             title: product?.name || 'TEMMUN TRADING',
             text: `Check out this car: ${product?.name}`,
-            url: window.location.href
+            url: window.location.href,
         };
 
         try {
@@ -83,30 +104,16 @@ export default function ProductDetail() {
     };
 
     const handleToggleSave = () => {
-        if (!user) {
-            alert('Гүүгл хаягаар нэвтэрч байж хадгална уу.');
-            return;
-        }
-        if (product) {
-            const newState = toggleSaved(product.id);
-            // toggleSaved returns: true (if ADDED means newly saved - index was -1), false (if REMOVED)
-            // Implementation: const newSaved = index === -1 ? ... : ...; return index === -1;
-            // So if it returns true, it's now saved.
-            setIsProductSaved(newState);
-        }
+        if (product) setIsProductSaved(toggleSaved(product.id));
     };
 
+    const openBooking = () => {
+        setReservationForm((form) => ({ ...form, userName: form.userName || user?.name || '' }));
+        setReservationStatus('idle');
+        setIsReservationModalOpen(true);
+    };
 
-    const [isCallModalOpen, setIsCallModalOpen] = useState(false);
-    const [isReservationModalOpen, setIsReservationModalOpen] = useState(false);
-    const [reservationForm, setReservationForm] = useState({
-        userName: '',
-        phone: '',
-        facebookId: ''
-    });
-    const [reservationStatus, setReservationStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
-
-    const handleReservationSubmit = async (e: React.FormEvent) => {
+    const handleReservationSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setReservationStatus('submitting');
 
@@ -117,43 +124,37 @@ export default function ProductDetail() {
                 body: JSON.stringify({
                     productId: product?.id,
                     productName: product?.name,
-                    userId: user?.email, // Send email as userId if logged in
-                    ...reservationForm
-                })
+                    userId: user?.email,
+                    ...reservationForm,
+                }),
             });
 
             if (response.ok) {
-                // --- EmailJS Integration Start ---
                 try {
                     // NOTE: Replace these with your actual EmailJS keys
                     const SERVICE_ID = 'YOUR_SERVICE_ID';
                     const TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
                     const PUBLIC_KEY = 'YOUR_PUBLIC_KEY';
 
-                    const templateParams = {
-                        product_name: product?.name,
-                        product_price: product?.price,
-                        user_name: reservationForm.userName,
-                        user_phone: reservationForm.phone,
-                        user_facebook: reservationForm.facebookId,
-                        user_email: user?.email || 'Guest',
-                        date: new Date().toLocaleString()
-                    };
-
-                    await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY);
-                    console.log('Email sent successfully');
+                    await emailjs.send(
+                        SERVICE_ID,
+                        TEMPLATE_ID,
+                        {
+                            product_name: product?.name,
+                            product_price: product?.price,
+                            user_name: reservationForm.userName,
+                            user_phone: reservationForm.phone,
+                            user_facebook: reservationForm.facebookId,
+                            user_email: user?.email || 'Guest',
+                            date: new Date().toLocaleString(),
+                        },
+                        PUBLIC_KEY
+                    );
                 } catch (emailError) {
                     console.error('Failed to send email:', emailError);
-                    // We don't block the success state even if email fails
                 }
-                // --- EmailJS Integration End ---
 
                 setReservationStatus('success');
-                setTimeout(() => {
-                    setIsReservationModalOpen(false);
-                    setReservationStatus('idle');
-                    setReservationForm({ userName: '', phone: '', facebookId: '' });
-                }, 2000);
             } else {
                 setReservationStatus('error');
             }
@@ -162,395 +163,454 @@ export default function ProductDetail() {
         }
     };
 
-    if (loading) return <div className="h-screen flex items-center justify-center bg-white dark:bg-background-dark text-slate-500">Loading...</div>;
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-canvas">
+                <div className="w-8 h-8 rounded-full border-4 border-line border-t-primary animate-spin" />
+            </div>
+        );
+    }
 
-    if (!product) return (
-        <div className="h-screen flex flex-col items-center justify-center bg-white dark:bg-background-dark text-slate-500 gap-4">
-            <span className="material-symbols-outlined text-4xl">error</span>
-            <p>Бүтээгдэхүүн олдсонгүй</p>
-            <button onClick={() => navigate('/')} className="text-primary font-bold">Нүүр хуудас руу буцах</button>
-        </div>
+    if (!product) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-canvas px-6 text-center">
+                <p className="text-[15px] font-extrabold">Бүтээгдэхүүн олдсонгүй</p>
+                <button onClick={() => navigate('/')} className="h-11 px-5 rounded-[11px] bg-primary text-white text-[13.5px] font-bold">
+                    Нүүр хуудас
+                </button>
+            </div>
+        );
+    }
+
+    const images = product.images?.length ? product.images : [];
+    const krw = formatKRW(product.priceKRW);
+    const meta = carMeta(product);
+
+    const specs = [
+        { k: 'Үйлдвэрлэсэн он', v: product.year },
+        { k: 'Гүйлт', v: product.mileage },
+        { k: 'Түлш', v: fuelLabel(product.fuel) },
+        { k: 'Хөдөлгүүр', v: product.engine },
+        { k: 'Хурдны хайрцаг', v: product.transmission },
+        { k: 'Хөтлөгч', v: product.drive },
+        { k: 'Өнгө', v: product.color },
+        { k: 'Дотор өнгө', v: product.interiorColor },
+        { k: 'Хаалга', v: product.doors },
+        { k: 'Байдал', v: STATUS_LABELS[product.status] },
+    ].filter((s): s is { k: string; v: string } => !!s.v && s.v !== '-');
+
+    /* 가격 · CTA 블록 — 모바일은 본문 상단, 데스크탑은 우측 사이드바에서 재사용 */
+    const priceBlock = (
+        <>
+            <div className="flex gap-1.5 flex-wrap">
+                <span className="text-[11px] font-bold text-primary bg-primary-soft rounded-[5px] px-2 py-[5px] whitespace-nowrap">
+                    {STATUS_LABELS[product.status]}
+                </span>
+                {product.isFeatured && (
+                    <span className="text-[11px] font-bold text-muted-strong bg-surface-4 rounded-[5px] px-2 py-[5px] whitespace-nowrap">
+                        Онцлох
+                    </span>
+                )}
+            </div>
+            <h1 className="mt-3 mb-0 text-[21px] font-extrabold tracking-[-0.025em] leading-[1.3] lg:text-2xl">{product.name}</h1>
+            <div className="mt-1.5 text-[13px] font-medium text-muted lg:mt-2 lg:text-[13.5px]">{meta}</div>
+
+            <div className="mt-[18px] lg:mt-[22px] lg:pt-5 lg:border-t lg:border-[#eef0f3]">
+                <div className="text-[12.5px] font-bold text-muted-soft">Машины үнэ</div>
+                <div className="mt-1 text-[28px] font-extrabold text-primary tracking-[-0.03em] lg:mt-1.5 lg:text-[32px]">{product.price}</div>
+                {krw && (
+                    <div className="mt-1 text-[12.5px] font-medium text-muted-faint lg:text-[13px]">Солонгост {krw}</div>
+                )}
+                <div className="mt-3.5 bg-surface-3 border border-line rounded-xl p-3.5 lg:mt-4 lg:px-4">
+                    <div className="text-[12.5px] font-bold text-muted-strong lg:text-[13px]">Багцад багтсан</div>
+                    <div className="mt-1 text-[15px] font-extrabold tracking-[-0.02em] lg:text-[17px]">Тээвэр · Гааль · Бүртгэл</div>
+                    <div className="mt-1.5 text-[11.5px] font-medium text-muted-soft leading-[1.5] lg:mt-2 lg:text-xs">
+                        Ханшийн өөрчлөлтөөс шалтгаалж үнэ бага зэрэг хэлбэлзэж болно.
+                    </div>
+                </div>
+            </div>
+        </>
     );
 
     return (
-        <div className="h-screen flex flex-col bg-background-light dark:bg-background-dark text-slate-900 dark:text-white overflow-hidden">
-            {/* Custom Header for Product Detail */}
-            <div className="flex-none z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                        <span className="material-symbols-outlined">arrow_back_ios_new</span>
-                    </button>
-                    {/* Removed product.name title */}
-                </div>
-                <div className="flex items-center gap-1">
-                    <button
-                        onClick={handleToggleSave}
-                        className={`p-2 rounded-full transition-all active:scale-95 ${isProductSaved
-                            ? 'text-red-500 bg-red-50 dark:bg-red-900/20'
-                            : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                            }`}
-                    >
-                        <span className={`material-symbols-outlined ${isProductSaved ? 'fill-current material-icons' : ''}`}>
-                            {/* fill-current class on symbol might not work for filled variant. 
-                                Material Symbols usually use 'fill' setting or a filled font. 
-                                Or simply 'favorite' vs 'favorite_border'. 
-                                I'll use text content switching. */}
-                            {isProductSaved ? 'favorite' : 'favorite_border'}
-                        </span>
-                    </button>
-                    <button
-                        onClick={handleShare}
-                        className="p-2 rounded-full text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors active:scale-95"
-                    >
-                        <span className="material-symbols-outlined">share</span>
-                    </button>
-                </div>
-            </div>
+        <div className="min-h-screen bg-canvas pb-[116px] lg:pb-0">
+            <Header showBack title={product.name} />
+            <TopTicker />
 
-            {/* Scrollable Content Area */}
-            <main className="flex-1 overflow-y-auto pb-32 scroll-smooth">
-                {/* Image Gallery */}
-                <div className="relative w-full aspect-video bg-black group">
-                    <div
-                        id="image-gallery-container"
-                        className="w-full h-full overflow-x-auto snap-x snap-mandatory flex scrollbar-hide"
-                        onScroll={(e) => {
-                            const container = e.currentTarget;
-                            const scrollPosition = container.scrollLeft;
-                            const width = container.clientWidth;
-                            const newIndex = Math.round(scrollPosition / width);
-                            setActiveImage(newIndex);
-                        }}
-                    >
-                        {product.images && product.images.length > 0 ? (
-                            product.images.map((img, idx) => (
-                                <div key={idx} className="w-full h-full flex-shrink-0 snap-center relative flex items-center justify-center">
-                                    <Image
-                                        src={img}
-                                        alt={`${product.name} - ${idx + 1}`}
-                                        className="max-w-full max-h-full object-contain"
-                                        size="full"
-                                        priority={idx === 0}
-                                    />
-                                </div>
-                            ))
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center text-slate-500 bg-slate-200 dark:bg-slate-800 flex-shrink-0 snap-center">
-                                <span className="material-symbols-outlined text-4xl">image_not_supported</span>
+            <main className="lg:max-w-shell lg:mx-auto lg:px-6 lg:pt-5 lg:pb-20">
+                <div className="hidden lg:block text-[12.5px] font-semibold text-muted-faint mb-4">
+                    <Link to="/search" className="text-muted-faint hover:text-primary">
+                        Автомашин
+                    </Link>{' '}
+                    · {product.name}
+                </div>
+
+                <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-7 lg:items-start">
+                    <div>
+                        {/* 갤러리 */}
+                        <div className="relative aspect-[4/3] bg-photo-strong flex items-center justify-center overflow-hidden lg:aspect-[16/10] lg:rounded-[18px] lg:border lg:border-line">
+                            {images.length > 0 ? (
+                                <>
+                                    <div
+                                        id="image-gallery-container"
+                                        className="w-full h-full flex overflow-x-auto snap-x snap-mandatory no-scrollbar"
+                                        onScroll={(e) => {
+                                            const el = e.currentTarget;
+                                            setActiveImage(Math.round(el.scrollLeft / el.clientWidth));
+                                        }}
+                                    >
+                                        {images.map((img, idx) => (
+                                            <div key={idx} className="w-full h-full flex-shrink-0 snap-center flex items-center justify-center">
+                                                <Image
+                                                    src={img}
+                                                    alt={`${product.name} - ${idx + 1}`}
+                                                    className="max-w-full max-h-full object-contain"
+                                                    size="full"
+                                                    priority={idx === 0}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {images.length > 1 && (
+                                        <div className="absolute bottom-3 right-3.5 text-[11.5px] font-bold text-white bg-night/60 rounded-full px-2.5 py-[5px]">
+                                            {activeImage + 1} / {images.length}
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <span className="text-[11.5px] font-bold tracking-[0.12em] text-placeholder">ГОЛ ЗУРАГ</span>
+                            )}
+                        </div>
+
+                        {/* 데스크탑 썸네일 */}
+                        {images.length > 1 && (
+                            <div className="hidden lg:grid grid-cols-5 gap-2.5 mt-2.5">
+                                {images.slice(0, 5).map((img, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => {
+                                            const container = document.getElementById('image-gallery-container');
+                                            if (container) container.scrollTo({ left: container.clientWidth * idx, behavior: 'smooth' });
+                                        }}
+                                        className={`aspect-[4/3] rounded-[10px] overflow-hidden border ${
+                                            idx === activeImage ? 'border-primary' : 'border-line'
+                                        }`}
+                                    >
+                                        <Image src={img} alt="" className="w-full h-full object-cover" size="thumbnail" />
+                                    </button>
+                                ))}
                             </div>
                         )}
-                    </div>
 
-                    {/* Image Navigation Dots */}
-                    {product.images && product.images.length > 1 && (
-                        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
-                            {product.images.map((_, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        const container = document.getElementById('image-gallery-container');
-                                        if (container) {
-                                            container.scrollTo({
-                                                left: container.clientWidth * idx,
-                                                behavior: 'smooth'
-                                            });
-                                        }
-                                    }}
-                                    className={`w-2 h-2 rounded-full transition-all shadow-sm ${idx === activeImage ? 'bg-white w-4' : 'bg-white/50 hover:bg-white/80'
-                                        }`}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </div>
+                        {/* 모바일 가격 블록 */}
+                        <div className="lg:hidden bg-surface px-4 pt-5 pb-[22px] border-b border-[#e9ebef]">{priceBlock}</div>
 
-                <div className="px-4 py-6">
-                    <div className="flex justify-between items-start mb-4">
-                        <div>
-                            <h1 className="text-2xl font-bold mb-1">{product.name}</h1>
-                            <p className="text-slate-500">{product.year} • {product.mileage}</p>
-                        </div>
-                        <div className="flex flex-col items-end text-right">
-                            <span className="text-primary text-xl font-bold">{product.price}</span>
-                            <span className="text-[10px] text-slate-400 font-medium">Монголд очих үнэ</span>
-                            {product.priceKRW && (
-                                <span className="text-xs text-slate-400 mt-0.5">
-                                    ({product.priceKRW.toLocaleString()} KRW)
-                                </span>
-                            )}
-                            <span className={`text-xs px-2 py-1 rounded-full mt-2 ${product.status === 'active' ? 'bg-green-100 text-green-700' :
-                                product.status === 'sold' ? 'bg-red-100 text-red-700' :
-                                    product.status === 'discounted' ? 'bg-orange-100 text-orange-700' : 'bg-yellow-100 text-yellow-700'
-                                }`}>
-                                {product.status === 'active' ? 'Бэлэн' : product.status === 'sold' ? 'Зарагдсан' : product.status === 'discounted' ? 'Хямдарсан' : 'Хүлээгдэж буй'}
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Quick Specs / Detailed Specs Grid */}
-                    <div className="mb-8">
-                        <h3 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">Дэлгэрэнгүй үзүүлэлт</h3>
-                        <div className="grid grid-cols-2 gap-3">
-                            <SpecItem icon="calendar_today" label="Үйлдвэрлэсэн он" value={product.year} />
-                            <SpecItem icon="speed" label="Явсан" value={product.mileage} />
-                            <SpecItem icon="local_gas_station" label="Түлш" value={
-                                product.fuel === 'Petrol' ? 'Бензин' :
-                                    product.fuel === 'Diesel' ? 'Дизель' :
-                                        product.fuel === 'Hybrid' ? 'Хайбрид' :
-                                            product.fuel === 'Electric' ? 'Цахилгаан' :
-                                                product.fuel === 'Gas' ? 'Газ' : product.fuel
-                            } />
-                            <SpecItem icon="settings" label="Хөдөлгүүр" value={product.engine || "-"} />
-                            <SpecItem icon="settings_input_component" label="Хурдны хайрцаг" value={product.transmission || "-"} />
-                            <SpecItem icon="architecture" label="Хөтлөгч" value={product.drive || "-"} />
-                            <SpecItem icon="palette" label="Өнгө" value={product.color || "-"} />
-                            <SpecItem icon="format_paint" label="Дотор өнгө" value={product.interiorColor || "-"} />
-                            <SpecItem icon="sensor_door" label="Хаалга" value={product.doors || "-"} />
-                        </div>
-                    </div>
-
-
-
-                    {/* Description */}
-                    <div className="mb-8">
-                        <h2 className="font-bold text-lg mb-3">Тайлбар</h2>
-                        <p className="text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-                            {product.description || "Тайлбар байхгүй байна."}
-                        </p>
-                    </div>
-
-                    {/* Vehicle Options */}
-                    {product.options && product.options.length > 0 && (
-                        <div className="mb-8">
-                            <h3 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">Нэмэлт тоноглол</h3>
-                            <div className="grid grid-cols-2 gap-3">
-                                {product.options.map(optId => {
-                                    const opt = VEHICLE_OPTIONS.find(o => o.id === optId);
-                                    if (!opt) return null;
-                                    return (
-                                        <div key={opt.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50">
-                                            <span className="material-symbols-outlined text-primary text-xl">{opt.icon}</span>
-                                            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{opt.label}</span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Similar Products */}
-                    {similarProducts.length > 0 && (
-                        <div className="mb-4">
-                            <h3 className="text-lg font-bold mb-4 text-slate-900 dark:text-white">Төстэй зар</h3>
-                            <div className="flex overflow-x-auto gap-4 pb-4 -mx-4 px-4 scrollbar-hide">
-                                {similarProducts.map(item => (
+                        {/* 주요 사양 */}
+                        <h2 className="hidden lg:block m-0 mt-9 mb-3.5 text-[19px] font-extrabold tracking-[-0.02em]">Үндсэн үзүүлэлт</h2>
+                        <div className="bg-surface mt-3 px-4 py-5 lg:mt-0 lg:rounded-2xl lg:border lg:border-line lg:px-6 lg:py-2">
+                            <div className="lg:hidden text-base font-extrabold tracking-[-0.02em] mb-3.5">Үндсэн үзүүлэлт</div>
+                            <div className="grid grid-cols-2 gap-3 lg:block lg:gap-0">
+                                {specs.map((spec) => (
                                     <div
-                                        key={item.id}
-                                        onClick={() => navigate(`/product/${item.id}`)}
-                                        className="min-w-[160px] w-[160px] bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 shrink-0 active:scale-95 transition-transform"
+                                        key={spec.k}
+                                        className="bg-surface-2 rounded-[11px] px-3.5 py-3 lg:grid lg:grid-cols-[180px_1fr] lg:bg-transparent lg:rounded-none lg:px-0 lg:py-[15px] lg:border-b lg:border-line-soft lg:last:border-b-0"
                                     >
-                                        <div className="aspect-[4/3] bg-slate-200 dark:bg-slate-700 relative">
-                                            <Image src={item.images[0]} alt={item.name} className="w-full h-full object-cover" size="thumbnail" />
-                                            {item.status !== 'active' && (
-                                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                                    <span className="text-white text-xs font-bold px-2 py-1 bg-black/50 rounded-lg backdrop-blur-sm">
-                                                        {item.status === 'sold' ? 'Зарагдсан' : 'Хүлээгдэж буй'}
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="p-3">
-                                            <h4 className="font-bold text-slate-900 dark:text-white text-sm truncate mb-1">{item.name}</h4>
-                                            <p className="text-primary font-bold text-sm mb-1">{item.price}</p>
-                                            <p className="text-[10px] text-slate-400">{item.year} • {item.mileage}</p>
-                                        </div>
+                                        <span className="block text-[11.5px] font-semibold text-muted-soft lg:text-[13.5px]">{spec.k}</span>
+                                        <span className="block mt-1 text-[13.5px] font-bold lg:mt-0">{spec.v}</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
-                    )}
+
+                        {/* 옵션 */}
+                        {optionGroups.length > 0 && (
+                            <>
+                                <div className="hidden lg:flex items-baseline justify-between mt-9 mb-3.5">
+                                    <h2 className="m-0 text-[19px] font-extrabold tracking-[-0.02em]">Нэмэлт тоноглол</h2>
+                                    <span className="text-[13px] font-bold text-muted-faint">{optionSummary}</span>
+                                </div>
+                                <div className="bg-surface mt-3 px-4 py-5 lg:mt-0 lg:rounded-2xl lg:border lg:border-line lg:px-6 lg:pt-1 lg:pb-5">
+                                    <div className="lg:hidden flex items-baseline justify-between mb-3.5">
+                                        <div className="text-base font-extrabold tracking-[-0.02em]">Нэмэлт тоноглол</div>
+                                        <span className="text-[12.5px] font-bold text-muted-faint">{optionSummary}</span>
+                                    </div>
+                                    {optionGroups.map((group) => (
+                                        <div key={group.key} className="py-3.5 border-t border-line-soft first:border-t-0 lg:py-5">
+                                            <div className="flex items-baseline gap-2 mb-2.5 lg:mb-3.5">
+                                                <span className="text-[13.5px] font-extrabold lg:text-sm">{group.title}</span>
+                                                <span className="text-[11.5px] font-bold text-primary lg:text-xs">
+                                                    {group.on}/{group.items.length}
+                                                </span>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 lg:grid-cols-3 lg:gap-x-3.5 lg:gap-y-2">
+                                                {group.items.map((item) => (
+                                                    <div key={item.label} className="flex items-center gap-2 min-w-0 py-1 lg:py-[7px] lg:gap-2.5">
+                                                        <span
+                                                            className={`flex-none w-[17px] h-[17px] rounded-full flex items-center justify-center text-[9.5px] font-bold lg:w-[18px] lg:h-[18px] lg:text-[10px] ${
+                                                                item.on ? 'bg-primary text-white' : 'bg-[#eef0f4] text-[#c3c9d2]'
+                                                            }`}
+                                                        >
+                                                            ✓
+                                                        </span>
+                                                        <span
+                                                            className={`text-[12.5px] truncate lg:text-[13.5px] ${
+                                                                item.on ? 'font-semibold text-[#1f2937]' : 'font-medium text-[#b6bcc6]'
+                                                            }`}
+                                                        >
+                                                            {item.label}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+
+                        {/* 설명 */}
+                        <h2 className="hidden lg:block m-0 mt-9 mb-3.5 text-[19px] font-extrabold tracking-[-0.02em]">Тайлбар</h2>
+                        <div className="bg-surface mt-3 px-4 py-5 lg:mt-0 lg:rounded-2xl lg:border lg:border-line lg:px-6 lg:py-[22px]">
+                            <div className="lg:hidden text-base font-extrabold tracking-[-0.02em] mb-3">Тайлбар</div>
+                            <p className="m-0 text-[13.5px] leading-[1.75] text-ink-soft whitespace-pre-wrap lg:text-[14.5px]">
+                                {product.description || 'Тайлбар байхгүй байна.'}
+                            </p>
+                        </div>
+
+                        {/* 유사 매물 */}
+                        {similarProducts.length > 0 && (
+                            <>
+                                <div className="flex items-baseline justify-between px-4 pt-6 pb-3 lg:px-0 lg:mt-9 lg:mb-3.5 lg:pt-0 lg:pb-0">
+                                    <h2 className="m-0 text-base font-extrabold tracking-[-0.02em] lg:text-[19px]">Ижил төстэй зар</h2>
+                                    <Link to="/search" className="text-[13px] font-bold text-primary lg:text-[13.5px]">
+                                        Бүгдийг харах →
+                                    </Link>
+                                </div>
+                                <div className="flex gap-3 overflow-x-auto no-scrollbar px-4 pb-1 lg:grid lg:grid-cols-4 lg:gap-3.5 lg:px-0 lg:overflow-visible">
+                                    {similarProducts.map((item) => (
+                                        <CarCard key={item.id} product={item} variant="mini" savable={false} />
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    {/* 데스크탑 사이드바 */}
+                    <aside className="hidden lg:flex lg:flex-col lg:gap-3.5 lg:sticky lg:top-[92px]">
+                        <div className="bg-surface border border-line rounded-[18px] p-6">
+                            {priceBlock}
+                            <div className="flex flex-col gap-2.5 mt-[22px]">
+                                <button onClick={openBooking} className="h-[50px] rounded-xl bg-primary text-white text-[15px] font-bold">
+                                    Захиалга өгөх
+                                </button>
+                                <button
+                                    onClick={handleToggleSave}
+                                    className={`h-[50px] rounded-xl border border-line-strong bg-surface text-[15px] font-bold ${
+                                        isProductSaved ? 'text-danger' : 'text-ink'
+                                    }`}
+                                >
+                                    {isProductSaved ? '♥ Хадгалсан' : '♡ Хадгалах'}
+                                </button>
+                                <div className="grid grid-cols-2 gap-2.5">
+                                    <button
+                                        onClick={() => setIsCallModalOpen(true)}
+                                        className="h-11 rounded-xl border border-line-strong bg-surface text-[13.5px] font-bold text-ink"
+                                    >
+                                        Залгах
+                                    </button>
+                                    <button
+                                        onClick={handleShare}
+                                        className="h-11 rounded-xl border border-line-strong bg-surface text-[13.5px] font-bold text-ink"
+                                    >
+                                        Хуваалцах
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="bg-night rounded-[18px] px-6 py-[22px]">
+                            <div className="text-xs font-bold tracking-[0.1em] text-night-line">TEMMUN TRADING</div>
+                            <a href="tel:01057279927" className="block mt-2.5 text-[17px] font-extrabold text-white hover:text-white">
+                                010 5727 9927
+                            </a>
+                            <a href="tel:99001979" className="block mt-[3px] text-sm font-bold text-night-text hover:text-night-text">
+                                9900 1979
+                            </a>
+                            <div className="mt-3.5 text-[12.5px] leading-[1.6] text-night-text">
+                                Инчон хот, Ённсү дүүрэг,
+                                <br />
+                                Нынхөдэ-ро 192
+                            </div>
+                        </div>
+                    </aside>
                 </div>
             </main>
 
-            {/* Action Bar & Bottom Nav - Fixed at bottom */}
-            <div className="flex-none z-40 relative">
-                {/* Floating Action Bar */}
-                <div className="fixed bottom-[80px] left-1/2 -translate-x-1/2 w-full max-w-[430px] px-4 pointer-events-none z-50">
-                    {/* Chat Floating Button */}
-                    <button
-                        onClick={() => window.open('https://www.facebook.com/temmun.trading', '_blank')}
-                        className="absolute bottom-[70px] right-4 bg-primary text-white h-10 px-4 rounded-full shadow-lg flex items-center justify-center gap-2 z-50 pointer-events-auto active:scale-95 transition-transform animate-bounce-slow"
-                    >
-                        <span className="material-symbols-outlined text-xl">chat</span>
-                        <span className="font-bold whitespace-nowrap text-sm">ЧАТ БИЧИХ</span>
-                        <span className="absolute -top-1 -right-1 bg-red-600 text-[10px] text-white font-bold px-1.5 py-0.5 rounded-full border border-white">1</span>
-                    </button>
-
-                    <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 p-2 flex gap-2 items-center max-w-md mx-auto pointer-events-auto">
-                        <button onClick={() => setIsCallModalOpen(true)} className="flex-1 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 font-bold h-12 rounded-xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-700">
-                            <span className="material-symbols-outlined">call</span>
-                            Залгах
-                        </button>
-                        <button onClick={() => setIsReservationModalOpen(true)} className="flex-1 bg-primary text-white font-bold h-12 rounded-xl shadow-md shadow-primary/20 active:scale-95 transition-transform flex items-center justify-center gap-2 hover:bg-blue-600">
-                            <span className="material-symbols-outlined">shopping_cart</span>
-                            Захиалах
-                        </button>
-                    </div>
-                </div>
-
-                <BottomNav />
+            {/* 모바일 하단 고정 CTA */}
+            <div className="lg:hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-app z-40 bg-white/95 backdrop-blur-sm border-t border-line px-4 pt-3 pb-4 flex gap-2.5 box-border">
+                <button
+                    onClick={handleToggleSave}
+                    aria-label="Хадгалах"
+                    className={`w-14 h-[52px] flex-none rounded-[13px] border border-line-strong bg-surface text-[19px] ${
+                        isProductSaved ? 'text-danger' : 'text-[#94a0b2]'
+                    }`}
+                >
+                    {isProductSaved ? '♥' : '♡'}
+                </button>
+                <button
+                    onClick={() => setIsCallModalOpen(true)}
+                    className="w-14 h-[52px] flex-none rounded-[13px] border border-line-strong bg-surface text-[17px] text-ink"
+                    aria-label="Залгах"
+                >
+                    ☎︎
+                </button>
+                <button onClick={openBooking} className="flex-1 h-[52px] rounded-[13px] bg-primary text-white text-[15px] font-bold">
+                    Захиалга өгөх
+                </button>
             </div>
 
-            {/* Call Selection Modal */}
+            <div className="hidden lg:block">
+                <Footer />
+            </div>
+
+            {/* 전화 연결 모달 */}
             {isCallModalOpen && (
-                <div className="fixed inset-y-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setIsCallModalOpen(false)}>
-                    <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden animate-slide-up" onClick={e => e.stopPropagation()}>
-                        <div className="p-6">
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Холбогдох дугаар</h3>
-                                <button onClick={() => setIsCallModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
-                                    <span className="material-symbols-outlined">close</span>
-                                </button>
-                            </div>
-
-                            <div className="space-y-3">
-                                <a href="tel:01057279927" className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-100 dark:border-slate-700">
-                                    <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
-                                        <span className="material-symbols-outlined">call</span>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-slate-500 font-medium">Солонгос дугаар</p>
-                                        <p className="text-lg font-bold text-slate-900 dark:text-white">010 5727 9927</p>
-                                    </div>
-                                </a>
-
-                                <a href="tel:99001979" className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-100 dark:border-slate-700">
-                                    <div className="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0">
-                                        <span className="material-symbols-outlined">call</span>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-slate-500 font-medium">Монгол дугаар</p>
-                                        <p className="text-lg font-bold text-slate-900 dark:text-white">9900 1979</p>
-                                    </div>
-                                </a>
-                            </div>
+                <div
+                    className="fixed inset-0 z-50 bg-[rgba(9,14,24,0.55)] flex items-end justify-center lg:items-center lg:p-6"
+                    onClick={() => setIsCallModalOpen(false)}
+                >
+                    <div
+                        className="w-full max-w-app bg-surface rounded-t-[20px] animate-sheet-up lg:max-w-[420px] lg:rounded-[20px] lg:shadow-modal lg:animate-slide-up"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between px-5 pt-[18px] pb-3 lg:px-6 lg:pt-[22px]">
+                            <div className="text-[17px] font-extrabold tracking-[-0.02em]">Холбогдох дугаар</div>
+                            <button onClick={() => setIsCallModalOpen(false)} className="w-9 h-9 rounded-[10px] bg-surface-4 text-muted text-[15px]">
+                                ✕
+                            </button>
+                        </div>
+                        <div className="px-5 pb-6 flex flex-col gap-2.5 lg:px-6">
+                            <a href="tel:01057279927" className="bg-surface-3 border border-line rounded-xl px-4 py-3.5 hover:text-ink">
+                                <div className="text-[12.5px] font-bold text-muted-soft">Солонгос дугаар</div>
+                                <div className="mt-1 text-[17px] font-extrabold text-ink">010 5727 9927</div>
+                            </a>
+                            <a href="tel:99001979" className="bg-surface-3 border border-line rounded-xl px-4 py-3.5 hover:text-ink">
+                                <div className="text-[12.5px] font-bold text-muted-soft">Монгол дугаар</div>
+                                <div className="mt-1 text-[17px] font-extrabold text-ink">9900 1979</div>
+                            </a>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Reservation Modal */}
+            {/* 예약 모달 */}
             {isReservationModalOpen && (
-                <div className="fixed inset-y-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
-                        <div className="p-6">
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Машин захиалах</h3>
-                                <button onClick={() => setIsReservationModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
-                                    <span className="material-symbols-outlined">close</span>
+                <div className="fixed inset-0 z-[60] bg-[rgba(9,14,24,0.55)] flex items-end justify-center lg:items-center lg:p-6">
+                    <div className="w-full max-w-app max-h-[90vh] overflow-y-auto bg-surface rounded-t-[20px] animate-sheet-up lg:max-w-[480px] lg:rounded-[20px] lg:shadow-modal lg:animate-slide-up">
+                        <div className="flex items-start justify-between gap-3.5 px-5 pt-[18px] pb-3.5 border-b border-line-soft lg:px-6 lg:pt-6 lg:pb-[18px]">
+                            <div>
+                                <div className="text-[17px] font-extrabold tracking-[-0.02em] lg:text-[19px]">Захиалга өгөх</div>
+                                <div className="mt-1 text-[12.5px] font-medium text-muted lg:text-[13px]">
+                                    Мэдээллээ үлдээгээрэй, ажлын 1 цагийн дотор холбогдоно.
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setIsReservationModalOpen(false)}
+                                className="w-9 h-9 flex-none rounded-[10px] bg-surface-4 text-muted text-[15px]"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        {reservationStatus === 'success' ? (
+                            <div className="px-5 pt-[30px] pb-[26px] text-center lg:px-6 lg:pt-[34px]">
+                                <div className="w-14 h-14 mx-auto rounded-full bg-primary-soft text-primary flex items-center justify-center text-[26px] font-extrabold">
+                                    ✓
+                                </div>
+                                <div className="mt-4 text-[17px] font-extrabold lg:text-[19px]">Захиалга хүлээн авлаа</div>
+                                <div className="mt-2 text-[13px] leading-[1.6] text-muted lg:text-[13.5px]">
+                                    {product.name}
+                                    <br />
+                                    {reservationForm.phone} дугаарт холбогдоно.
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setIsReservationModalOpen(false);
+                                        setReservationStatus('idle');
+                                        setReservationForm({ userName: '', phone: '', facebookId: '' });
+                                    }}
+                                    className="mt-5 w-full h-12 rounded-xl border border-line-strong bg-surface text-[14.5px] font-bold text-ink"
+                                >
+                                    Хаах
                                 </button>
                             </div>
-
-                            {reservationStatus === 'success' ? (
-                                <div className="text-center py-8">
-                                    <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <span className="material-symbols-outlined text-3xl">check</span>
+                        ) : (
+                            <form onSubmit={handleReservationSubmit} className="px-5 pt-4 pb-6 lg:px-6 lg:pt-5 lg:pb-[26px]">
+                                <div className="bg-surface-3 border border-line rounded-xl px-4 py-3.5 mb-4 lg:mb-5">
+                                    <div className="text-[13.5px] font-extrabold lg:text-sm">{product.name}</div>
+                                    <div className="mt-2 flex items-baseline justify-between gap-2.5">
+                                        <span className="text-xs font-bold text-muted-strong lg:text-[12.5px]">Үнэ</span>
+                                        <span className="text-base font-extrabold text-primary lg:text-[17px]">{product.price}</span>
                                     </div>
-                                    <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Захиалга амжилттай!</h4>
-                                    <p className="text-slate-500 text-sm mb-6">Бид тантай удахгүй холбогдох болно.</p>
-
-                                    <button
-                                        onClick={() => navigate('/profile')}
-                                        className="w-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-bold py-3 rounded-xl mb-3 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                                    >
-                                        Миний захиалга харах
-                                    </button>
-                                    <button
-                                        onClick={() => setIsReservationModalOpen(false)}
-                                        className="text-slate-400 text-sm font-medium hover:text-slate-600"
-                                    >
-                                        Хаах
-                                    </button>
                                 </div>
-                            ) : (
-                                <form onSubmit={handleReservationSubmit} className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Нэр <span className="text-red-500">*</span></label>
+
+                                <div className="flex flex-col gap-3">
+                                    <label className="flex flex-col gap-[7px]">
+                                        <span className="text-[12.5px] font-bold text-ink-soft">
+                                            Нэр <span className="text-danger">*</span>
+                                        </span>
                                         <input
-                                            type="text"
                                             required
                                             value={reservationForm.userName}
                                             onChange={(e) => setReservationForm({ ...reservationForm, userName: e.target.value })}
-                                            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-slate-400"
                                             placeholder="Таны нэр"
+                                            className="h-[50px] px-3.5 rounded-xl border border-line-strong text-sm font-medium text-ink outline-none box-border focus:border-primary lg:h-[46px] lg:rounded-[11px]"
                                         />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Утасны дугаар <span className="text-red-500">*</span></label>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Монгол эсвэл Солонгос утасны дугаар</p>
+                                    </label>
+                                    <label className="flex flex-col gap-[7px]">
+                                        <span className="text-[12.5px] font-bold text-ink-soft">
+                                            Утасны дугаар <span className="text-danger">*</span>
+                                        </span>
                                         <input
-                                            type="tel"
                                             required
+                                            type="tel"
                                             value={reservationForm.phone}
                                             onChange={(e) => setReservationForm({ ...reservationForm, phone: e.target.value })}
-                                            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-slate-400"
-                                            placeholder="Утасны дугаар"
+                                            placeholder="9900 1979"
+                                            className="h-[50px] px-3.5 rounded-xl border border-line-strong text-sm font-medium text-ink outline-none box-border focus:border-primary lg:h-[46px] lg:rounded-[11px]"
                                         />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Facebook ID</label>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Та Facebook ID-аа үлдээвэл бид холбогдох болно</p>
+                                    </label>
+                                    <label className="flex flex-col gap-[7px]">
+                                        <span className="text-[12.5px] font-bold text-ink-soft">
+                                            Facebook ID <span className="font-semibold text-muted-faint">(заавал биш)</span>
+                                        </span>
                                         <input
-                                            type="text"
                                             value={reservationForm.facebookId}
                                             onChange={(e) => setReservationForm({ ...reservationForm, facebookId: e.target.value })}
-                                            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-slate-400"
-                                            placeholder="Facebook ID"
+                                            placeholder="facebook.com/..."
+                                            className="h-[50px] px-3.5 rounded-xl border border-line-strong text-sm font-medium text-ink outline-none box-border focus:border-primary lg:h-[46px] lg:rounded-[11px]"
                                         />
-                                    </div>
+                                    </label>
+                                </div>
 
-                                    {reservationStatus === 'error' && (
-                                        <p className="text-red-500 text-sm text-center">Алдаа гарлаа. Дахин оролдоно уу.</p>
-                                    )}
+                                {reservationStatus === 'error' && (
+                                    <div className="mt-3.5 text-[12.5px] font-bold text-danger">Алдаа гарлаа. Дахин оролдоно уу.</div>
+                                )}
 
-                                    <button
-                                        type="submit"
-                                        disabled={reservationStatus === 'submitting'}
-                                        className="w-full bg-primary text-white font-bold h-12 rounded-xl shadow-lg shadow-primary/30 mt-4 active:scale-95 transition-transform flex items-center justify-center gap-2 disabled:opacity-70 disabled:pointer-events-none"
-                                    >
-                                        {reservationStatus === 'submitting' ? (
-                                            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                        ) : (
-                                            <>
-                                                <span>Захиалга илгээх</span>
-                                                <span className="material-symbols-outlined">send</span>
-                                            </>
-                                        )}
-                                    </button>
-                                </form>
-                            )}
-                        </div>
+                                <button
+                                    type="submit"
+                                    disabled={reservationStatus === 'submitting'}
+                                    className="mt-[18px] w-full h-[52px] rounded-[13px] bg-primary text-white text-[15px] font-bold disabled:opacity-70 lg:h-[50px] lg:rounded-xl"
+                                >
+                                    {reservationStatus === 'submitting' ? 'Илгээж байна…' : 'Захиалгаа илгээх'}
+                                </button>
+                                <div className="mt-3 text-[11.5px] leading-[1.6] text-muted-faint text-center">
+                                    Илгээснээр та Үйлчилгээний нөхцөл, Нууцлалын бодлогыг зөвшөөрч байна.
+                                </div>
+                            </form>
+                        )}
                     </div>
                 </div>
             )}
-        </div>
-    );
-}
-
-function SpecItem({ icon, label, value }: { icon: string, label: string, value: string }) {
-    if (!value || value === '-') return null; // Don't show if empty
-
-    return (
-        <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-3 flex items-center gap-3 border border-slate-100 dark:border-slate-700/50">
-            <div className="w-10 h-10 rounded-lg bg-white dark:bg-slate-700 flex items-center justify-center text-primary shrink-0 shadow-sm">
-                <span className="material-symbols-outlined text-xl">{icon}</span>
-            </div>
-            <div className="min-w-0">
-                <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wide leading-tight mb-0.5">{label}</p>
-                <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{value}</p>
-            </div>
         </div>
     );
 }

@@ -1,43 +1,40 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { KeyboardEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
+/** 모바일 홈 상단 검색창. 데스크탑은 헤더 안의 검색창을 쓰므로 숨긴다. */
 export default function SearchSection() {
     const [searchParams] = useSearchParams();
-    const initialQuery = searchParams.get('q') || '';
-    const [query, setQuery] = useState(initialQuery);
+    const [query, setQuery] = useState(searchParams.get('q') || '');
     const navigate = useNavigate();
 
     const handleSearch = () => {
-        if (query.trim()) {
-            navigate(`/search?q=${encodeURIComponent(query)}`);
-        }
+        navigate(query.trim() ? `/search?q=${encodeURIComponent(query.trim())}` : '/search');
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            handleSearch();
-        }
+    const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') handleSearch();
     };
 
     return (
-        <div className="px-4 py-4 bg-white dark:bg-background-dark">
-            <label className="flex flex-col w-full">
-                <div className="flex w-full items-center rounded-xl h-12 bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                    <button
-                        onClick={handleSearch}
-                        className="text-primary flex items-center justify-center pl-4 pr-2 hover:text-blue-600 transition-colors"
-                    >
-                        <span className="material-symbols-outlined">search</span>
+        <div className="lg:hidden px-4 pt-4">
+            <div className="flex items-center gap-2.5 h-12 px-3.5 rounded-[14px] bg-surface border border-line">
+                <button onClick={handleSearch} aria-label="Хайх" className="text-muted-faint text-base leading-none">
+                    ⌕
+                </button>
+                <input
+                    className="flex-1 min-w-0 border-0 outline-none bg-transparent text-sm font-medium text-ink placeholder:text-muted-faint"
+                    placeholder="Та ямар машин хайж байна?"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                />
+                {query && (
+                    <button onClick={() => setQuery('')} aria-label="Цэвэрлэх" className="text-muted-faint text-sm leading-none">
+                        ✕
                     </button>
-                    <input
-                        className="form-input w-full border-none bg-transparent focus:ring-0 text-slate-900 dark:text-white placeholder:text-slate-500 text-sm font-medium px-2 outline-none"
-                        placeholder="Та ямар машин хайж байна вэ?"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                    />
-                </div>
-            </label>
+                )}
+            </div>
         </div>
     );
 }

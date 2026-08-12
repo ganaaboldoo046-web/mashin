@@ -25,15 +25,15 @@ const AdminExchangeRate = lazy(() => import('./pages/admin/AdminExchangeRate'));
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
 
 const LoadingFallback = () => (
-    <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
-        <div className="w-10 h-10 border-4 border-slate-200 dark:border-slate-800 border-t-primary rounded-full animate-spin"></div>
+    <div className="min-h-screen flex items-center justify-center bg-canvas">
+        <div className="w-10 h-10 border-4 border-line border-t-primary rounded-full animate-spin"></div>
     </div>
 );
 
-/* 모바일 프레임 래퍼 - 사용자 페이지 전용 (430px 제한) */
-function MobileLayout() {
+/* 사용자 페이지 래퍼: lg 미만은 430px 모바일 앱 프레임, lg 이상은 전체 너비 데스크탑 레이아웃 */
+function SiteLayout() {
   return (
-    <div className="w-full max-w-[430px] mx-auto min-h-screen bg-background-light dark:bg-background-dark relative shadow-2xl overflow-x-hidden border-x border-slate-200 dark:border-slate-800">
+    <div className="relative mx-auto w-full max-w-app min-h-screen bg-canvas overflow-x-hidden border-x border-line shadow-xl lg:max-w-none lg:border-x-0 lg:shadow-none">
       <Outlet />
     </div>
   );
@@ -45,8 +45,8 @@ function App() {
       <Router>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
-            {/* 사용자 페이지: 430px 모바일 프레임 적용 */}
-            <Route element={<MobileLayout />}>
+            {/* 사용자 페이지: 모바일은 430px 프레임, 데스크탑은 1280px 레이아웃 */}
+            <Route element={<SiteLayout />}>
               <Route path="/" element={<Home />} />
               <Route path="/search" element={<Search />} />
               <Route path="/sell" element={<Sell />} />

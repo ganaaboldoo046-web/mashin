@@ -1,65 +1,71 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Header from '../components/Header';
+import TopTicker from '../components/TopTicker';
 import BottomNav from '../components/BottomNav';
+import CarCard from '../components/CarCard';
+import Footer from '../components/Footer';
 import { getProducts, getSavedIds } from '../utils/storage';
 import type { Product } from '../utils/storage';
 
 export default function Saved() {
     const [savedProducts, setSavedProducts] = useState<Product[]>([]);
+    const [savedIds, setSavedIds] = useState<number[]>(getSavedIds);
 
     useEffect(() => {
         const loadSaved = async () => {
             const allProducts = await getProducts();
-            const savedIds = getSavedIds();
-            const filtered = allProducts.filter(p => savedIds.includes(p.id));
-            setSavedProducts(filtered);
+            const ids = getSavedIds();
+            setSavedIds(ids);
+            setSavedProducts(allProducts.filter((p) => ids.includes(p.id)));
         };
 
         loadSaved();
-
-        // Listen for updates
         window.addEventListener('storageSaved', loadSaved);
         return () => window.removeEventListener('storageSaved', loadSaved);
     }, []);
 
     return (
-        <div className="pb-24 min-h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-white">
-            <div className="p-4">
-                <h1 className="text-2xl font-bold mb-6">Хадгалсан</h1>
+        <div className="min-h-screen bg-canvas pb-24 lg:pb-0">
+            <Header />
+            <TopTicker />
+
+            <main className="px-4 pt-4 pb-6 lg:max-w-shell lg:mx-auto lg:px-6 lg:pt-8 lg:pb-20">
+                <h1 className="hidden lg:block m-0 mb-1.5 text-[30px] font-extrabold tracking-[-0.03em]">Хадгалсан зар</h1>
+                <p className="hidden lg:block m-0 mb-7 text-[14.5px] text-muted">
+                    {savedProducts.length} зар хадгалсан байна.
+                </p>
 
                 {savedProducts.length > 0 ? (
-                    <div className="grid grid-cols-1 gap-4">
-                        {savedProducts.map((car) => (
-                            <Link to={`/product/${car.id}`} key={car.id} className="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-sm border border-slate-100 dark:border-slate-700 flex gap-4 relative group">
-                                <div className="w-32 h-24 rounded-xl overflow-hidden shrink-0">
-                                    <img src={car.images[0]} alt={car.name} className="w-full h-full object-cover" />
-                                </div>
-                                <div className="flex flex-col justify-between flex-1 py-1">
-                                    <div>
-                                        <h3 className="font-bold text-base">{car.name}</h3>
-                                        <div className="flex gap-2 text-xs text-slate-500 mt-1">
-                                            <span>{car.year}</span>
-                                            <span>•</span>
-                                            <span>{car.mileage}</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-between items-end">
-                                        <span className="text-primary font-bold">{car.price}</span>
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
+                    <>
+                        <div className="flex flex-col gap-3 lg:hidden">
+                            {savedProducts.map((product) => (
+                                <CarCard key={product.id} product={product} variant="row" savedIds={savedIds} />
+                            ))}
+                        </div>
+                        <div className="hidden lg:grid lg:grid-cols-4 lg:gap-4">
+                            {savedProducts.map((product) => (
+                                <CarCard key={product.id} product={product} savedIds={savedIds} />
+                            ))}
+                        </div>
+                    </>
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-20 text-center text-slate-500">
-                        <span className="material-symbols-outlined text-6xl mb-4 text-slate-300">bookmark_border</span>
-                        <p className="font-medium mb-1">Одоогоор хадгалсан зар байхгүй байна.</p>
-                        <p className="text-sm">Та таалагдсан зараа хадгалаад дуртай үедээ үзэх боломжтой.</p>
-                        <Link to="/search" className="mt-8 px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30">
-                            Зар хайх
+                    <div className="bg-surface border border-line rounded-2xl px-5 py-16 text-center">
+                        <div className="text-[26px] text-[#cbd2dc]">♡</div>
+                        <div className="mt-3 text-[15px] font-extrabold">Хадгалсан зар байхгүй</div>
+                        <div className="mt-1.5 text-[13px] text-muted">Таалагдсан машиныг ♡ дарж хадгална уу.</div>
+                        <Link
+                            to="/search"
+                            className="mt-[18px] inline-flex items-center h-11 px-5 rounded-[11px] bg-primary text-white text-[13.5px] font-bold hover:text-white"
+                        >
+                            Машин үзэх
                         </Link>
                     </div>
                 )}
+            </main>
+
+            <div className="hidden lg:block">
+                <Footer />
             </div>
             <BottomNav />
         </div>

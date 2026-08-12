@@ -1,38 +1,44 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import Header from '../components/Header';
+import TopTicker from '../components/TopTicker';
 import BottomNav from '../components/BottomNav';
-import Image from '../components/Image';
-import { getProducts, getCategories, type Product, type Category } from '../utils/storage';
+import CarCard from '../components/CarCard';
+import Footer from '../components/Footer';
+import { getCategories, getProducts, getSavedIds, type Category, type Product } from '../utils/storage';
 
 type SortOption = 'newest' | 'price-asc' | 'price-desc' | 'year-desc';
 
+const SORT_OPTIONS: { label: string; value: SortOption }[] = [
+    { label: 'Санал болгох', value: 'newest' },
+    { label: 'Үнэ: хямдаас', value: 'price-asc' },
+    { label: 'Үнэ: үнэтэйгээс', value: 'price-desc' },
+    { label: 'Он: шинэ нь', value: 'year-desc' },
+];
+
+const priceValue = (price: string) => {
+    const n = parseFloat(price.replace(/[^0-9.]/g, ''));
+    if (Number.isNaN(n)) return 0;
+    return price.includes('сая') ? n * 1_000_000 : n;
+};
+
 export default function CategoryDetail() {
-    const navigate = useNavigate();
     const { id } = useParams();
     const [allProducts, setAllProducts] = useState<Product[]>([]);
     const [category, setCategory] = useState<Category | null>(null);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState<SortOption>('newest');
-    const [showSortMenu, setShowSortMenu] = useState(false);
+    const [savedIds, setSavedIds] = useState<number[]>(getSavedIds);
 
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const [products, allCategories] = await Promise.all([
-                    getProducts(),
-                    getCategories()
-                ]);
-
-                // Find specific category
+                const [products, allCategories] = await Promise.all([getProducts(), getCategories()]);
                 const catId = Number(id);
-                const foundCat = allCategories.find(c => c.id === catId);
-                setCategory(foundCat || null);
-
-                // Filter products by category
-                const filtered = products.filter(p => p.categoryId === catId);
-                setAllProducts(filtered);
+                setCategory(allCategories.find((c) => c.id === catId) || null);
+                setAllProducts(products.filter((p) => p.categoryId === catId));
             } catch (err) {
                 console.error('Failed to fetch category data:', err);
             } finally {
@@ -43,33 +49,29 @@ export default function CategoryDetail() {
         fetchData();
     }, [id]);
 
-    const filteredAndSortedProducts = useMemo(() => {
+    useEffect(() => {
+        const loadSaved = () => setSavedIds(getSavedIds());
+        window.addEventListener('storageSaved', loadSaved);
+        return () => window.removeEventListener('storageSaved', loadSaved);
+    }, []);
+
+    const products = useMemo(() => {
         let result = [...allProducts];
 
-        // Search Filter
-        if (searchQuery.trim()) {
-            const q = searchQuery.toLowerCase();
-            result = result.filter(p =>
-                p.name.toLowerCase().includes(q) ||
-                p.description?.toLowerCase().includes(q)
-            );
+        const q = searchQuery.trim().toLowerCase();
+        if (q) {
+            result = result.filter((p) => p.name.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q));
         }
 
-        // Sorting
         result.sort((a, b) => {
-            const getPrice = (p: Product) => {
-                const val = p.price.replace(/[^0-9.]/g, '');
-                return parseFloat(val) || 0;
-            };
-
             switch (sortBy) {
                 case 'price-asc':
-                    return getPrice(a) - getPrice(b);
+                    return priceValue(a.price) - priceValue(b.price);
                 case 'price-desc':
-                    return getPrice(b) - getPrice(a);
+                    return priceValue(b.price) - priceValue(a.price);
                 case 'year-desc':
                     return parseInt(b.year) - parseInt(a.year);
-                default: // newest
+                default:
                     return (b.id || 0) - (a.id || 0);
             }
         });
@@ -77,179 +79,87 @@ export default function CategoryDetail() {
         return result;
     }, [allProducts, searchQuery, sortBy]);
 
-    const getTitle = () => {
-        return category ? category.name : 'Машин';
-    };
-
-    const sortOptions: { label: string; value: SortOption }[] = [
-        { label: 'Сүүлийнх', value: 'newest' },
-        { label: 'Үнэ: Хямдаас үнэтэй', value: 'price-asc' },
-        { label: 'Үнэ: Үнэтэйгээс хямд', value: 'price-desc' },
-        { label: 'Он: Шинэ нь түрүүнд', value: 'year-desc' },
-    ];
-
     return (
-        <div className="bg-background-light dark:bg-background-dark min-h-screen font-display text-slate-900 dark:text-slate-100 pb-20">
-            {/* Header Section */}
-            <header className="sticky top-0 z-50 bg-white dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 px-4 py-3">
-                <div className="flex items-center justify-between max-w-xl mx-auto">
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-900 dark:text-white"
-                        >
-                            <span className="material-symbols-outlined block">arrow_back</span>
-                        </button>
-                        <h1 className="text-lg font-bold tracking-tight">{getTitle()}</h1>
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-                            <span className="material-symbols-outlined block">search</span>
-                        </button>
-                        <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-                            <span className="material-symbols-outlined block">tune</span>
-                        </button>
-                    </div>
-                </div>
-            </header>
+        <div className="min-h-screen bg-canvas pb-24 lg:pb-0">
+            <Header showBack title={category?.name || 'Автомашин'} />
+            <TopTicker />
 
-            <main className="max-w-xl mx-auto">
-                {/* Search & Quick Filters */}
-                <div className="px-4 py-4">
-                    <div className="relative mb-4">
-                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+            <main className="lg:max-w-shell lg:mx-auto lg:px-6 lg:pt-8 lg:pb-20">
+                <div className="hidden lg:block mb-7">
+                    <h1 className="m-0 mb-1.5 text-[30px] font-extrabold tracking-[-0.03em]">{category?.name || 'Автомашин'}</h1>
+                    <p className="m-0 text-[14.5px] text-muted">Нийт {allProducts.length} зар.</p>
+                </div>
+
+                <div className="px-4 pt-4 lg:px-0 lg:pt-0">
+                    <div className="flex items-center gap-2.5 h-12 px-3.5 rounded-[14px] bg-surface border border-line lg:h-11 lg:max-w-[420px]">
+                        <span className="text-muted-faint text-base leading-none">⌕</span>
                         <input
-                            className="w-full bg-white dark:bg-slate-800 border-none rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary shadow-sm text-slate-900 dark:text-white placeholder:text-slate-400"
-                            placeholder="Машин хайх..."
-                            type="text"
+                            className="flex-1 min-w-0 border-0 outline-none bg-transparent text-sm font-medium text-ink placeholder:text-muted-faint"
+                            placeholder="Энэ ангилалд хайх"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
-                    </div>
-                    {/* Horizontal Filter Chips */}
-                    <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1 no-scrollbar">
-                        <button className="flex items-center gap-1 shrink-0 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium">
-                            <span>Бүгд</span>
-                        </button>
-                        <button className="flex items-center gap-1 shrink-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-lg text-sm font-medium">
-                            <span>Үнэ</span>
-                            <span className="material-symbols-outlined text-sm">keyboard_arrow_down</span>
-                        </button>
-                        <button className="flex items-center gap-1 shrink-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-lg text-sm font-medium">
-                            <span>Он</span>
-                            <span className="material-symbols-outlined text-sm">keyboard_arrow_down</span>
-                        </button>
-                        <button className="flex items-center gap-1 shrink-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-lg text-sm font-medium">
-                            <span>Гүйлт</span>
-                            <span className="material-symbols-outlined text-sm">keyboard_arrow_down</span>
-                        </button>
-                    </div>
-                </div>
-
-                {/* Car Listings */}
-                <div className="px-4 relative">
-                    <div className="flex items-center justify-between mb-4">
-                        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-                            {loading ? 'Уншиж байна...' : `Нийт ${filteredAndSortedProducts.length} автомашин олдлоо`}
-                        </p>
-                        <div className="relative">
-                            <button
-                                onClick={() => setShowSortMenu(!showSortMenu)}
-                                className="text-primary text-sm font-semibold flex items-center gap-1 p-2 hover:bg-primary/5 rounded-lg transition-colors"
-                            >
-                                <span className="material-symbols-outlined text-sm">swap_vert</span>
-                                Эрэмбэлэх
+                        {searchQuery && (
+                            <button onClick={() => setSearchQuery('')} aria-label="Цэвэрлэх" className="text-muted-faint text-sm leading-none">
+                                ✕
                             </button>
-
-                            {showSortMenu && (
-                                <>
-                                    <div className="fixed inset-0 z-40" onClick={() => setShowSortMenu(false)}></div>
-                                    <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 py-2 z-50">
-                                        {sortOptions.map(opt => (
-                                            <button
-                                                key={opt.value}
-                                                onClick={() => {
-                                                    setSortBy(opt.value);
-                                                    setShowSortMenu(false);
-                                                }}
-                                                className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between ${sortBy === opt.value
-                                                    ? 'bg-primary/10 text-primary font-bold'
-                                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
-                                                    }`}
-                                            >
-                                                {opt.label}
-                                                {sortBy === opt.value && (
-                                                    <span className="material-symbols-outlined text-sm">check</span>
-                                                )}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </>
-                            )}
-                        </div>
+                        )}
                     </div>
-
-                    {loading ? (
-                        <div className="flex justify-center py-20">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                        </div>
-                    ) : filteredAndSortedProducts.length > 0 ? (
-                        <div className="grid grid-cols-2 gap-3">
-                            {filteredAndSortedProducts.map((product) => (
-                                <div
-                                    key={product.id}
-                                    onClick={() => navigate(`/product/${product.id}`)}
-                                    className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm flex flex-col p-2 cursor-pointer border border-slate-100 dark:border-slate-700 active:scale-[0.98] transition-all"
-                                >
-                                    <div className="relative aspect-square w-full mb-2">
-                                        <Image
-                                            alt={product.name}
-                                            className="w-full h-full object-cover rounded-lg"
-                                            src={product.images?.[0] || 'https://via.placeholder.com/300?text=No+Image'}
-                                            size="thumbnail"
-                                        />
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                // Toggle save logic could go here
-                                            }}
-                                            className="absolute top-1 right-1 w-7 h-7 bg-white/80 dark:bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center text-slate-700 dark:text-white"
-                                        >
-                                            <span className="material-symbols-outlined text-base">favorite</span>
-                                        </button>
-                                        <div className="absolute bottom-1 left-1 bg-primary px-1.5 py-0.5 rounded text-[9px] font-bold text-white uppercase shadow-sm">
-                                            {product.status || 'Идэвхтэй'}
-                                        </div>
-                                    </div>
-                                    <div className="px-1 flex-grow flex flex-col">
-                                        <h3 className="font-bold text-[13px] leading-tight mb-0.5 text-slate-900 dark:text-white line-clamp-1">{product.name}</h3>
-                                        <div className="text-[10px] text-slate-400 dark:text-slate-500 mb-1.5">
-                                            <span>{product.year} он • {product.mileage}</span>
-                                        </div>
-                                        <span className="text-primary font-bold text-sm mt-auto">{product.price}</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-20">
-                            <span className="material-symbols-outlined text-6xl text-slate-200 dark:text-slate-700 mb-4">inventory_2</span>
-                            <p className="text-slate-500 dark:text-slate-400">
-                                {searchQuery ? 'Илэрц олдсонгүй' : 'Энэ ангилалд машин одоогоор байхгүй байна.'}
-                            </p>
-                            {searchQuery && (
-                                <button
-                                    onClick={() => setSearchQuery('')}
-                                    className="mt-4 text-primary font-bold text-sm"
-                                >
-                                    Хайлтыг цэвэрлэх
-                                </button>
-                            )}
-                        </div>
-                    )}
                 </div>
+
+                <div className="flex gap-2 overflow-x-auto no-scrollbar px-4 pt-3 lg:px-0 lg:pt-4 lg:flex-wrap lg:overflow-visible">
+                    {SORT_OPTIONS.map((option) => (
+                        <button
+                            key={option.value}
+                            onClick={() => setSortBy(option.value)}
+                            className={`flex-none h-10 px-[15px] rounded-[20px] border text-[13px] whitespace-nowrap lg:h-9 lg:rounded-[9px] ${
+                                sortBy === option.value
+                                    ? 'border-primary bg-primary-soft text-primary font-bold'
+                                    : 'border-line-strong bg-surface text-ink-soft font-semibold'
+                            }`}
+                        >
+                            {option.label}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="flex items-center justify-between px-4 pt-4 pb-3.5 lg:px-0">
+                    <div className="text-[13.5px] font-bold lg:text-sm">
+                        {loading ? 'Уншиж байна…' : `${products.length} машин`}
+                    </div>
+                </div>
+
+                {loading ? (
+                    <div className="flex justify-center py-20">
+                        <div className="w-8 h-8 rounded-full border-4 border-line border-t-primary animate-spin" />
+                    </div>
+                ) : products.length > 0 ? (
+                    <div className="flex flex-col gap-3 px-4 lg:grid lg:grid-cols-4 lg:gap-4 lg:px-0">
+                        {products.map((product, i) => (
+                            <CarCard key={product.id} product={product} savedIds={savedIds} priority={i === 0} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="mx-4 bg-surface border border-line rounded-2xl px-5 py-14 text-center lg:mx-0">
+                        <div className="text-[15px] font-extrabold">
+                            {searchQuery ? 'Тохирох зар олдсонгүй' : 'Энэ ангилалд зар алга'}
+                        </div>
+                        <div className="mt-1.5 text-[13px] text-muted">Өөр ангилал эсвэл хайлт оролдоно уу.</div>
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                className="mt-4 h-11 px-5 rounded-[11px] bg-primary text-white text-[13.5px] font-bold"
+                            >
+                                Хайлт цэвэрлэх
+                            </button>
+                        )}
+                    </div>
+                )}
             </main>
 
+            <div className="hidden lg:block">
+                <Footer />
+            </div>
             <BottomNav />
         </div>
     );

@@ -1,4 +1,5 @@
-import { useEffect, useState, memo } from 'react';
+import { memo, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Image from './Image';
 import { type Category, getCategories } from '../utils/storage';
 
@@ -6,39 +7,54 @@ const Categories = memo(function Categories() {
     const [categories, setCategories] = useState<Category[]>([]);
 
     useEffect(() => {
-        const loadCategories = async () => {
-            const data = await getCategories();
-            setCategories(data);
-        };
-
-        loadCategories();
-
-        // Listen for updates from Admin panel
-        window.addEventListener('storageCategories', loadCategories);
-        return () => window.removeEventListener('storageCategories', loadCategories);
+        const load = async () => setCategories(await getCategories());
+        load();
+        window.addEventListener('storageCategories', load);
+        return () => window.removeEventListener('storageCategories', load);
     }, []);
 
     if (categories.length === 0) return null;
 
     return (
-        <div className="flex gap-3 overflow-x-auto no-scrollbar p-4 bg-white dark:bg-background-dark">
-            {categories.map((category) => (
-                <a
-                    href={`/category/${category.id}`}
-                    key={category.id}
-                    className="flex items-center gap-2 px-4 py-3 bg-white dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm shrink-0 whitespace-nowrap active:bg-slate-50 dark:active:bg-slate-700 hover:border-primary transition-colors"
-                >
-                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary overflow-hidden">
-                        {category.image ? (
-                            <Image src={category.image} alt={category.name} className="w-full h-full object-cover" size="thumbnail" />
-                        ) : (
-                            <span className="material-symbols-outlined text-sm">{category.icon}</span>
-                        )}
-                    </div>
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{category.name}</span>
-                </a>
-            ))}
-        </div>
+        <>
+            {/* 모바일: 가로 스크롤 칩 */}
+            <div className="lg:hidden mt-4 flex gap-2 overflow-x-auto no-scrollbar px-4">
+                {categories.map((category) => (
+                    <Link
+                        key={category.id}
+                        to={`/category/${category.id}`}
+                        className="flex-none h-11 px-4 inline-flex items-center gap-1.5 rounded-[22px] border border-line bg-surface text-[13px] font-bold text-ink whitespace-nowrap"
+                    >
+                        {category.name}
+                        {category.count > 0 && <span className="text-muted-faint font-semibold">{category.count}</span>}
+                    </Link>
+                ))}
+            </div>
+
+            {/* 데스크탑: 6열 카드 그리드 */}
+            <section className="hidden lg:block mb-11">
+                <div className="flex items-baseline justify-between mb-4">
+                    <h2 className="m-0 text-[22px] font-extrabold tracking-[-0.02em]">Категори</h2>
+                </div>
+                <div className="grid grid-cols-6 gap-3">
+                    {categories.map((category) => (
+                        <Link
+                            key={category.id}
+                            to={`/category/${category.id}`}
+                            className="border border-line bg-surface rounded-[14px] px-3.5 py-[18px] text-left transition-colors hover:border-primary"
+                        >
+                            <div className="h-[46px] rounded-[9px] bg-tile mb-3 overflow-hidden">
+                                {category.image && (
+                                    <Image src={category.image} alt={category.name} className="w-full h-full object-cover" size="thumbnail" />
+                                )}
+                            </div>
+                            <div className="text-[13.5px] font-bold text-ink truncate">{category.name}</div>
+                            <div className="text-xs font-semibold text-muted-faint mt-[3px]">{category.count} зар</div>
+                        </Link>
+                    ))}
+                </div>
+            </section>
+        </>
     );
 });
 

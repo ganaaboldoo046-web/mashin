@@ -143,14 +143,13 @@ export default function CustomerReviews() {
     };
 
     return (
-        <section className="mt-8 px-4 relative">
-            <div className="flex justify-between items-center mb-4 px-2">
-                <h2 className="text-xl font-bold text-slate-800 dark:text-white">Хэрэглэгчийн сэтгэгдэл</h2>
+        <section className="relative mt-4 px-4 lg:mt-11 lg:px-0">
+            <div className="flex items-baseline justify-between pt-6 pb-3 lg:pt-0 lg:pb-4">
+                <h2 className="m-0 text-lg font-extrabold tracking-[-0.02em] lg:text-[22px]">Хэрэглэгчийн сэтгэгдэл</h2>
                 <button
                     onClick={handleWriteClick}
-                    className="text-sm bg-primary text-white px-3 py-1.5 rounded-full hover:bg-primary-dark transition-colors flex items-center gap-1"
+                    className="h-9 px-3.5 rounded-[10px] border border-line-strong bg-surface text-[13px] font-bold text-ink whitespace-nowrap"
                 >
-                    <span className="material-symbols-outlined text-sm">edit</span>
                     Сэтгэгдэл бичих
                 </button>
             </div>
@@ -165,29 +164,25 @@ export default function CustomerReviews() {
                 {[...reviews, ...reviews].map((review, index) => (
                     <div
                         key={`${review.id}-${index}`}
-                        className="min-w-[280px] bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col gap-3"
+                        className="min-w-[280px] bg-surface p-4 rounded-2xl border border-line flex flex-col gap-3"
                     >
                         <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${review.gender === 'male' ? 'bg-blue-100 text-blue-600' : 'bg-pink-100 text-pink-600'}`}>
-                                <span className="material-symbols-outlined text-2xl">
-                                    {review.gender === 'male' ? 'face' : 'face_3'}
-                                </span>
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-extrabold ${review.gender === 'male' ? 'bg-primary-soft text-primary' : 'bg-[#fdeaf1] text-[#d4467f]'}`}>
+                                {review.user_name.slice(0, 1).toUpperCase()}
                             </div>
                             <div>
-                                <h4 className="font-bold text-sm text-slate-900 dark:text-white">{review.user_name}</h4>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">{review.car_model}</p>
+                                <h4 className="text-sm font-bold text-ink">{review.user_name}</h4>
+                                <p className="text-xs text-muted">{review.car_model}</p>
                             </div>
                         </div>
 
-                        <div className="flex text-yellow-400 text-sm">
+                        <div className="flex gap-0.5 text-[#f5a524] text-sm">
                             {[...Array(5)].map((_, i) => (
-                                <span key={i} className="material-symbols-outlined text-sm filled" style={{ fontVariationSettings: "'FILL' 1" }}>
-                                    {i < review.rating ? 'star' : 'star_border'}
-                                </span>
+                                <span key={i}>{i < review.rating ? '★' : '☆'}</span>
                             ))}
                         </div>
 
-                        <p className="text-sm text-slate-600 dark:text-slate-300 whitespace-normal line-clamp-2 leading-relaxed">
+                        <p className="text-sm text-ink-soft whitespace-normal line-clamp-2 leading-relaxed">
                             "{review.comment}"
                         </p>
                     </div>
