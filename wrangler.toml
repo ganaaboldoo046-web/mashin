@@ -6,10 +6,10 @@ compatibility_flags = ["nodejs_compat"]
 # D1 Database
 [[d1_databases]]
 binding = "DB"
-database_name = "somang-db"
-database_id = "8dc651ff-a52b-4e79-9941-ca9da05b2c16"
+database_name = "car2"
+database_id = "638b867c-9171-45be-9d65-63db3a0dd842"
 
 # R2 Storage
 [[r2_buckets]]
 binding = "BUCKET"
-bucket_name = "somang-assets"
+bucket_name = "carr2"
