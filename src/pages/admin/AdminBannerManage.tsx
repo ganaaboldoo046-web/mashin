@@ -19,19 +19,16 @@ export default function AdminBannerManage() {
     }, []);
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            setSelectedFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setNewBanner({ ...newBanner, image: reader.result as string });
-            };
-            reader.readAsDataURL(file);
-        }
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setSelectedFile(file);
+        // Object URL rather than a base64 preview: only the uploaded R2 url may be saved.
+        setNewBanner(prev => ({ ...prev, image: URL.createObjectURL(file) }));
     };
 
     const startEdit = (banner: Banner) => {
         setEditingId(banner.id);
+        setSelectedFile(null);
         setNewBanner({
             title: banner.title,
             subtitle: banner.subtitle,
@@ -58,6 +55,10 @@ export default function AdminBannerManage() {
             if (selectedFile) {
                 const webpBlob = await convertToWebP(selectedFile);
                 imageUrl = await uploadImage(webpBlob);
+            }
+
+            if (imageUrl.startsWith('blob:') || imageUrl.startsWith('data:')) {
+                throw new Error('Зургийг сервер лүү хуулж чадсангүй. Дахин оролдоно уу.');
             }
 
             const bannerData: Omit<Banner, 'id'> = {
