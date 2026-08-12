@@ -14,8 +14,9 @@ export default function AdminProductCreate() {
     const [loading, setLoading] = useState(true);
 
     // Form State
-    const [imageFiles, setImageFiles] = useState<File[]>([]);
-    const [images, setImages] = useState<string[]>([]);
+    /** Already-uploaded images carry `url`; newly picked ones carry `file`. Keeping
+     *  both on one item avoids the two arrays drifting out of sync on edit. */
+    const [images, setImages] = useState<{ preview: string; url?: string; file?: File }[]>([]);
     const [formData, setFormData] = useState({
         name: '',
         price: '', // MNT display string
@@ -65,7 +66,7 @@ export default function AdminProductCreate() {
                         categoryId: productToEdit.categoryId.toString(),
                         status: productToEdit.status
                     });
-                    setImages(productToEdit.images);
+                    setImages(productToEdit.images.map((url) => ({ preview: url, url })));
                     setSelectedOptions(productToEdit.options || []);
                 }
             }
@@ -76,25 +77,21 @@ export default function AdminProductCreate() {
     }, [id]);
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            const files = Array.from(e.target.files);
-            setImageFiles(prev => [...prev, ...files]);
-
-            files.forEach(file => {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    if (reader.result) {
-                        setImages(prev => [...prev, reader.result as string]);
-                    }
-                };
-                reader.readAsDataURL(file);
-            });
-        }
+        if (!e.target.files) return;
+        const picked = Array.from(e.target.files).map((file) => ({
+            preview: URL.createObjectURL(file),
+            file,
+        }));
+        setImages((prev) => [...prev, ...picked]);
+        e.target.value = '';
     };
 
     const removeImage = (index: number) => {
-        setImages(images.filter((_, i) => i !== index));
-        setImageFiles(imageFiles.filter((_, i) => i !== index));
+        setImages((prev) => {
+            const target = prev[index];
+            if (target?.file) URL.revokeObjectURL(target.preview);
+            return prev.filter((_, i) => i !== index);
+        });
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -128,25 +125,16 @@ export default function AdminProductCreate() {
         setLoading(true);
 
         try {
-            // 1. Process and Upload Images to R2
+            // 1. Process and Upload Images to R2. Only R2 URLs may reach D1 — a
+            // base64 payload here would blow past the row limit (SQLITE_TOOBIG).
             const uploadedImageUrls: string[] = [];
 
-            for (let i = 0; i < images.length; i++) {
-                const img = images[i];
-                if (img.startsWith('/api/images/')) {
-                    uploadedImageUrls.push(img);
-                } else if (img.startsWith('data:')) {
-                    // Find matching file by index (roughly, based on how they were added)
-                    // Better to store File objects alongside images
-                    const file = imageFiles[i]; // This assumes 1:1 mapping which we maintain in state
-                    if (file) {
-                        const webpBlob = await convertToWebP(file);
-                        const url = await uploadImage(webpBlob);
-                        uploadedImageUrls.push(url);
-                    } else {
-                        // Fallback if file not found (unlikely)
-                        uploadedImageUrls.push(img);
-                    }
+            for (const image of images) {
+                if (image.url) {
+                    uploadedImageUrls.push(image.url);
+                } else if (image.file) {
+                    const webpBlob = await convertToWebP(image.file);
+                    uploadedImageUrls.push(await uploadImage(webpBlob));
                 }
             }
 
@@ -175,7 +163,7 @@ export default function AdminProductCreate() {
             navigate('/admin/products');
         } catch (err) {
             console.error('Save failed:', err);
-            alert('Хадгалахад алдаа гарлаа.');
+            alert(`Хадгалахад алдаа гарлаа.\n\n${err instanceof Error ? err.message : String(err)}`);
         } finally {
             setLoading(false);
         }
@@ -209,9 +197,9 @@ export default function AdminProductCreate() {
                 <div className="mb-8">
                     <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Зураг оруулах</h3>
                     <div className="flex flex-wrap gap-4">
-                        {images.map((img, index) => (
-                            <div key={index} className="w-32 h-24 rounded-lg overflow-hidden relative group">
-                                <img src={img} alt="" className="w-full h-full object-cover" />
+                        {images.map((image, index) => (
+                            <div key={image.preview} className="w-32 h-24 rounded-lg overflow-hidden relative group">
+                                <img src={image.preview} alt="" className="w-full h-full object-cover" />
                                 <button
                                     type="button"
                                     onClick={() => removeImage(index)}
