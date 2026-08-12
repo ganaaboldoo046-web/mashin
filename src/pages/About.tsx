@@ -11,7 +11,7 @@ export default function About() {
                 {/* Header Removed */}
 
                 <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm overflow-hidden mb-6">
-                    <img src="/about.jpg" alt="About Temmun Trading" className="w-full h-auto object-cover" />
+                    <img src="/about.jpg" alt="About dt-trading" className="w-full h-auto object-cover" />
                     <div className="p-6">
                         {/* Title Removed */}
                         <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-4">

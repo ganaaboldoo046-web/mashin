@@ -13,7 +13,7 @@ export default function Privacy() {
                     <section>
                         <h2 className="text-xl font-bold mb-3">1. Мэдээлэл цуглуулах</h2>
                         <p>
-                            "Temmun Trading" нь хэрэглэгчид үйлчилгээ үзүүлэх зорилгоор дараах хувийн мэдээллийг цуглуулна:
+                            "dt-trading" нь хэрэглэгчид үйлчилгээ үзүүлэх зорилгоор дараах хувийн мэдээллийг цуглуулна:
                         </p>
                         <ul className="list-disc pl-5 mt-2 space-y-1">
                             <li>Овог, Нэр</li>
@@ -56,7 +56,7 @@ export default function Privacy() {
                             Нууцлалын бодлоготой холбоотой асуулт, хүсэлтийг доорх хаягаар хүлээн авна.
                         </p>
                         <div className="mt-2 text-slate-600 dark:text-slate-400 font-medium">
-                            <p>Temmun Trading</p>
+                            <p>dt-trading</p>
                             <p>Хувийн мэдээлэл хариуцсан ажилтан</p>
                             <p>Утас: 010 5727 9927</p>
                             <p>Имэйл: temmuntrading@gmail.com</p>

@@ -59,7 +59,7 @@ function HeroCopy({ banner, size }: { banner: BannerType; size: 'mobile' | 'desk
                         : 'text-[10.5px] font-extrabold tracking-[0.14em] text-[#7fa9ff]'
                 }
             >
-                TEMMUN TRADING
+                DT-TRADING
             </span>
             <h2
                 className={

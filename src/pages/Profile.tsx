@@ -214,7 +214,7 @@ export default function Profile() {
                     </div>
 
                     <div className="mt-4 bg-night rounded-2xl p-5 lg:hidden">
-                        <div className="text-[11.5px] font-bold tracking-[0.1em] text-night-line">TEMMUN TRADING</div>
+                        <div className="text-[11.5px] font-bold tracking-[0.1em] text-night-line">DT-TRADING</div>
                         <a href="tel:01057279927" className="block mt-2.5 text-base font-extrabold text-white hover:text-white">
                             010 5727 9927
                         </a>
@@ -264,7 +264,7 @@ export default function Profile() {
             {/* Login Content */}
             <div className="relative z-20 w-full max-w-md px-6 text-center text-white flex flex-col items-center justify-center min-h-[80vh]">
                 <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 drop-shadow-lg">
-                    TEMMUN <br /> TRADING
+                    DT-TRADING
                 </h1>
                 <p className="text-lg md:text-xl font-medium text-slate-200 mb-12 drop-shadow-md leading-relaxed whitespace-pre-line">
                     Бүх төрлийн АВТО МАШИН захиалга авч <br />түргэн шуурхай найдвартай нийлүүлсээр байна

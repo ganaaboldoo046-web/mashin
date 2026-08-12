@@ -195,7 +195,7 @@ export default function Search() {
                             Бүх машин
                             <br />1 жилийн баталгаа
                         </div>
-                        <div className="mt-8 text-[11.5px] font-bold tracking-[0.1em] text-night-line">TEMMUN CARE</div>
+                        <div className="mt-8 text-[11.5px] font-bold tracking-[0.1em] text-night-line">DT CARE</div>
                     </div>
                     <div className="text-[15px] font-extrabold mb-1.5">Брэнд · Загвар</div>
                     <div className="flex flex-col">

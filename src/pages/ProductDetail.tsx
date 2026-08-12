@@ -86,7 +86,7 @@ export default function ProductDetail() {
 
     const handleShare = async () => {
         const shareData = {
-            title: product?.name || 'TEMMUN TRADING',
+            title: product?.name || 'DT-TRADING',
             text: `Check out this car: ${product?.name}`,
             url: window.location.href,
         };
@@ -428,7 +428,7 @@ export default function ProductDetail() {
                             </div>
                         </div>
                         <div className="bg-night rounded-[18px] px-6 py-[22px]">
-                            <div className="text-xs font-bold tracking-[0.1em] text-night-line">TEMMUN TRADING</div>
+                            <div className="text-xs font-bold tracking-[0.1em] text-night-line">DT-TRADING</div>
                             <a href="tel:01057279927" className="block mt-2.5 text-[17px] font-extrabold text-white hover:text-white">
                                 010 5727 9927
                             </a>
