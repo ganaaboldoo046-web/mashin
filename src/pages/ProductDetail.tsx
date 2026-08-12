@@ -264,7 +264,7 @@ export default function ProductDetail() {
                                                 <Image
                                                     src={img}
                                                     alt={`${product.name} - ${idx + 1}`}
-                                                    className="max-w-full max-h-full object-contain"
+                                                    className="w-full h-full object-cover"
                                                     size="full"
                                                     priority={idx === 0}
                                                 />

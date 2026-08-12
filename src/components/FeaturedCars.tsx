@@ -4,14 +4,19 @@ import CarCard from './CarCard';
 import { getProducts, getSavedIds } from '../utils/storage';
 import type { Product } from '../utils/storage';
 
+/** 한 번에 2줄(2열 × 2행)씩 노출하고, 5번째부터는 더보기로 펼친다. */
+const PAGE_SIZE = 4;
+
 export default function FeaturedCars() {
     const [cars, setCars] = useState<Product[]>([]);
     const [savedIds, setSavedIds] = useState<number[]>(getSavedIds);
+    const [page, setPage] = useState(1);
 
     useEffect(() => {
         const loadCars = async () => {
             const all = await getProducts();
-            setCars(all.filter((p) => p.status === 'active').slice(0, 4));
+            setCars(all.filter((p) => p.status === 'active'));
+            setPage(1);
         };
         const loadSaved = () => setSavedIds(getSavedIds());
 
@@ -26,6 +31,10 @@ export default function FeaturedCars() {
 
     if (cars.length === 0) return null;
 
+    const totalPages = Math.ceil(cars.length / PAGE_SIZE);
+    const visible = cars.slice(0, page * PAGE_SIZE);
+    const hasMore = page < totalPages;
+
     return (
         <section className="mt-2 lg:mt-0">
             <div className="flex items-baseline justify-between px-4 pt-6 pb-3 lg:px-0 lg:pt-0 lg:pb-4">
@@ -34,11 +43,32 @@ export default function FeaturedCars() {
                     Бүгдийг харах →
                 </Link>
             </div>
-            <div className="flex flex-col gap-3 px-4 lg:grid lg:grid-cols-4 lg:gap-4 lg:px-0">
-                {cars.map((car, i) => (
+
+            {/* 모바일: 2열 컴팩트 카드 / 데스크탑: 4열 */}
+            <div className="grid grid-cols-2 gap-3 px-4 lg:hidden">
+                {visible.map((car, i) => (
+                    <CarCard key={car.id} product={car} variant="compact" savedIds={savedIds} priority={i < 2} />
+                ))}
+            </div>
+            <div className="hidden lg:grid lg:grid-cols-4 lg:gap-4">
+                {visible.map((car, i) => (
                     <CarCard key={car.id} product={car} savedIds={savedIds} priority={i === 0} />
                 ))}
             </div>
+
+            {hasMore && (
+                <div className="px-4 pt-3 lg:px-0 lg:pt-4">
+                    <button
+                        onClick={() => setPage((p) => p + 1)}
+                        className="w-full h-12 rounded-xl border border-line bg-surface flex items-center justify-center gap-2 text-[13.5px] font-bold text-ink"
+                    >
+                        Дэлгэрэнгүй харах
+                        <span className="font-semibold text-muted-faint">
+                            {page} / {totalPages}
+                        </span>
+                    </button>
+                </div>
+            )}
         </section>
     );
 }

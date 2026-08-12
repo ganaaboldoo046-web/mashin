@@ -1,11 +1,11 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import Image from './Image';
-import { carMeta, formatKRW, STATUS_LABELS } from '../utils/format';
+import { carMeta, formatKRW, fuelLabel, STATUS_LABELS } from '../utils/format';
 import { isSaved, toggleSaved } from '../utils/storage';
 import type { Product } from '../utils/storage';
 
-type Variant = 'grid' | 'row' | 'mini';
+type Variant = 'grid' | 'row' | 'mini' | 'compact';
 
 interface CarCardProps {
     product: Product;
@@ -21,6 +21,7 @@ const ASPECT: Record<Variant, string> = {
     grid: 'aspect-[16/10]',
     row: '',
     mini: 'aspect-[4/3]',
+    compact: 'aspect-[4/3]',
 };
 
 function Photo({ product, variant, priority }: { product: Product; variant: Variant; priority?: boolean }) {
@@ -97,6 +98,34 @@ const CarCard = memo(function CarCard({
                     {krw && <div className="mt-0.5 text-[11.5px] font-semibold text-muted">Солонгост {krw}</div>}
                 </div>
                 {savable && <SaveButton id={product.id} saved={saved} className="w-11 h-11 flex-none bg-surface-2" />}
+            </Link>
+        );
+    }
+
+    if (variant === 'compact') {
+        return (
+            <Link
+                to={`/product/${product.id}`}
+                className="block bg-surface border border-line rounded-2xl overflow-hidden text-ink hover:text-ink transition-colors hover:border-[#c9d3e4]"
+            >
+                <div className="relative">
+                    <Photo product={product} variant="compact" priority={priority} />
+                    {savable && (
+                        <SaveButton
+                            id={product.id}
+                            saved={saved}
+                            className="absolute top-2 right-2 w-9 h-9 bg-white/90 backdrop-blur-sm"
+                        />
+                    )}
+                </div>
+                <div className="px-3 pt-2.5 pb-3">
+                    <div className="text-[13px] font-bold leading-[1.35] line-clamp-2 min-h-[35px]">{product.name}</div>
+                    <div className="mt-1.5 text-[11.5px] font-medium text-muted">{product.year}</div>
+                    <div className="text-[11.5px] font-medium text-muted truncate">
+                        {[product.mileage, fuelLabel(product.fuel)].filter(Boolean).join(' · ')}
+                    </div>
+                    <div className="mt-1.5 text-[15px] font-extrabold text-primary">{product.price}</div>
+                </div>
             </Link>
         );
     }
