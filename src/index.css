@@ -2,10 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 디자인 토큰. 다크가 기본이고 [data-theme="light"]에서 라이트로 뒤집힌다.
+   Tailwind 색상들이 이 변수를 참조하므로, 여기만 바꾸면 전체 테마가 따라온다. */
+:root,
+[data-theme='dark'] {
+  --bg: #0d0d0d;
+  --surface: #1a1a1a;
+  --surface-2: #242424;
+  --surface-3: #161616;
+  --line: #2c2c2c;
+  --line-2: #4a4a4a;
+  --ink-block: #000000;
+  --text: #ffffff;
+  --text-2: #c7c7c7;
+  --text-3: #b0b0b0;
+  --muted: #9a9a9a;
+  --muted-2: #8a8a8a;
+  --muted-3: #6e6e6e;
+  --muted-4: #5a5a5a;
+  --tint: #2a1112;
+  --danger: #ff5a5a;
+  --accent-soft: #ff6b6b;
+  --overlay: rgba(0, 0, 0, 0.7);
+  --photo-overlay: rgba(0, 0, 0, 0.55);
+}
+
+[data-theme='light'] {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #f7f8fa;
+  --surface-3: #e9ecf1;
+  --line: #e6e8ec;
+  --line-2: #c9d3e4;
+  --ink-block: #101622;
+  --text: #0f172a;
+  --text-2: #374151;
+  --text-3: #4b5563;
+  --muted: #6b7280;
+  --muted-2: #9aa1ac;
+  --muted-3: #b6bcc6;
+  --muted-4: #c3c9d2;
+  --tint: #fff3f2;
+  --danger: #e5484d;
+  --accent-soft: #ffaca6;
+  --overlay: rgba(9, 14, 24, 0.55);
+  --photo-overlay: rgba(255, 255, 255, 0.92);
+}
+
 @layer base {
   body {
-    /* Gutter tone behind the 430px phone frame; the desktop layout fills the page instead. */
-    @apply font-sans antialiased bg-[#eceef2] lg:bg-canvas text-ink min-h-screen;
+    @apply font-sans antialiased bg-canvas text-ink min-h-screen;
     overflow-x: hidden;
     font-variant-numeric: tabular-nums;
   }
@@ -16,6 +62,15 @@
 
   a:hover {
     @apply text-primary-dark;
+  }
+
+  /* 다크에서는 흰 로고로 반전, 라이트에서는 원본 그대로 */
+  .brand-logo {
+    filter: brightness(0) invert(1);
+  }
+
+  [data-theme='light'] .brand-logo {
+    filter: none;
   }
 }
 

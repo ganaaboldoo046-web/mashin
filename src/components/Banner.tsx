@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Image from './Image';
-import { getBanners, getExchangeRate, type Banner as BannerType } from '../utils/storage';
+import { getBanners, type Banner as BannerType } from '../utils/storage';
+import { useExchangeRate } from '../hooks/useExchangeRate';
 
 /** 배너가 하나도 없을 때 노출되는 기본 히어로 카피. */
 const FALLBACK: BannerType = {
@@ -29,25 +30,6 @@ function useBanners() {
     return banners;
 }
 
-function useExchangeRate() {
-    const [rate, setRate] = useState<number>(() => getExchangeRate().krwToMnt);
-
-    useEffect(() => {
-        let alive = true;
-        fetch('/api/exchange_rate')
-            .then((res) => (res.ok ? res.json() : null))
-            .then((data) => {
-                if (alive && data && typeof data.rate === 'number') setRate(data.rate);
-            })
-            .catch(() => undefined);
-        return () => {
-            alive = false;
-        };
-    }, []);
-
-    return rate;
-}
-
 function HeroCopy({ banner, size }: { banner: BannerType; size: 'mobile' | 'desktop' }) {
     const isDesktop = size === 'desktop';
     return (
@@ -55,8 +37,8 @@ function HeroCopy({ banner, size }: { banner: BannerType; size: 'mobile' | 'desk
             <span
                 className={
                     isDesktop
-                        ? 'self-start text-[11.5px] font-extrabold tracking-[0.14em] text-[#7fa9ff] bg-primary/[0.16] px-3 py-[7px] rounded-md'
-                        : 'text-[10.5px] font-extrabold tracking-[0.14em] text-[#7fa9ff]'
+                        ? 'self-start text-[11.5px] font-extrabold tracking-[0.14em] text-[#FF8A80] bg-primary/[0.16] px-3 py-[7px] rounded-md'
+                        : 'text-[10.5px] font-extrabold tracking-[0.14em] text-[#FF8A80]'
                 }
             >
                 DT-TRADING
@@ -74,8 +56,8 @@ function HeroCopy({ banner, size }: { banner: BannerType; size: 'mobile' | 'desk
                 <p
                     className={
                         isDesktop
-                            ? 'm-0 mb-7 text-[15px] leading-[1.6] text-[#a9b6cc] max-w-[46ch]'
-                            : 'mt-2 text-[12.5px] leading-[1.55] text-[#a9b6cc]'
+                            ? 'm-0 mb-7 text-[15px] leading-[1.6] text-white/[0.72] max-w-[46ch]'
+                            : 'mt-2 text-[12.5px] leading-[1.55] text-white/[0.72]'
                     }
                 >
                     {banner.subtitle}

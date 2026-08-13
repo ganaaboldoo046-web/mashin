@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import Image from './Image';
-import { carMeta, formatKRW, fuelLabel, STATUS_LABELS } from '../utils/format';
+import { carMeta, formatKRW, STATUS_LABELS } from '../utils/format';
 import { isSaved, toggleSaved } from '../utils/storage';
 import type { Product } from '../utils/storage';
 
@@ -104,28 +104,31 @@ const CarCard = memo(function CarCard({
 
     if (variant === 'compact') {
         return (
-            <Link
-                to={`/product/${product.id}`}
-                className="block bg-surface border border-line rounded-2xl overflow-hidden text-ink hover:text-ink transition-colors hover:border-[#c9d3e4]"
-            >
-                <div className="relative">
-                    <Photo product={product} variant="compact" priority={priority} />
-                    {savable && (
-                        <SaveButton
-                            id={product.id}
-                            saved={saved}
-                            className="absolute top-2 right-2 w-9 h-9 bg-white/90 backdrop-blur-sm"
+            <Link to={`/product/${product.id}`} className="block min-w-0 text-ink hover:text-ink">
+                <div className="relative aspect-square rounded-xl overflow-hidden bg-photo flex items-center justify-center">
+                    {product.images?.[0] ? (
+                        <Image
+                            src={product.images[0]}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                            size="thumbnail"
+                            priority={priority}
                         />
+                    ) : (
+                        <span className="text-[10.5px] font-bold tracking-[0.12em] text-placeholder">ЗУРАГ</span>
+                    )}
+                    <span className="absolute top-2 left-2 text-[10.5px] font-extrabold text-white bg-primary rounded-[5px] px-1.5 py-[3px]">
+                        {product.status === 'active' ? 'Шалгасан' : STATUS_LABELS[product.status]}
+                    </span>
+                    {savable && (
+                        <SaveButton id={product.id} saved={saved} className="absolute top-1 right-1 w-11 h-11 text-white/90" />
                     )}
                 </div>
-                <div className="px-3 pt-2.5 pb-3">
-                    <div className="text-[13px] font-bold leading-[1.35] line-clamp-2 min-h-[35px]">{product.name}</div>
-                    <div className="mt-1.5 text-[11.5px] font-medium text-muted">{product.year}</div>
-                    <div className="text-[11.5px] font-medium text-muted truncate">
-                        {[product.mileage, fuelLabel(product.fuel)].filter(Boolean).join(' · ')}
-                    </div>
-                    <div className="mt-1.5 text-[15px] font-extrabold text-primary">{product.price}</div>
+                <div className="mt-2.5 text-sm font-bold leading-[1.4] tracking-[-0.01em] line-clamp-2">{product.name}</div>
+                <div className="mt-1.5 text-xs font-medium text-muted-soft truncate">
+                    {[product.year, product.mileage].filter(Boolean).join(' · ')}
                 </div>
+                <div className="mt-2 text-base font-extrabold tracking-[-0.02em]">{product.price}</div>
             </Link>
         );
     }

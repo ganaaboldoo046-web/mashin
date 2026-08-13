@@ -45,7 +45,7 @@ export default function FeaturedCars() {
             </div>
 
             {/* 모바일: 2열 컴팩트 카드 / 데스크탑: 4열 */}
-            <div className="grid grid-cols-2 gap-3 px-4 lg:hidden">
+            <div className="grid grid-cols-2 gap-x-3 gap-y-4 px-4 lg:hidden">
                 {visible.map((car, i) => (
                     <CarCard key={car.id} product={car} variant="compact" savedIds={savedIds} priority={i < 2} />
                 ))}
@@ -57,10 +57,10 @@ export default function FeaturedCars() {
             </div>
 
             {hasMore && (
-                <div className="px-4 pt-3 lg:px-0 lg:pt-4">
+                <div className="px-4 pt-5 lg:px-0 lg:pt-4">
                     <button
                         onClick={() => setPage((p) => p + 1)}
-                        className="w-full h-12 rounded-xl border border-line bg-surface flex items-center justify-center gap-2 text-[13.5px] font-bold text-ink"
+                        className="w-full h-[52px] rounded-[13px] border border-line bg-surface flex items-center justify-center gap-2 text-[14.5px] font-bold text-ink"
                     >
                         Дэлгэрэнгүй харах
                         <span className="font-semibold text-muted-faint">
