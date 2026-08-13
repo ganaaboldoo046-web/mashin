@@ -98,13 +98,14 @@ export default function Banner() {
                         {banner.image && (
                             <>
                                 <Image
+                                    key={banner.image}
                                     src={banner.image}
                                     alt={banner.title}
                                     className="absolute inset-0 w-full h-full object-cover"
                                     size="full"
                                     priority={i === 0}
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-r from-black via-black/85 to-black/40" />
+                                <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/40 to-black/10" />
                             </>
                         )}
                         <div className="relative flex flex-col items-start">
