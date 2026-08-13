@@ -5,3 +5,5 @@ ADMIN_PASSWORD_HASH=replace_with_sha256_hex
 # At least 32 random characters. Used to sign admin and user session cookies.
 SESSION_SECRET=replace_with_a_long_random_value
 PUBLIC_SITE_URL=http://127.0.0.1:8788
+# The same public Web OAuth client ID used by VITE_GOOGLE_CLIENT_ID.
+GOOGLE_CLIENT_ID=replace_with_google_web_client_id.apps.googleusercontent.com

@@ -15,12 +15,15 @@ npm run dev:full
 
 ## Required configuration
 
-Set `VITE_GOOGLE_CLIENT_ID` at build time. Configure these encrypted Cloudflare secrets for Pages Functions:
+Create a Google OAuth 2.0 **Web application** client. Add the production site and local development URLs to its Authorized JavaScript origins. Set its public client ID as `VITE_GOOGLE_CLIENT_ID` at build time and as `GOOGLE_CLIENT_ID` in Cloudflare Pages runtime variables.
+
+Configure these Cloudflare Pages variables and secrets:
 
 - `ADMIN_EMAIL`
 - `ADMIN_PASSWORD_HASH`: lowercase SHA-256 of the administrator password
 - `SESSION_SECRET`: at least 32 random characters
 - `PUBLIC_SITE_URL`: canonical production origin, for example `https://www.temmun.mn`
+- `GOOGLE_CLIENT_ID`: Google Web OAuth client ID (a public variable, not a password)
 
 Never commit `.dev.vars` or plaintext administrator credentials.
 
@@ -28,4 +31,4 @@ Never commit `.dev.vars` or plaintext administrator credentials.
 
 Pull requests run build and lint checks. A verified push to `main` deploys the exact commit to the `temmun-car` Cloudflare Pages project through `.github/workflows/deploy.yml`.
 
-Add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` to the GitHub `production` environment. D1 (`DB`) and R2 (`BUCKET`) bindings and the authentication secrets must also exist in the Cloudflare Pages production environment.
+Add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as secrets and `VITE_GOOGLE_CLIENT_ID` as a variable in the GitHub `production` environment. D1 (`DB`) and R2 (`BUCKET`) bindings and the authentication variables/secrets must also exist in the Cloudflare Pages production environment.

@@ -1,15 +1,15 @@
 import React from 'react';
-import { useGoogleLogin } from '@react-oauth/google';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import TopTicker from '../components/TopTicker';
 import BottomNav from '../components/BottomNav';
 import CarCard from '../components/CarCard';
 import Footer from '../components/Footer';
-import { setUser as persistUser } from '../hooks/useUser';
-import type { AppUser } from '../hooks/useUser';
+import GoogleSignInButton from '../components/GoogleSignInButton';
+import { setUser as persistUser, useUser } from '../hooks/useUser';
 import { getProducts, getSavedIds, getRecentlyViewedIds } from '../utils/storage';
 import type { Product } from '../utils/storage';
+import { DT_CONTACT } from '../constants/contact';
 
 // Import login background images
 import img1 from '../assets/login/img1.jpg';
@@ -27,7 +27,7 @@ interface ReservationOrder {
 }
 
 export default function Profile() {
-    const [user, setUser] = React.useState<AppUser | null>(null);
+    const user = useUser();
 
     // Tabs State
     const [activeTab, setActiveTab] = React.useState<'recent' | 'saved' | 'orders'>('recent');
@@ -36,25 +36,6 @@ export default function Profile() {
     const [myOrders, setMyOrders] = React.useState<ReservationOrder[]>([]);
 
     React.useEffect(() => {
-        const loadSession = async () => {
-            try {
-                const sessionResponse = await fetch('/api/user_session', { headers: { Accept: 'application/json' } });
-                if (!sessionResponse.ok) {
-                    persistUser(null);
-                    return;
-                }
-                const session = await sessionResponse.json() as { user: AppUser };
-                persistUser(session.user);
-                setUser(session.user);
-
-                const ordersResponse = await fetch('/api/reservations_list', { headers: { Accept: 'application/json' } });
-                if (ordersResponse.ok) setMyOrders(await ordersResponse.json() as ReservationOrder[]);
-            } catch {
-                persistUser(null);
-            }
-        };
-        loadSession();
-
         // Load Tab Data
         const loadTabData = async () => {
             const allProducts = await getProducts();
@@ -82,38 +63,21 @@ export default function Profile() {
         };
     }, []);
 
-    const login = useGoogleLogin({
-        onSuccess: async (tokenResponse) => {
-            try {
-                const res = await fetch('/api/auth_google', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ accessToken: tokenResponse.access_token }),
-                });
-                if (!res.ok) throw new Error('Server authentication failed');
-                const { user: appUser } = await res.json() as { user: AppUser };
-
-                persistUser(appUser);
-                setUser(appUser);
-            } catch (error) {
-                console.error("Failed to fetch user info:", error);
-                alert("로그인 정보를 가져오는데 실패했습니다.");
-            }
-        },
-        onError: () => {
-            console.error("Login Failed");
-            alert("로그인에 실패했습니다.");
+    React.useEffect(() => {
+        if (!user) {
+            setMyOrders([]);
+            return;
         }
-    });
-
-    const handleGoogleLogin = () => {
-        login();
-    };
+        fetch('/api/reservations_list', { headers: { Accept: 'application/json' } })
+            .then(async (response) => {
+                if (response.ok) setMyOrders(await response.json() as ReservationOrder[]);
+            })
+            .catch(() => undefined);
+    }, [user]);
 
     const handleLogout = async () => {
         await fetch('/api/user_logout', { method: 'POST' }).catch(() => undefined);
         persistUser(null);
-        setUser(null);
         setMyOrders([]);
     };
 
@@ -208,11 +172,11 @@ export default function Profile() {
 
                     <div className="mt-4 bg-night rounded-2xl p-5 lg:hidden">
                         <div className="text-[11.5px] font-bold tracking-[0.1em] text-night-line">DT-TRADING</div>
-                        <a href="tel:01057279927" className="block mt-2.5 text-base font-extrabold text-white hover:text-white">
-                            010 5727 9927
+                        <a href={DT_CONTACT.primary.href} className="block mt-2.5 text-base font-extrabold text-white hover:text-white">
+                            {DT_CONTACT.primary.display}
                         </a>
-                        <a href="tel:99001979" className="block mt-0.5 text-[13.5px] font-bold text-night-text hover:text-night-text">
-                            9900 1979
+                        <a href={DT_CONTACT.secondary.href} className="block mt-0.5 text-[13.5px] font-bold text-night-text hover:text-night-text">
+                            {DT_CONTACT.secondary.display}
                         </a>
                         <p className="mt-3 text-xs leading-[1.6] text-night-text">Инчон хот, Ённсү дүүрэг, Нынхөдэ-ро 192</p>
                     </div>
@@ -263,13 +227,7 @@ export default function Profile() {
                     Бүх төрлийн АВТО МАШИН захиалга авч <br />түргэн шуурхай найдвартай нийлүүлсээр байна
                 </p>
 
-                <button
-                    onClick={handleGoogleLogin}
-                    className="w-full max-w-xs py-4 bg-white text-slate-900 border border-slate-200 font-bold rounded-full flex items-center justify-center gap-3 hover:bg-slate-50 transition-transform active:scale-95 shadow-xl group"
-                >
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6 h-6 group-hover:scale-110 transition-transform" alt="Google" />
-                    <span>Google-ээр нэвтрэх</span>
-                </button>
+                <GoogleSignInButton className="w-full" />
 
                 <p className="mt-6 text-xs text-slate-400">
                     Үйлчилгээний нөхцөл болон нууцлалын бодлогыг зөвшөөрч байна.

@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
-import { useGoogleLogin } from '@react-oauth/google';
-import type { AppUser } from '../hooks/useUser';
+import GoogleSignInButton from './GoogleSignInButton';
+import { useUser } from '../hooks/useUser';
 
 interface Review {
     id: number;
@@ -27,13 +27,14 @@ const MOCK_REVIEWS: Review[] = [
 export default function CustomerReviews() {
     const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [userInfo, setUserInfo] = useState<AppUser | null>(null);
+    const userInfo = useUser();
     const [formData, setFormData] = useState({
         car_model: '',
         comment: '',
         rating: 5,
         gender: 'male'
     });
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -85,35 +86,11 @@ export default function CustomerReviews() {
         return () => cancelAnimationFrame(animationId);
     }, [reviews]); // Restart animation when reviews change
 
-    // Google Login Logic
-    const login = useGoogleLogin({
-        onSuccess: async (tokenResponse) => {
-            try {
-                const res = await fetch('/api/auth_google', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ accessToken: tokenResponse.access_token }),
-                });
-                if (!res.ok) throw new Error('Server authentication failed');
-                const { user } = await res.json() as { user: AppUser };
-                setUserInfo(user);
-                setIsModalOpen(true); // Open modal after login
-            } catch (error) {
-                console.error("Failed to fetch user info:", error);
-                alert("로그인 정보를 가져오는데 실패했습니다.");
-            }
-        },
-        onError: () => {
-            console.error("Login Failed");
-            alert("로그인에 실패했습니다.");
-        }
-    });
-
     const handleWriteClick = () => {
         if (userInfo) {
             setIsModalOpen(true);
         } else {
-            login();
+            setIsLoginModalOpen(true);
         }
     };
 
@@ -190,6 +167,28 @@ export default function CustomerReviews() {
                     </div>
                 ))}
             </div>
+
+            {isLoginModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4">
+                    <div className="relative w-full max-w-sm rounded-2xl bg-slate-900 p-6 text-center shadow-xl">
+                        <button
+                            onClick={() => setIsLoginModalOpen(false)}
+                            className="absolute right-4 top-4 text-slate-400 hover:text-white"
+                            aria-label="Хаах"
+                        >
+                            <span className="material-symbols-outlined">close</span>
+                        </button>
+                        <h3 className="mb-2 text-lg font-bold text-white">Нэвтрэх</h3>
+                        <p className="mb-5 text-sm text-slate-300">Сэтгэгдэл бичихийн тулд Google бүртгэлээрээ нэвтэрнэ үү.</p>
+                        <GoogleSignInButton
+                            onAuthenticated={() => {
+                                setIsLoginModalOpen(false);
+                                setIsModalOpen(true);
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
 
             {/* Write Review Modal */}
             {isModalOpen && (

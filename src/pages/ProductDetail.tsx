@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { FormEvent } from 'react';
-import emailjs from '@emailjs/browser';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Facebook, MessageCircle, Phone } from 'lucide-react';
 import Header from '../components/Header';
 import TopTicker from '../components/TopTicker';
 import Image from '../components/Image';
@@ -10,8 +9,8 @@ import Footer from '../components/Footer';
 import { getProducts, addToRecentlyViewed, isSaved, toggleSaved } from '../utils/storage';
 import type { Product } from '../utils/storage';
 import { carMeta, formatKRW, fuelLabel, STATUS_LABELS } from '../utils/format';
-import { useUser } from '../hooks/useUser';
 import { VEHICLE_OPTIONS } from '../constants/vehicleOptions';
+import { DT_CONTACT } from '../constants/contact';
 
 const OPTION_GROUPS: { key: string; title: string }[] = [
     { key: 'exterior', title: 'Гадаад / Дотоод' },
@@ -23,7 +22,6 @@ const OPTION_GROUPS: { key: string; title: string }[] = [
 export default function ProductDetail() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const user = useUser();
 
     const [product, setProduct] = useState<Product | null>(null);
     const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
@@ -33,8 +31,6 @@ export default function ProductDetail() {
 
     const [isCallModalOpen, setIsCallModalOpen] = useState(false);
     const [isReservationModalOpen, setIsReservationModalOpen] = useState(false);
-    const [reservationForm, setReservationForm] = useState({ userName: '', phone: '', facebookId: '' });
-    const [reservationStatus, setReservationStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -108,59 +104,7 @@ export default function ProductDetail() {
     };
 
     const openBooking = () => {
-        setReservationForm((form) => ({ ...form, userName: form.userName || user?.name || '' }));
-        setReservationStatus('idle');
         setIsReservationModalOpen(true);
-    };
-
-    const handleReservationSubmit = async (e: FormEvent) => {
-        e.preventDefault();
-        setReservationStatus('submitting');
-
-        try {
-            const response = await fetch('/api/reservations_create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    productId: product?.id,
-                    productName: product?.name,
-                    userId: user?.email,
-                    ...reservationForm,
-                }),
-            });
-
-            if (response.ok) {
-                try {
-                    // NOTE: Replace these with your actual EmailJS keys
-                    const SERVICE_ID = 'YOUR_SERVICE_ID';
-                    const TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
-                    const PUBLIC_KEY = 'YOUR_PUBLIC_KEY';
-
-                    await emailjs.send(
-                        SERVICE_ID,
-                        TEMPLATE_ID,
-                        {
-                            product_name: product?.name,
-                            product_price: product?.price,
-                            user_name: reservationForm.userName,
-                            user_phone: reservationForm.phone,
-                            user_facebook: reservationForm.facebookId,
-                            user_email: user?.email || 'Guest',
-                            date: new Date().toLocaleString(),
-                        },
-                        PUBLIC_KEY
-                    );
-                } catch (emailError) {
-                    console.error('Failed to send email:', emailError);
-                }
-
-                setReservationStatus('success');
-            } else {
-                setReservationStatus('error');
-            }
-        } catch {
-            setReservationStatus('error');
-        }
     };
 
     if (loading) {
@@ -429,11 +373,11 @@ export default function ProductDetail() {
                         </div>
                         <div className="bg-night rounded-[18px] px-6 py-[22px]">
                             <div className="text-xs font-bold tracking-[0.1em] text-night-line">DT-TRADING</div>
-                            <a href="tel:01057279927" className="block mt-2.5 text-[17px] font-extrabold text-white hover:text-white">
-                                010 5727 9927
+                            <a href={DT_CONTACT.primary.href} className="block mt-2.5 text-[17px] font-extrabold text-white hover:text-white">
+                                {DT_CONTACT.primary.display}
                             </a>
-                            <a href="tel:99001979" className="block mt-[3px] text-sm font-bold text-night-text hover:text-night-text">
-                                9900 1979
+                            <a href={DT_CONTACT.secondary.href} className="block mt-[3px] text-sm font-bold text-night-text hover:text-night-text">
+                                {DT_CONTACT.secondary.display}
                             </a>
                             <div className="mt-3.5 text-[12.5px] leading-[1.6] text-night-text">
                                 Инчон хот, Ённсү дүүрэг,
@@ -489,13 +433,13 @@ export default function ProductDetail() {
                             </button>
                         </div>
                         <div className="px-5 pb-6 flex flex-col gap-2.5 lg:px-6">
-                            <a href="tel:01057279927" className="bg-surface-3 border border-line rounded-xl px-4 py-3.5 hover:text-ink">
-                                <div className="text-[12.5px] font-bold text-muted-soft">Солонгос дугаар</div>
-                                <div className="mt-1 text-[17px] font-extrabold text-ink">010 5727 9927</div>
+                            <a href={DT_CONTACT.primary.href} className="bg-surface-3 border border-line rounded-xl px-4 py-3.5 hover:text-ink">
+                                <div className="text-[12.5px] font-bold text-muted-soft">Солонгос дугаар 1</div>
+                                <div className="mt-1 text-[17px] font-extrabold text-ink">{DT_CONTACT.primary.display}</div>
                             </a>
-                            <a href="tel:99001979" className="bg-surface-3 border border-line rounded-xl px-4 py-3.5 hover:text-ink">
-                                <div className="text-[12.5px] font-bold text-muted-soft">Монгол дугаар</div>
-                                <div className="mt-1 text-[17px] font-extrabold text-ink">9900 1979</div>
+                            <a href={DT_CONTACT.secondary.href} className="bg-surface-3 border border-line rounded-xl px-4 py-3.5 hover:text-ink">
+                                <div className="text-[12.5px] font-bold text-muted-soft">Солонгос дугаар 2</div>
+                                <div className="mt-1 text-[17px] font-extrabold text-ink">{DT_CONTACT.secondary.display}</div>
                             </a>
                         </div>
                     </div>
@@ -504,110 +448,84 @@ export default function ProductDetail() {
 
             {/* 예약 모달 */}
             {isReservationModalOpen && (
-                <div className="fixed inset-0 z-[60] bg-[rgba(9,14,24,0.55)] flex items-end justify-center lg:items-center lg:p-6">
-                    <div className="w-full max-w-app max-h-[90vh] overflow-y-auto bg-surface rounded-t-[20px] animate-sheet-up lg:max-w-[480px] lg:rounded-[20px] lg:shadow-modal lg:animate-slide-up">
-                        <div className="flex items-start justify-between gap-3.5 px-5 pt-[18px] pb-3.5 border-b border-line-soft lg:px-6 lg:pt-6 lg:pb-[18px]">
-                            <div>
-                                <div className="text-[17px] font-extrabold tracking-[-0.02em] lg:text-[19px]">Захиалга өгөх</div>
-                                <div className="mt-1 text-[12.5px] font-medium text-muted lg:text-[13px]">
-                                    Мэдээллээ үлдээгээрэй, ажлын 1 цагийн дотор холбогдоно.
-                                </div>
-                            </div>
+                <div
+                    className="fixed inset-0 z-[60] flex items-center justify-center bg-[rgba(9,14,24,0.6)] p-4 backdrop-blur-[1px]"
+                    onClick={() => setIsReservationModalOpen(false)}
+                >
+                    <div
+                        className="w-full max-w-[384px] max-h-[calc(100vh-32px)] overflow-y-auto rounded-[22px] bg-surface px-5 pb-5 pt-5 shadow-modal animate-slide-up sm:px-6 sm:pb-6"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="reservation-title"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between gap-4">
+                            <h2 id="reservation-title" className="m-0 text-[21px] font-extrabold tracking-[-0.025em] text-ink">
+                                Захиалга өгөх
+                            </h2>
                             <button
                                 onClick={() => setIsReservationModalOpen(false)}
-                                className="w-9 h-9 flex-none rounded-[10px] bg-surface-4 text-muted text-[15px]"
+                                className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-[18px] text-muted hover:bg-surface-4"
+                                aria-label="Хаах"
                             >
                                 ✕
                             </button>
                         </div>
+                        <p className="mb-0 mt-6 text-[15px] font-medium leading-[1.7] text-muted">
+                            Доорх сувгуудаар бидэнтэй холбогдоно уу. Машины нэр болон линкийг илгээнэ үү.
+                        </p>
+                        <div className="mt-3 rounded-xl bg-surface-3 px-4 py-3 text-[13px] font-bold text-ink-soft">
+                            {product.name}
+                        </div>
 
-                        {reservationStatus === 'success' ? (
-                            <div className="px-5 pt-[30px] pb-[26px] text-center lg:px-6 lg:pt-[34px]">
-                                <div className="w-14 h-14 mx-auto rounded-full bg-primary-soft text-primary flex items-center justify-center text-[26px] font-extrabold">
-                                    ✓
-                                </div>
-                                <div className="mt-4 text-[17px] font-extrabold lg:text-[19px]">Захиалга хүлээн авлаа</div>
-                                <div className="mt-2 text-[13px] leading-[1.6] text-muted lg:text-[13.5px]">
-                                    {product.name}
-                                    <br />
-                                    {reservationForm.phone} дугаарт холбогдоно.
-                                </div>
-                                <button
-                                    onClick={() => {
-                                        setIsReservationModalOpen(false);
-                                        setReservationStatus('idle');
-                                        setReservationForm({ userName: '', phone: '', facebookId: '' });
-                                    }}
-                                    className="mt-5 w-full h-12 rounded-xl border border-line-strong bg-surface text-[14.5px] font-bold text-ink"
+                        <div className="mt-4 flex flex-col gap-3">
+                            <a
+                                href={DT_CONTACT.messenger}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex min-h-[84px] items-center gap-4 rounded-2xl border border-line-strong px-4 py-3.5 text-ink hover:border-primary hover:text-ink"
+                            >
+                                <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-[#7157ff] text-white">
+                                    <MessageCircle size={22} fill="currentColor" aria-hidden="true" />
+                                </span>
+                                <span className="min-w-0 text-left">
+                                    <span className="block text-[18px] font-extrabold">Messenger</span>
+                                    <span className="mt-0.5 block text-[12.5px] font-medium text-muted-faint">Facebook Messenger-ээр бичих</span>
+                                </span>
+                            </a>
+                            <a
+                                href={DT_CONTACT.facebook}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex min-h-[84px] items-center gap-4 rounded-2xl border border-line-strong px-4 py-3.5 text-ink hover:border-primary hover:text-ink"
+                            >
+                                <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-[#1877f2] text-white">
+                                    <Facebook size={23} fill="currentColor" aria-hidden="true" />
+                                </span>
+                                <span className="min-w-0 text-left">
+                                    <span className="block text-[18px] font-extrabold">Facebook</span>
+                                    <span className="mt-0.5 block text-[12.5px] font-medium text-muted-faint">Facebook хуудас руу орох</span>
+                                </span>
+                            </a>
+                            {[
+                                { href: DT_CONTACT.primary.href, number: `KR ${DT_CONTACT.primary.display}` },
+                                { href: DT_CONTACT.secondary.href, number: `KR ${DT_CONTACT.secondary.display}` },
+                            ].map((contact) => (
+                                <a
+                                    key={contact.href}
+                                    href={contact.href}
+                                    className="flex min-h-[84px] items-center gap-4 rounded-2xl border border-line-strong px-4 py-3.5 text-ink hover:border-primary hover:text-ink"
                                 >
-                                    Хаах
-                                </button>
-                            </div>
-                        ) : (
-                            <form onSubmit={handleReservationSubmit} className="px-5 pt-4 pb-6 lg:px-6 lg:pt-5 lg:pb-[26px]">
-                                <div className="bg-surface-3 border border-line rounded-xl px-4 py-3.5 mb-4 lg:mb-5">
-                                    <div className="text-[13.5px] font-extrabold lg:text-sm">{product.name}</div>
-                                    <div className="mt-2 flex items-baseline justify-between gap-2.5">
-                                        <span className="text-xs font-bold text-muted-strong lg:text-[12.5px]">Үнэ</span>
-                                        <span className="text-base font-extrabold text-primary lg:text-[17px]">{product.price}</span>
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-col gap-3">
-                                    <label className="flex flex-col gap-[7px]">
-                                        <span className="text-[12.5px] font-bold text-ink-soft">
-                                            Нэр <span className="text-danger">*</span>
-                                        </span>
-                                        <input
-                                            required
-                                            value={reservationForm.userName}
-                                            onChange={(e) => setReservationForm({ ...reservationForm, userName: e.target.value })}
-                                            placeholder="Таны нэр"
-                                            className="h-[50px] px-3.5 rounded-xl border border-line-strong text-sm font-medium text-ink outline-none box-border focus:border-primary lg:h-[46px] lg:rounded-[11px]"
-                                        />
-                                    </label>
-                                    <label className="flex flex-col gap-[7px]">
-                                        <span className="text-[12.5px] font-bold text-ink-soft">
-                                            Утасны дугаар <span className="text-danger">*</span>
-                                        </span>
-                                        <input
-                                            required
-                                            type="tel"
-                                            value={reservationForm.phone}
-                                            onChange={(e) => setReservationForm({ ...reservationForm, phone: e.target.value })}
-                                            placeholder="9900 1979"
-                                            className="h-[50px] px-3.5 rounded-xl border border-line-strong text-sm font-medium text-ink outline-none box-border focus:border-primary lg:h-[46px] lg:rounded-[11px]"
-                                        />
-                                    </label>
-                                    <label className="flex flex-col gap-[7px]">
-                                        <span className="text-[12.5px] font-bold text-ink-soft">
-                                            Facebook ID <span className="font-semibold text-muted-faint">(заавал биш)</span>
-                                        </span>
-                                        <input
-                                            value={reservationForm.facebookId}
-                                            onChange={(e) => setReservationForm({ ...reservationForm, facebookId: e.target.value })}
-                                            placeholder="facebook.com/..."
-                                            className="h-[50px] px-3.5 rounded-xl border border-line-strong text-sm font-medium text-ink outline-none box-border focus:border-primary lg:h-[46px] lg:rounded-[11px]"
-                                        />
-                                    </label>
-                                </div>
-
-                                {reservationStatus === 'error' && (
-                                    <div className="mt-3.5 text-[12.5px] font-bold text-danger">Алдаа гарлаа. Дахин оролдоно уу.</div>
-                                )}
-
-                                <button
-                                    type="submit"
-                                    disabled={reservationStatus === 'submitting'}
-                                    className="mt-[18px] w-full h-[52px] rounded-[13px] bg-primary text-white text-[15px] font-bold disabled:opacity-70 lg:h-[50px] lg:rounded-xl"
-                                >
-                                    {reservationStatus === 'submitting' ? 'Илгээж байна…' : 'Захиалгаа илгээх'}
-                                </button>
-                                <div className="mt-3 text-[11.5px] leading-[1.6] text-muted-faint text-center">
-                                    Илгээснээр та Үйлчилгээний нөхцөл, Нууцлалын бодлогыг зөвшөөрч байна.
-                                </div>
-                            </form>
-                        )}
+                                    <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-[#00a94f] text-white">
+                                        <Phone size={22} aria-hidden="true" />
+                                    </span>
+                                    <span className="min-w-0 text-left">
+                                        <span className="block text-[17px] font-extrabold">{contact.number}</span>
+                                        <span className="mt-0.5 block text-[12.5px] font-medium text-muted-faint">Утсаар холбогдох</span>
+                                    </span>
+                                </a>
+                            ))}
+                        </div>
                     </div>
                 </div>
             )}

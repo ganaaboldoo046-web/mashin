@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Image from './Image';
 import { getBanners, type Banner as BannerType } from '../utils/storage';
+import { DT_CONTACT } from '../constants/contact';
 
 /** 배너가 하나도 없을 때 노출되는 기본 히어로 카피. */
 const FALLBACK: BannerType = {
@@ -132,7 +133,7 @@ export default function Banner() {
                                     Машин үзэх
                                 </Link>
                                 <a
-                                    href="tel:01057279927"
+                                    href={DT_CONTACT.primary.href}
                                     className="hidden lg:inline-flex h-12 px-6 items-center rounded-xl border border-white/25 text-white text-[14.5px] font-bold hover:text-white"
                                 >
                                     Холбоо барих

@@ -16,6 +16,7 @@ export interface AppEnv {
     ADMIN_PASSWORD_HASH?: string;
     SESSION_SECRET?: string;
     PUBLIC_SITE_URL?: string;
+    GOOGLE_CLIENT_ID?: string;
 }
 
 export interface FunctionContext {

@@ -1,6 +1,7 @@
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BottomNav from '../components/BottomNav';
+import { DT_CONTACT } from '../constants/contact';
 
 export default function About() {
     return (
@@ -45,9 +46,10 @@ export default function About() {
                         </div>
                         <div className="flex items-center gap-3">
                             <span className="material-symbols-outlined text-slate-400">call</span>
-                            <a href="tel:+821000000000" className="text-primary font-medium hover:underline">
-                                +82 10-0000-0000
-                            </a>
+                            <span className="flex flex-col">
+                                <a href={DT_CONTACT.primary.href} className="text-primary font-medium hover:underline">{DT_CONTACT.primary.display}</a>
+                                <a href={DT_CONTACT.secondary.href} className="text-primary font-medium hover:underline">{DT_CONTACT.secondary.display}</a>
+                            </span>
                         </div>
                         <div className="flex items-center gap-3">
                             <span className="material-symbols-outlined text-slate-400">mail</span>

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { DT_CONTACT } from '../constants/contact';
 
 const COLUMNS = [
     {
@@ -30,11 +31,11 @@ export default function Footer() {
             <div className="lg:hidden px-4 py-8">
                 <div className="bg-night rounded-2xl p-5">
                     <div className="text-[11.5px] font-bold tracking-[0.1em] text-night-line">DT-TRADING</div>
-                    <a href="tel:01057279927" className="block mt-2.5 text-base font-extrabold text-white hover:text-white">
-                        010 5727 9927
+                    <a href={DT_CONTACT.primary.href} className="block mt-2.5 text-base font-extrabold text-white hover:text-white">
+                        {DT_CONTACT.primary.display}
                     </a>
-                    <a href="tel:99001979" className="block mt-0.5 text-[13.5px] font-bold text-night-text hover:text-night-text">
-                        9900 1979
+                    <a href={DT_CONTACT.secondary.href} className="block mt-0.5 text-[13.5px] font-bold text-night-text hover:text-night-text">
+                        {DT_CONTACT.secondary.display}
                     </a>
                     <p className="mt-3 text-xs leading-[1.6] text-night-text">Инчон хот, Ённсү дүүрэг, Нынхөдэ-ро 192</p>
                 </div>
@@ -56,10 +57,11 @@ export default function Footer() {
                         <div className="mt-3.5 text-[12.5px] leading-[1.7] text-muted">
                             {ADDRESS}
                             <br />
-                            <a href="tel:01057279927">010 5727 9927</a> · <a href="tel:99001979">9900 1979</a>
+                            <a href={DT_CONTACT.primary.href}>{DT_CONTACT.primary.display}</a> ·{' '}
+                            <a href={DT_CONTACT.secondary.href}>{DT_CONTACT.secondary.display}</a>
                         </div>
                         <a
-                            href="https://www.facebook.com/temmun.trading"
+                            href={DT_CONTACT.facebook}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="mt-4 inline-flex items-center gap-2 text-[12.5px] font-bold text-muted hover:text-primary"

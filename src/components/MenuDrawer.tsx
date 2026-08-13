@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { setUser, useUser } from '../hooks/useUser';
+import { DT_CONTACT } from '../constants/contact';
 
 const GROUPS = [
     {
@@ -130,11 +131,11 @@ export default function MenuDrawer({ open, onClose }: MenuDrawerProps) {
 
                 <div className="m-4 p-5 rounded-2xl bg-night">
                     <div className="text-[11.5px] font-bold tracking-[0.1em] text-white/50">DT-TRADING</div>
-                    <a href="tel:01057279927" className="block mt-2.5 text-base font-extrabold text-white hover:text-white">
-                        010 5727 9927
+                    <a href={DT_CONTACT.primary.href} className="block mt-2.5 text-base font-extrabold text-white hover:text-white">
+                        {DT_CONTACT.primary.display}
                     </a>
-                    <a href="tel:99001979" className="block mt-0.5 text-[13.5px] font-bold text-white/60 hover:text-white/60">
-                        9900 1979
+                    <a href={DT_CONTACT.secondary.href} className="block mt-0.5 text-[13.5px] font-bold text-white/60 hover:text-white/60">
+                        {DT_CONTACT.secondary.display}
                     </a>
                     <p className="mt-3 text-xs leading-[1.6] text-white/60">Инчон хот, Ённсү дүүрэг, Нынхөдэ-ро 192</p>
                 </div>

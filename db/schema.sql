@@ -53,6 +53,19 @@ CREATE TABLE IF NOT EXISTS users (
   created_at INTEGER DEFAULT (strftime('%s', 'now'))
 );
 
+-- OAuth users (Google sign-in customers)
+CREATE TABLE IF NOT EXISTS oauth_users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  provider TEXT NOT NULL,
+  provider_sub TEXT NOT NULL,
+  email TEXT NOT NULL,
+  name TEXT,
+  avatar TEXT,
+  created_at INTEGER DEFAULT (strftime('%s', 'now')),
+  last_login_at INTEGER DEFAULT (strftime('%s', 'now')),
+  UNIQUE(provider, provider_sub)
+);
+
 -- Reservations (예약) 테이블
 CREATE TABLE IF NOT EXISTS reservations (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
