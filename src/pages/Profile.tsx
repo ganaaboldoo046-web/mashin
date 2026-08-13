@@ -171,7 +171,7 @@ export default function Profile() {
                     </div>
 
                     <div className="mt-4 bg-night rounded-2xl p-5 lg:hidden">
-                        <div className="text-[11.5px] font-bold tracking-[0.1em] text-night-line">DT-TRADING</div>
+                        <div className="text-[11.5px] font-bold tracking-[0.1em] text-night-line">DT Trading</div>
                         <a href={DT_CONTACT.primary.href} className="block mt-2.5 text-base font-extrabold text-white hover:text-white">
                             {DT_CONTACT.primary.display}
                         </a>
@@ -221,7 +221,7 @@ export default function Profile() {
             {/* Login Content */}
             <div className="relative z-20 w-full max-w-md px-6 text-center text-white flex flex-col items-center justify-center min-h-[80vh]">
                 <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 drop-shadow-lg">
-                    DT-TRADING
+                    DT Trading
                 </h1>
                 <p className="text-lg md:text-xl font-medium text-slate-200 mb-12 drop-shadow-md leading-relaxed whitespace-pre-line">
                     Бүх төрлийн АВТО МАШИН захиалга авч <br />түргэн шуурхай найдвартай нийлүүлсээр байна

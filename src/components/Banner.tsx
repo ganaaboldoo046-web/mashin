@@ -109,7 +109,7 @@ export default function Banner() {
                         )}
                         <div className="relative flex flex-col items-start">
                             <span className="text-[10.5px] lg:text-[11.5px] font-extrabold tracking-[0.14em] text-[#FF8A80] bg-primary/20 px-2.5 py-1.5 rounded-md">
-                                DT-TRADING
+                                DT Trading
                             </span>
                             {i === 0 ? (
                                 <h1 className="mt-2.5 lg:mt-5 mb-0 lg:mb-3 text-[22px] lg:text-[42px] font-extrabold leading-[1.3] lg:leading-[1.18] tracking-[-0.02em] lg:tracking-[-0.03em] text-white lg:max-w-[15ch] text-balance">

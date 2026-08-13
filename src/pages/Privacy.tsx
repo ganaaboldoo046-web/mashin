@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { DT_PHONE_SUMMARY } from '../constants/contact';
+import { DT_CONTACT, DT_PHONE_SUMMARY } from '../constants/contact';
 
 export default function Privacy() {
     return (
@@ -73,7 +73,7 @@ export default function Privacy() {
                         <div className="mt-2 text-slate-600 dark:text-slate-400 font-medium">
                             <p>DT Trading</p>
                             <p>Утас: {DT_PHONE_SUMMARY}</p>
-                            <p>Имэйл: temmuntrading@gmail.com</p>
+                            <p>Имэйл: <a href={DT_CONTACT.email.href} className="hover:text-primary hover:underline">{DT_CONTACT.email.display}</a></p>
                         </div>
                     </section>
                 </div>

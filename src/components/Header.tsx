@@ -59,7 +59,9 @@ export default function Header({ showBack = false, title }: HeaderProps) {
         if (e.key === 'Enter') runSearch();
     };
 
-    const mobileTitle = title ?? MOBILE_TITLES[location.pathname] ?? '';
+    // Keep titles on detail-style back headers, but leave the area beside the
+    // logo clear on regular mobile pages.
+    const mobileTitle = showBack ? (title ?? MOBILE_TITLES[location.pathname] ?? '') : '';
     const initial = user?.name?.slice(0, 1).toUpperCase() || '';
 
     return (
@@ -73,7 +75,7 @@ export default function Header({ showBack = false, title }: HeaderProps) {
                         </button>
                     ) : (
                         <Link to="/" className="flex-none">
-                            <img src="/logo.png" alt="dt-trading" className="h-[30px] w-auto block" />
+                            <img src="/logo.png" alt="DT Trading" className="h-[30px] w-auto block" />
                         </Link>
                     )}
                     <div className="flex-1 min-w-0 text-[15.5px] font-extrabold tracking-[-0.01em] truncate">{mobileTitle}</div>
@@ -100,7 +102,7 @@ export default function Header({ showBack = false, title }: HeaderProps) {
                 {/* 데스크탑 헤더 */}
                 <div className="hidden lg:flex max-w-shell mx-auto px-6 h-[68px] items-center gap-5">
                     <Link to="/" className="flex-none">
-                        <img src="/logo.png" alt="dt-trading" className="h-[38px] w-auto block" />
+                        <img src="/logo.png" alt="DT Trading" className="h-[38px] w-auto block" />
                     </Link>
 
                     <nav className="flex items-center gap-0.5 flex-none">

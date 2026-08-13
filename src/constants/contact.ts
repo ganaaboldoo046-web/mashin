@@ -1,4 +1,8 @@
 export const DT_CONTACT = {
+    email: {
+        display: 'snorsininster@gmail.com',
+        href: 'mailto:snorsininster@gmail.com',
+    },
     primary: {
         display: '010-7755-0118',
         href: 'tel:+821077550118',

@@ -39,12 +39,12 @@ Also redirect `temmun-car.pages.dev` to the custom domain in the Cloudflare Page
 Create or select the Google Cloud project, then use these values:
 
 - App name: `DT Trading`
-- User support email: `temmuntrading@gmail.com`
+- User support email: `snorsininster@gmail.com`
 - App home page: `https://dt-trading.kr/`
 - Privacy policy: `https://dt-trading.kr/privacy`
 - Terms of service: `https://dt-trading.kr/terms`
 - Authorized domain: `dt-trading.kr`
-- Developer contact email: `temmuntrading@gmail.com`
+- Developer contact email: `snorsininster@gmail.com`
 - Audience: **External**
 - Data access scopes: `openid`, `email`, `profile` only
 

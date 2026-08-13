@@ -54,7 +54,7 @@ export default function MenuDrawer({ open, onClose }: MenuDrawerProps) {
             >
                 <div className="flex items-center justify-between px-4 py-3.5 border-b border-line">
                     <Link to="/" onClick={onClose}>
-                        <img src="/logo.png" alt="dt-trading" className="h-[30px] w-auto block" />
+                        <img src="/logo.png" alt="DT Trading" className="h-[30px] w-auto block" />
                     </Link>
                     <button onClick={onClose} aria-label="Хаах" className="w-9 h-9 rounded-[10px] bg-line text-muted text-[15px]">
                         ✕
@@ -130,7 +130,7 @@ export default function MenuDrawer({ open, onClose }: MenuDrawerProps) {
                 )}
 
                 <div className="m-4 p-5 rounded-2xl bg-night">
-                    <div className="text-[11.5px] font-bold tracking-[0.1em] text-white/50">DT-TRADING</div>
+                    <div className="text-[11.5px] font-bold tracking-[0.1em] text-white/50">DT Trading</div>
                     <a href={DT_CONTACT.primary.href} className="block mt-2.5 text-base font-extrabold text-white hover:text-white">
                         {DT_CONTACT.primary.display}
                     </a>

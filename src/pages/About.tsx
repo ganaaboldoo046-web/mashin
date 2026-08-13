@@ -53,8 +53,8 @@ export default function About() {
                         </div>
                         <div className="flex items-center gap-3">
                             <span className="material-symbols-outlined text-slate-400">mail</span>
-                            <a href="mailto:temmuntrading@gmail.com" className="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
-                                temmuntrading@gmail.com
+                            <a href={DT_CONTACT.email.href} className="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
+                                {DT_CONTACT.email.display}
                             </a>
                         </div>
                     </div>

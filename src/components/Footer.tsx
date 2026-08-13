@@ -30,12 +30,15 @@ export default function Footer() {
             {/* 모바일: 다크 연락처 카드 + 법적 고지 */}
             <div className="lg:hidden px-4 py-8">
                 <div className="bg-night rounded-2xl p-5">
-                    <div className="text-[11.5px] font-bold tracking-[0.1em] text-night-line">DT-TRADING</div>
+                    <div className="text-[11.5px] font-bold tracking-[0.1em] text-night-line">DT Trading</div>
                     <a href={DT_CONTACT.primary.href} className="block mt-2.5 text-base font-extrabold text-white hover:text-white">
                         {DT_CONTACT.primary.display}
                     </a>
                     <a href={DT_CONTACT.secondary.href} className="block mt-0.5 text-[13.5px] font-bold text-night-text hover:text-night-text">
                         {DT_CONTACT.secondary.display}
+                    </a>
+                    <a href={DT_CONTACT.email.href} className="block mt-2 text-[12px] font-medium text-night-text hover:text-white">
+                        {DT_CONTACT.email.display}
                     </a>
                     <p className="mt-3 text-xs leading-[1.6] text-night-text">Инчон хот, Ённсү дүүрэг, Нынхөдэ-ро 192</p>
                 </div>
@@ -63,6 +66,8 @@ export default function Footer() {
                             <br />
                             <a href={DT_CONTACT.primary.href}>{DT_CONTACT.primary.display}</a> ·{' '}
                             <a href={DT_CONTACT.secondary.href}>{DT_CONTACT.secondary.display}</a>
+                            <br />
+                            <a href={DT_CONTACT.email.href}>{DT_CONTACT.email.display}</a>
                         </div>
                         <a
                             href={DT_CONTACT.facebook}
