@@ -160,7 +160,7 @@ const CarCard = memo(function CarCard({
                     <SaveButton
                         id={product.id}
                         saved={saved}
-                        className="absolute top-2.5 right-2.5 w-11 h-11 bg-black/55"
+                        className="absolute top-2.5 right-2.5 w-11 h-11 bg-white/90 backdrop-blur-sm"
                     />
                 )}
             </div>

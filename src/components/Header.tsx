@@ -3,7 +3,6 @@ import type { KeyboardEvent } from 'react';
 import { Link, NavLink, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import MenuDrawer from './MenuDrawer';
 import { setUser, useUser } from '../hooks/useUser';
-import { useTheme } from '../hooks/useTheme';
 import { useExchangeRate } from '../hooks/useExchangeRate';
 
 const MOBILE_TITLES: Record<string, string> = {
@@ -35,7 +34,6 @@ export default function Header({ showBack = false, title }: HeaderProps) {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const user = useUser();
-    const { theme, toggle: toggleTheme } = useTheme();
     const rate = useExchangeRate();
     const [query, setQuery] = useState(searchParams.get('q') || '');
     const [menuOpen, setMenuOpen] = useState(false);
@@ -62,7 +60,6 @@ export default function Header({ showBack = false, title }: HeaderProps) {
 
     const mobileTitle = title ?? MOBILE_TITLES[location.pathname] ?? '';
     const initial = user?.name?.slice(0, 1).toUpperCase() || '';
-    const themeIcon = theme === 'dark' ? '☀' : '☾';
 
     return (
         <>
@@ -75,7 +72,7 @@ export default function Header({ showBack = false, title }: HeaderProps) {
                         </button>
                     ) : (
                         <Link to="/" className="flex-none">
-                            <img src="/logo.png" alt="dt-trading" className="brand-logo h-[30px] w-auto block" />
+                            <img src="/logo.png" alt="dt-trading" className="h-[30px] w-auto block" />
                         </Link>
                     )}
                     <div className="flex-1 min-w-0 text-[15.5px] font-extrabold tracking-[-0.01em] truncate">{mobileTitle}</div>
@@ -94,9 +91,6 @@ export default function Header({ showBack = false, title }: HeaderProps) {
                             Нэвтрэх
                         </Link>
                     )}
-                    <button onClick={toggleTheme} aria-label="Загвар солих" className={iconButton}>
-                        {themeIcon}
-                    </button>
                     <button onClick={() => setMenuOpen(true)} aria-label="Цэс" className={iconButton}>
                         ☰
                     </button>
@@ -105,7 +99,7 @@ export default function Header({ showBack = false, title }: HeaderProps) {
                 {/* 데스크탑 헤더 */}
                 <div className="hidden lg:flex max-w-shell mx-auto px-6 h-[68px] items-center gap-5">
                     <Link to="/" className="flex-none">
-                        <img src="/logo.png" alt="dt-trading" className="brand-logo h-[38px] w-auto block" />
+                        <img src="/logo.png" alt="dt-trading" className="h-[38px] w-auto block" />
                     </Link>
 
                     <nav className="flex items-center gap-0.5 flex-none">
@@ -143,10 +137,6 @@ export default function Header({ showBack = false, title }: HeaderProps) {
                                 </button>
                             )}
                         </div>
-
-                        <button onClick={toggleTheme} aria-label="Загвар солих" className="w-10 h-10 flex-none rounded-[10px] border border-line bg-surface text-ink text-[15px]">
-                            {themeIcon}
-                        </button>
 
                         {user ? (
                             <div className="relative" ref={userMenuRef}>

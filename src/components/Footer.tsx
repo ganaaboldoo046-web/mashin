@@ -52,7 +52,7 @@ export default function Footer() {
             <div className="hidden lg:block px-6 pt-12 pb-14">
                 <div className="max-w-shell mx-auto grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-8">
                     <div>
-                        <img src="/logo.png" alt="dt-trading" className="brand-logo h-[34px] w-auto block" />
+                        <img src="/logo.png" alt="dt-trading" className="h-[34px] w-auto block" />
                         <div className="mt-3.5 text-[12.5px] leading-[1.7] text-muted">
                             {ADDRESS}
                             <br />

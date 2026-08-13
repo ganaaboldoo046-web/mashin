@@ -53,7 +53,7 @@ export default function MenuDrawer({ open, onClose }: MenuDrawerProps) {
             >
                 <div className="flex items-center justify-between px-4 py-3.5 border-b border-line">
                     <Link to="/" onClick={onClose}>
-                        <img src="/logo.png" alt="dt-trading" className="brand-logo h-[30px] w-auto block" />
+                        <img src="/logo.png" alt="dt-trading" className="h-[30px] w-auto block" />
                     </Link>
                     <button onClick={onClose} aria-label="Хаах" className="w-9 h-9 rounded-[10px] bg-line text-muted text-[15px]">
                         ✕

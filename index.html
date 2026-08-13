@@ -22,17 +22,6 @@
     .fonts-loading { opacity: 0; }
     .fonts-loaded { opacity: 1; transition: opacity 0.15s ease-in; }
   </style>
-  <script>
-    /* 첫 페인트 전에 테마를 적용해 밝은 화면이 번쩍이는 것을 막는다. 기본값은 다크. */
-    (function () {
-      try {
-        var saved = localStorage.getItem('temmun_theme');
-        document.documentElement.setAttribute('data-theme', saved === 'light' ? 'light' : 'dark');
-      } catch (e) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
-    })();
-  </script>
 </head>
 
 <body>

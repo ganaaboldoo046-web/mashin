@@ -2,32 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 디자인 토큰. 다크가 기본이고 [data-theme="light"]에서 라이트로 뒤집힌다.
-   Tailwind 색상들이 이 변수를 참조하므로, 여기만 바꾸면 전체 테마가 따라온다. */
-:root,
-[data-theme='dark'] {
-  --bg: #0d0d0d;
-  --surface: #1a1a1a;
-  --surface-2: #242424;
-  --surface-3: #161616;
-  --line: #2c2c2c;
-  --line-2: #4a4a4a;
-  --ink-block: #000000;
-  --text: #ffffff;
-  --text-2: #c7c7c7;
-  --text-3: #b0b0b0;
-  --muted: #9a9a9a;
-  --muted-2: #8a8a8a;
-  --muted-3: #6e6e6e;
-  --muted-4: #5a5a5a;
-  --tint: #2a1112;
-  --danger: #ff5a5a;
-  --accent-soft: #ff6b6b;
-  --overlay: rgba(0, 0, 0, 0.7);
-  --photo-overlay: rgba(0, 0, 0, 0.55);
-}
-
-[data-theme='light'] {
+/* 디자인 토큰. Tailwind 색상들이 이 변수를 참조한다. */
+:root {
   --bg: #f4f5f7;
   --surface: #ffffff;
   --surface-2: #f7f8fa;
@@ -46,7 +22,6 @@
   --danger: #e5484d;
   --accent-soft: #ffaca6;
   --overlay: rgba(9, 14, 24, 0.55);
-  --photo-overlay: rgba(255, 255, 255, 0.92);
 }
 
 @layer base {
@@ -62,15 +37,6 @@
 
   a:hover {
     @apply text-primary-dark;
-  }
-
-  /* 다크에서는 흰 로고로 반전, 라이트에서는 원본 그대로 */
-  .brand-logo {
-    filter: brightness(0) invert(1);
-  }
-
-  [data-theme='light'] .brand-logo {
-    filter: none;
   }
 }
 
