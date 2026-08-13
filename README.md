@@ -1,73 +1,31 @@
-# React + TypeScript + Vite
+# DT Trading
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Mongolian customers can browse, save and reserve inspected vehicles imported from Korea. The project uses React, TypeScript, Vite and Cloudflare Pages Functions with D1 and R2.
 
-Currently, two official plugins are available:
+## Local development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm ci
+npm run build
+copy .dev.vars.example .dev.vars
+npm run dev:full
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+`npm run dev` starts only Vite. API-backed screens intentionally show an outage state unless a Pages Functions server is also running.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Required configuration
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Set `VITE_GOOGLE_CLIENT_ID` at build time. Configure these encrypted Cloudflare secrets for Pages Functions:
+
+- `ADMIN_EMAIL`
+- `ADMIN_PASSWORD_HASH`: lowercase SHA-256 of the administrator password
+- `SESSION_SECRET`: at least 32 random characters
+- `PUBLIC_SITE_URL`: canonical production origin, for example `https://www.temmun.mn`
+
+Never commit `.dev.vars` or plaintext administrator credentials.
+
+## Deployment
+
+Pull requests run build and lint checks. A verified push to `main` deploys the exact commit to the `temmun-car` Cloudflare Pages project through `.github/workflows/deploy.yml`.
+
+Add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` to the GitHub `production` environment. D1 (`DB`) and R2 (`BUCKET`) bindings and the authentication secrets must also exist in the Cloudflare Pages production environment.

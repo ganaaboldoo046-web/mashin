@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import ErrorBoundary from './components/ErrorBoundary';
+import Seo from './components/Seo';
 
 // Lazy loaded pages for Code Splitting
 const Home = lazy(() => import('./pages/Home'));
@@ -43,6 +44,7 @@ function App() {
   return (
     <ErrorBoundary>
       <Router>
+        <Seo />
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
             {/* 사용자 페이지: 모바일은 430px 프레임, 데스크탑은 1280px 레이아웃 */}

@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
+import type { AppUser } from '../hooks/useUser';
 
 interface Review {
     id: number;
@@ -24,9 +25,9 @@ const MOCK_REVIEWS: Review[] = [
 ];
 
 export default function CustomerReviews() {
-    const [reviews, setReviews] = useState<Review[]>([]);
+    const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [userInfo, setUserInfo] = useState<any>(null); // Google User Info
+    const [userInfo, setUserInfo] = useState<AppUser | null>(null);
     const [formData, setFormData] = useState({
         car_model: '',
         comment: '',
@@ -36,34 +37,34 @@ export default function CustomerReviews() {
 
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    // Fetch Reviews
-    const fetchReviews = async () => {
+    const fetchReviews = async (): Promise<Review[]> => {
         try {
             const res = await fetch('/api/reviews_list');
             if (res.ok) {
-                const data = await res.json();
+                const data = await res.json() as Review[];
                 if (Array.isArray(data) && data.length > 0) {
-                    setReviews(data);
-                } else {
-                    setReviews(MOCK_REVIEWS);
+                    return data;
                 }
-            } else {
-                setReviews(MOCK_REVIEWS);
             }
-        } catch (error) {
-            console.error("Error fetching reviews:", error);
-            setReviews(MOCK_REVIEWS);
+        } catch {
+            // The curated fallback keeps the section useful during a transient API outage.
         }
+        return MOCK_REVIEWS;
     };
 
     useEffect(() => {
-        fetchReviews();
+        let cancelled = false;
+        fetchReviews().then((data) => {
+            if (!cancelled) setReviews(data);
+        });
+        return () => { cancelled = true; };
     }, []);
 
     // Auto Scroll Animation
     useEffect(() => {
         const scrollContainer = scrollRef.current;
         if (!scrollContainer) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
         let animationId: number;
         let scrollAmount = 0;
@@ -88,11 +89,14 @@ export default function CustomerReviews() {
     const login = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
-                const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+                const res = await fetch('/api/auth_google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accessToken: tokenResponse.access_token }),
                 });
-                const userData = await res.json();
-                setUserInfo(userData);
+                if (!res.ok) throw new Error('Server authentication failed');
+                const { user } = await res.json() as { user: AppUser };
+                setUserInfo(user);
                 setIsModalOpen(true); // Open modal after login
             } catch (error) {
                 console.error("Failed to fetch user info:", error);
@@ -122,8 +126,6 @@ export default function CustomerReviews() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    user_id: userInfo.sub, // Google unique ID
-                    user_name: userInfo.name,
                     ...formData
                 })
             });
@@ -132,7 +134,7 @@ export default function CustomerReviews() {
                 alert("Review submitted successfully!");
                 setIsModalOpen(false);
                 setFormData({ car_model: '', comment: '', rating: 5, gender: 'male' });
-                fetchReviews(); // Refresh list
+                setReviews(await fetchReviews());
             } else {
                 alert("Failed to submit review.");
             }

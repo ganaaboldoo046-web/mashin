@@ -1,10 +1,16 @@
-export async function onRequest(context: any) {
+import { requireAdmin, rejectCrossOrigin, type FunctionContext } from '../_lib/auth';
+
+export async function onRequest(context: FunctionContext) {
     const { env, request } = context;
     const db = env.DB;
 
     if (request.method !== "POST") {
         return new Response("Method Not Allowed", { status: 405 });
     }
+    const originError = rejectCrossOrigin(context);
+    if (originError) return originError;
+    const authError = await requireAdmin(context);
+    if (authError) return authError;
 
     // Defensive: Create table if missing & ensure all columns exist
     try {

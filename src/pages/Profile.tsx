@@ -7,6 +7,7 @@ import BottomNav from '../components/BottomNav';
 import CarCard from '../components/CarCard';
 import Footer from '../components/Footer';
 import { setUser as persistUser } from '../hooks/useUser';
+import type { AppUser } from '../hooks/useUser';
 import { getProducts, getSavedIds, getRecentlyViewedIds } from '../utils/storage';
 import type { Product } from '../utils/storage';
 
@@ -17,47 +18,42 @@ import img3 from '../assets/login/img3.jpg';
 import img4 from '../assets/login/img4.jpg';
 import img5 from '../assets/login/img5.jpg';
 
+interface ReservationOrder {
+    id: number;
+    product_name: string;
+    status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+    created_at: number;
+    phone?: string;
+}
+
 export default function Profile() {
-    const [user, setUser] = React.useState<any>(null);
+    const [user, setUser] = React.useState<AppUser | null>(null);
 
     // Tabs State
     const [activeTab, setActiveTab] = React.useState<'recent' | 'saved' | 'orders'>('recent');
     const [recentProducts, setRecentProducts] = React.useState<Product[]>([]);
     const [savedProducts, setSavedProducts] = React.useState<Product[]>([]);
-    const [myOrders, setMyOrders] = React.useState<any[]>([]);
+    const [myOrders, setMyOrders] = React.useState<ReservationOrder[]>([]);
 
     React.useEffect(() => {
-        const storedUser = localStorage.getItem('somang_user');
-        if (storedUser) {
-            const parsedUser = JSON.parse(storedUser);
-
-            // Clear legacy mock data if detected
-            if (parsedUser.email === 'user@gmail.com' && parsedUser.name === 'Google User') {
-                localStorage.removeItem('somang_user');
-                setUser(null);
-                return;
-            }
-
-            setUser(parsedUser);
-
-            // Fetch My Orders
-            const fetchMyOrders = async () => {
-                try {
-                    // Use email or phone as identifier
-                    const userId = parsedUser.email || parsedUser.phone;
-                    if (!userId) return;
-
-                    const res = await fetch(`/api/reservations_list?userId=${encodeURIComponent(userId)}`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        setMyOrders(data as any[]);
-                    }
-                } catch (error) {
-                    console.error("Failed to fetch orders", error);
+        const loadSession = async () => {
+            try {
+                const sessionResponse = await fetch('/api/user_session', { headers: { Accept: 'application/json' } });
+                if (!sessionResponse.ok) {
+                    persistUser(null);
+                    return;
                 }
-            };
-            fetchMyOrders();
-        }
+                const session = await sessionResponse.json() as { user: AppUser };
+                persistUser(session.user);
+                setUser(session.user);
+
+                const ordersResponse = await fetch('/api/reservations_list', { headers: { Accept: 'application/json' } });
+                if (ordersResponse.ok) setMyOrders(await ordersResponse.json() as ReservationOrder[]);
+            } catch {
+                persistUser(null);
+            }
+        };
+        loadSession();
 
         // Load Tab Data
         const loadTabData = async () => {
@@ -89,18 +85,13 @@ export default function Profile() {
     const login = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
-                const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+                const res = await fetch('/api/auth_google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accessToken: tokenResponse.access_token }),
                 });
-                const userData = await res.json();
-
-                // Format user data to match app structure
-                const appUser = {
-                    email: userData.email,
-                    name: userData.name,
-                    avatar: userData.picture,
-                    googleId: userData.sub
-                };
+                if (!res.ok) throw new Error('Server authentication failed');
+                const { user: appUser } = await res.json() as { user: AppUser };
 
                 persistUser(appUser);
                 setUser(appUser);
@@ -119,9 +110,11 @@ export default function Profile() {
         login();
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        await fetch('/api/user_logout', { method: 'POST' }).catch(() => undefined);
         persistUser(null);
         setUser(null);
+        setMyOrders([]);
     };
 
     if (user) {
@@ -308,7 +301,7 @@ function ProductList({ products, emptyMessage }: { products: Product[], emptyMes
     );
 }
 
-function OrderList({ orders, emptyMessage }: { orders: any[], emptyMessage: string }) {
+function OrderList({ orders, emptyMessage }: { orders: ReservationOrder[], emptyMessage: string }) {
     if (!orders || orders.length === 0) {
         return (
             <div className="bg-surface border border-line rounded-2xl px-5 py-12 text-center">

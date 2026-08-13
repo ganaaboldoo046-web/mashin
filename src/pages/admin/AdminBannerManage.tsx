@@ -73,9 +73,9 @@ export default function AdminBannerManage() {
             const updated = await getBanners();
             setBanners(updated);
             handleCancel();
-        } catch (err: any) {
+        } catch (err) {
             console.error('Save failed:', err);
-            alert(`Хадгалахад алдаа гарлаа: ${err.message || 'Тодорхойгүй алдаа'}`);
+            alert(`Хадгалахад алдаа гарлаа: ${err instanceof Error ? err.message : 'Тодорхойгүй алдаа'}`);
         } finally {
             setLoading(false);
         }

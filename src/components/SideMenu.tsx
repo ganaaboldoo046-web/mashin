@@ -13,7 +13,7 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
     // Close menu when route changes
     useEffect(() => {
         onClose();
-    }, [location.pathname]);
+    }, [location.pathname, onClose]);
 
     // Prevent body scroll when menu is open
     useEffect(() => {

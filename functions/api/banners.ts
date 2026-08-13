@@ -1,4 +1,6 @@
-export async function onRequest(context: any) {
+import { requireAdmin, rejectCrossOrigin, type FunctionContext } from '../_lib/auth';
+
+export async function onRequest(context: FunctionContext) {
     const { env, request } = context;
     const db = env.DB;
 
@@ -30,6 +32,10 @@ export async function onRequest(context: any) {
     }
 
     if (request.method === "POST") {
+        const originError = rejectCrossOrigin(context);
+        if (originError) return originError;
+        const authError = await requireAdmin(context);
+        if (authError) return authError;
         try {
             const data = await request.json();
             const { id, title, subtitle, image, bg, active } = data;

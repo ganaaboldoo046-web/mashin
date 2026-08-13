@@ -1,10 +1,11 @@
 {
-  "name": "somang-trade",
+  "name": "dt-trading",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:full": "wrangler pages dev dist --d1 DB=car2 --r2 BUCKET=carr2",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

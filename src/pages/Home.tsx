@@ -9,24 +9,39 @@ import CustomerReviews from '../components/CustomerReviews';
 import Footer from '../components/Footer';
 import BottomNav from '../components/BottomNav';
 import CategorySection from '../components/CategorySection';
-import { getCategories, getProducts } from '../utils/storage';
+import DataStatePanel from '../components/DataStatePanel';
+import { getCategoriesOrThrow, getProductsOrThrow } from '../utils/storage';
 import type { Category, Product } from '../utils/storage';
 
 export default function Home() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
+    const [dataStatus, setDataStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+    const [retryVersion, setRetryVersion] = useState(0);
 
     useEffect(() => {
+        let cancelled = false;
         const loadHomeData = async () => {
-            const [cats, prods] = await Promise.all([getCategories(), getProducts()]);
-            setCategories(cats);
-            setProducts(prods.filter((p) => p.status === 'active' || p.status === 'pending'));
+            setDataStatus('loading');
+            try {
+                const [cats, prods] = await Promise.all([getCategoriesOrThrow(), getProductsOrThrow()]);
+                if (!cancelled) {
+                    setCategories(cats);
+                    setProducts(prods.filter((p) => p.status === 'active' || p.status === 'pending'));
+                    setDataStatus('ready');
+                }
+            } catch {
+                if (!cancelled) setDataStatus('error');
+            }
         };
 
         loadHomeData();
         window.addEventListener('storageProducts', loadHomeData);
-        return () => window.removeEventListener('storageProducts', loadHomeData);
-    }, []);
+        return () => {
+            cancelled = true;
+            window.removeEventListener('storageProducts', loadHomeData);
+        };
+    }, [retryVersion]);
 
     const getCategoryProducts = (categoryId: number) => products.filter((p) => p.categoryId === categoryId);
 
@@ -37,6 +52,13 @@ export default function Home() {
 
             <main className="lg:max-w-shell lg:mx-auto lg:px-6 lg:pt-7 lg:pb-20">
                 <SearchSection />
+                {dataStatus === 'error' && (
+                    <DataStatePanel
+                        status="error"
+                        onRetry={() => setRetryVersion((version) => version + 1)}
+                        className="mx-4 mt-4 lg:mx-0"
+                    />
+                )}
                 <Banner />
                 <Categories />
                 <FeaturedCars />

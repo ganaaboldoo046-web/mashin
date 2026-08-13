@@ -1,7 +1,5 @@
 
-interface Env {
-    DB: D1Database;
-}
+import { requireAdmin, rejectCrossOrigin, type FunctionContext } from '../_lib/auth';
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
     const { env } = context;
@@ -18,7 +16,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     }
 };
 
-export const onRequestPost: PagesFunction<Env> = async (context) => {
+export const onRequestPost = async (context: FunctionContext) => {
+    const originError = rejectCrossOrigin(context);
+    if (originError) return originError;
+    const authError = await requireAdmin(context);
+    if (authError) return authError;
     const { request, env } = context;
     try {
         const { rate } = await request.json() as { rate: number };

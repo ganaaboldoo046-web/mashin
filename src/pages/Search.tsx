@@ -6,28 +6,22 @@ import SearchSection from '../components/SearchSection';
 import BottomNav from '../components/BottomNav';
 import CarCard from '../components/CarCard';
 import Footer from '../components/Footer';
-import { getProducts, getSavedIds } from '../utils/storage';
+import DataStatePanel from '../components/DataStatePanel';
+import { getProductsOrThrow, getSavedIds } from '../utils/storage';
 import type { Product } from '../utils/storage';
 import { fuelLabel } from '../utils/format';
+import {
+    FILTER_GROUPS,
+    filterOptionLabel,
+    matchesFilter,
+    productMileage,
+    productPriceMnt,
+    type FilterGroupKey,
+} from '../utils/productFilters';
 
-type GroupKey = 'years' | 'miles' | 'prices' | 'fuels';
-type Selection = Record<GroupKey, string[]>;
+type Selection = Record<FilterGroupKey, string[]>;
 
 const EMPTY: Selection = { years: [], miles: [], prices: [], fuels: [] };
-
-const GROUPS: { key: GroupKey; title: string; values: string[] }[] = [
-    { key: 'years', title: 'Үйлдвэрлэсэн он', values: ['2020+', '2015–2019', '2014 ба хуучин'] },
-    { key: 'miles', title: 'Гүйлт', values: ['50 мянга хүртэл', '50–100 мянга', '100 мянгаас дээш'] },
-    { key: 'prices', title: 'Үнэ', values: ['30 сая хүртэл', '30–60 сая', '60 саяас дээш'] },
-    { key: 'fuels', title: 'Түлш', values: ['Бензин', 'Дизель', 'Хайбрид', 'Цахилгаан', 'Газ'] },
-];
-
-/** "33.6 сая ₮" 처럼 사람이 읽는 가격 문자열을 ₮ 정수로 되돌린다. */
-const priceValue = (price: string) => {
-    const n = parseFloat(price.replace(/[^0-9.]/g, ''));
-    if (Number.isNaN(n)) return 0;
-    return price.includes('сая') ? n * 1_000_000 : n;
-};
 
 type SortKey = 'recommended' | 'newest' | 'priceAsc' | 'priceDesc' | 'kmAsc';
 type ViewKey = 'grid' | 'list' | 'compact';
@@ -40,40 +34,13 @@ const SORT_OPTIONS: { key: SortKey; label: string }[] = [
     { key: 'kmAsc', label: 'Гүйлт багатай нь' },
 ];
 
-const VIEW_MODES: { key: ViewKey; icon: string }[] = [
-    { key: 'grid', icon: '▦' },
-    { key: 'list', icon: '☰' },
-    { key: 'compact', icon: '▤' },
+const VIEW_MODES: { key: ViewKey; icon: string; label: string }[] = [
+    { key: 'grid', icon: '▦', label: 'Жижиг хүснэгтээр харах' },
+    { key: 'list', icon: '☰', label: 'Том картаар харах' },
+    { key: 'compact', icon: '▤', label: 'Жагсаалтаар харах' },
 ];
 
-const mileageValue = (mileage: string) => Number(mileage.replace(/[^0-9]/g, '')) || 0;
-const yearValue = (year: string) => Number(String(year).slice(0, 4)) || 0;
-const brandOf = (product: Product) => product.name.trim().split(' ')[0];
-
-function matchesGroup(key: GroupKey, value: string, product: Product) {
-    switch (key) {
-        case 'years': {
-            const y = yearValue(product.year);
-            if (value === '2020+') return y >= 2020;
-            if (value === '2015–2019') return y >= 2015 && y <= 2019;
-            return y > 0 && y <= 2014;
-        }
-        case 'miles': {
-            const km = mileageValue(product.mileage);
-            if (value === '50 мянга хүртэл') return km <= 50_000;
-            if (value === '50–100 мянга') return km > 50_000 && km <= 100_000;
-            return km > 100_000;
-        }
-        case 'prices': {
-            const p = priceValue(product.price);
-            if (value === '30 сая хүртэл') return p <= 30_000_000;
-            if (value === '30–60 сая') return p > 30_000_000 && p <= 60_000_000;
-            return p > 60_000_000;
-        }
-        case 'fuels':
-            return fuelLabel(product.fuel) === value;
-    }
-}
+const brandOf = (product: Product) => product.name.trim().split(/\s+/)[0].toLocaleUpperCase('en-US');
 
 const chipClass = (active: boolean) =>
     `flex-none h-10 px-[15px] rounded-[20px] border text-[13px] whitespace-nowrap transition-colors lg:h-9 lg:rounded-[9px] ${
@@ -99,18 +66,33 @@ export default function Search() {
     const [sort, setSort] = useState<SortKey>('recommended');
     const [sortOpen, setSortOpen] = useState(false);
     const [view, setView] = useState<ViewKey>('list');
+    const [loadStatus, setLoadStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+    const [retryVersion, setRetryVersion] = useState(0);
 
     useEffect(() => {
-        const load = async () => setProducts(await getProducts());
+        let cancelled = false;
+        const load = async () => {
+            setLoadStatus('loading');
+            try {
+                const data = await getProductsOrThrow();
+                if (!cancelled) {
+                    setProducts(data);
+                    setLoadStatus('ready');
+                }
+            } catch {
+                if (!cancelled) setLoadStatus('error');
+            }
+        };
         const loadSaved = () => setSavedIds(getSavedIds());
         load();
         window.addEventListener('storageProducts', load);
         window.addEventListener('storageSaved', loadSaved);
         return () => {
+            cancelled = true;
             window.removeEventListener('storageProducts', load);
             window.removeEventListener('storageSaved', loadSaved);
         };
-    }, []);
+    }, [retryVersion]);
 
     useEffect(() => {
         document.body.style.overflow = panelOpen || sortOpen ? 'hidden' : '';
@@ -119,7 +101,7 @@ export default function Search() {
         };
     }, [panelOpen, sortOpen]);
 
-    const toggle = (key: GroupKey, value: string) =>
+    const toggle = (key: FilterGroupKey, value: string) =>
         setSelection((prev) => ({
             ...prev,
             [key]: prev[key].includes(value) ? prev[key].filter((v) => v !== value) : [...prev[key], value],
@@ -145,9 +127,9 @@ export default function Search() {
             if (q && !`${product.name} ${product.year} ${product.mileage} ${fuelLabel(product.fuel)}`.toLowerCase().includes(q))
                 return false;
             if (brands.length > 0 && !brands.includes(brandOf(product))) return false;
-            return GROUPS.every(({ key }) => {
+            return FILTER_GROUPS.every(({ key }) => {
                 const picked = selection[key];
-                return picked.length === 0 || picked.some((value) => matchesGroup(key, value, product));
+                return picked.length === 0 || picked.some((value) => matchesFilter(key, value, product));
             });
         });
 
@@ -157,15 +139,16 @@ export default function Search() {
                 sorted.sort((a, b) => (b.id || 0) - (a.id || 0));
                 break;
             case 'priceAsc':
-                sorted.sort((a, b) => priceValue(a.price) - priceValue(b.price));
+                sorted.sort((a, b) => productPriceMnt(a) - productPriceMnt(b));
                 break;
             case 'priceDesc':
-                sorted.sort((a, b) => priceValue(b.price) - priceValue(a.price));
+                sorted.sort((a, b) => productPriceMnt(b) - productPriceMnt(a));
                 break;
             case 'kmAsc':
-                sorted.sort((a, b) => mileageValue(a.mileage) - mileageValue(b.mileage));
+                sorted.sort((a, b) => productMileage(a) - productMileage(b));
                 break;
             default:
+                sorted.sort((a, b) => Number(Boolean(b.isFeatured)) - Number(Boolean(a.isFeatured)) || b.id - a.id);
                 break;
         }
         return sorted;
@@ -173,22 +156,33 @@ export default function Search() {
 
     const activeChips = [
         ...brands.map((b) => ({ label: b, remove: () => toggleBrand(b) })),
-        ...GROUPS.flatMap(({ key }) => selection[key].map((value) => ({ label: value, remove: () => toggle(key, value) }))),
+        ...FILTER_GROUPS.flatMap(({ key }) => selection[key].map((value) => ({ label: filterOptionLabel(key, value), remove: () => toggle(key, value) }))),
     ];
 
     const filterGroups = (
         <>
-            {GROUPS.map((group) => (
+            <div className="py-[18px] border-b border-line-soft">
+                <div className="text-[13.5px] font-extrabold mb-3">Брэнд</div>
+                <div className="flex flex-wrap gap-2">
+                    {brandRows.map(([brand, count]) => (
+                        <button key={brand} onClick={() => toggleBrand(brand)} aria-pressed={brands.includes(brand)} className={pillClass(brands.includes(brand))}>
+                            {brand} · {count}
+                        </button>
+                    ))}
+                </div>
+            </div>
+            {FILTER_GROUPS.map((group) => (
                 <div key={group.key} className="py-[18px] border-t border-line-soft first:border-t-0">
                     <div className="text-[13.5px] font-extrabold mb-3">{group.title}</div>
                     <div className="flex flex-wrap gap-2">
-                        {group.values.map((value) => (
+                        {group.options.map((option) => (
                             <button
-                                key={value}
-                                onClick={() => toggle(group.key, value)}
-                                className={pillClass(selection[group.key].includes(value))}
+                                key={option.id}
+                                onClick={() => toggle(group.key, option.id)}
+                                aria-pressed={selection[group.key].includes(option.id)}
+                                className={pillClass(selection[group.key].includes(option.id))}
                             >
-                                {value}
+                                {option.label}
                             </button>
                         ))}
                     </div>
@@ -202,13 +196,13 @@ export default function Search() {
             <button onClick={() => setPanelOpen((v) => !v)} className={chipClass(activeChips.length > 0)}>
                 Бүх шүүлтүүр ⇅
             </button>
-            {GROUPS.map((group) => (
+            {FILTER_GROUPS.map((group) => (
                 <button
                     key={group.key}
                     onClick={() => setPanelOpen(true)}
                     className={chipClass(selection[group.key].length > 0)}
                 >
-                    {group.title.split(' ')[0]}
+                    {group.shortTitle}
                     {selection[group.key].length > 0 ? ` ${selection[group.key].length}` : ''}
                     <span className="ml-1.5 text-[11px] text-muted-soft">⌄</span>
                 </button>
@@ -310,7 +304,8 @@ export default function Search() {
                                     <button
                                         key={mode.key}
                                         onClick={() => setView(mode.key)}
-                                        aria-label={mode.key}
+                                        aria-label={mode.label}
+                                        aria-pressed={view === mode.key}
                                         className={`w-10 h-[34px] rounded-[9px] text-sm ${
                                             view === mode.key ? 'bg-night text-white' : 'text-placeholder'
                                         }`}
@@ -322,7 +317,11 @@ export default function Search() {
                         </div>
                     </div>
 
-                    {results.length === 0 ? (
+                    {loadStatus === 'loading' ? (
+                        <DataStatePanel status="loading" className="mx-4 lg:mx-0" />
+                    ) : loadStatus === 'error' ? (
+                        <DataStatePanel status="error" onRetry={() => setRetryVersion((version) => version + 1)} className="mx-4 lg:mx-0" />
+                    ) : results.length === 0 ? (
                         <div className="mx-4 bg-surface border border-line rounded-2xl px-5 py-12 text-center lg:mx-0 lg:py-14">
                             <div className="text-[15px] font-extrabold">Тохирох зар олдсонгүй</div>
                             <div className="mt-1.5 text-[13px] text-muted">Шүүлтүүрээ багасгаад дахин оролдоно уу.</div>
@@ -405,7 +404,7 @@ export default function Search() {
                     >
                         <div className="sticky top-0 bg-surface px-5 pt-[18px] pb-3 flex items-center justify-between border-b border-line-soft">
                             <div className="text-[17px] font-extrabold tracking-[-0.02em]">Шүүлтүүр</div>
-                            <button onClick={() => setPanelOpen(false)} className="w-9 h-9 rounded-[10px] bg-surface-4 text-muted text-[15px]">
+                            <button onClick={() => setPanelOpen(false)} aria-label="Хаах" className="w-9 h-9 rounded-[10px] bg-surface-4 text-muted text-[15px]">
                                 ✕
                             </button>
                         </div>

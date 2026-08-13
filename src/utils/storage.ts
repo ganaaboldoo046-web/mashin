@@ -53,6 +53,22 @@ export const initialExchangeRate: ExchangeRate = {
 // API Base URL (empty string for relative path in Pages)
 const API_BASE = '/api';
 
+export class ApiRequestError extends Error {
+    status: number;
+
+    constructor(message: string, status = 0) {
+        super(message);
+        this.name = 'ApiRequestError';
+        this.status = status;
+    }
+}
+
+const requestJson = async <T>(path: string): Promise<T> => {
+    const response = await fetch(`${API_BASE}${path}`, { headers: { Accept: 'application/json' } });
+    if (!response.ok) throw new ApiRequestError('Үйлчилгээтэй холбогдож чадсангүй.', response.status);
+    return response.json() as Promise<T>;
+};
+
 export const initialBanners: Banner[] = [
     {
         id: 1,
@@ -100,11 +116,11 @@ export const getBanners = async (force: boolean = false): Promise<Banner[]> => {
         try {
             const res = await fetch(`${API_BASE}/banners`);
             if (!res.ok) throw new Error('Failed to fetch banners');
-            const data = await res.json();
+            const data = await res.json() as Array<Omit<Banner, 'active'> & { active: boolean | number }>;
             // Return empty array if DB is empty, don't fallback to initialBanners after first setup
-            cachedBanners = data.map((b: any) => ({
+            cachedBanners = data.map((b) => ({
                 ...b,
-                active: b.active === 1
+                active: b.active === true || b.active === 1
             }));
             return cachedBanners as Banner[];
         } catch (e) {
@@ -115,6 +131,13 @@ export const getBanners = async (force: boolean = false): Promise<Banner[]> => {
         }
     })();
     return bannersPromise;
+};
+
+export const getBannersOrThrow = async (): Promise<Banner[]> => {
+    const data = await requestJson<Array<Omit<Banner, 'active'> & { active: boolean | number }>>('/banners');
+    const normalized = data.map((banner) => ({ ...banner, active: banner.active === true || banner.active === 1 }));
+    cachedBanners = normalized;
+    return normalized;
 };
 
 export const saveBanner = async (banner: Partial<Banner>) => {
@@ -153,7 +176,7 @@ export const getCategories = async (force: boolean = false): Promise<Category[]>
         try {
             const res = await fetch(`${API_BASE}/categories`);
             if (!res.ok) throw new Error('Failed to fetch categories');
-            const data = await res.json();
+            const data = await res.json() as Category[];
             cachedCategories = Array.isArray(data) ? data : [];
             return cachedCategories;
         } catch (e) {
@@ -164,6 +187,13 @@ export const getCategories = async (force: boolean = false): Promise<Category[]>
         }
     })();
     return categoriesPromise;
+};
+
+export const getCategoriesOrThrow = async (): Promise<Category[]> => {
+    const data = await requestJson<Category[]>('/categories');
+    if (!Array.isArray(data)) throw new ApiRequestError('Ангиллын мэдээлэл буруу байна.');
+    cachedCategories = data;
+    return data;
 };
 
 export const createCategory = async (category: Partial<Category>) => {
@@ -218,18 +248,12 @@ export const getProducts = async (force: boolean = false): Promise<Product[]> =>
         try {
             const res = await fetch(`${API_BASE}/products`);
             if (!res.ok) throw new Error('Failed to fetch products');
-            const data = await res.json();
+            const data = await res.json() as ProductApiRow[];
             if (!Array.isArray(data)) {
                 cachedProducts = [];
                 return [];
             }
-            cachedProducts = data.map((p: any) => ({
-                ...p,
-                images: typeof p.images === 'string' ? JSON.parse(p.images) : p.images,
-                options: p.options ? (typeof p.options === 'string' ? JSON.parse(p.options) : p.options) : [],
-                isFeatured: p.isFeatured === 1,
-                tags: [p.year, p.fuel].filter(Boolean)
-            }));
+            cachedProducts = data.map(normalizeProduct);
             return cachedProducts;
         } catch (e) {
             console.error(e);
@@ -239,6 +263,28 @@ export const getProducts = async (force: boolean = false): Promise<Product[]> =>
         }
     })();
     return productsPromise;
+};
+
+type ProductApiRow = Omit<Product, 'images' | 'options' | 'isFeatured'> & {
+    images: string[] | string;
+    options?: string[] | string;
+    isFeatured?: boolean | number;
+};
+
+const normalizeProduct = (product: ProductApiRow): Product => ({
+    ...product,
+    images: typeof product.images === 'string' ? JSON.parse(product.images) as string[] : product.images,
+    options: product.options ? (typeof product.options === 'string' ? JSON.parse(product.options) as string[] : product.options) : [],
+    isFeatured: product.isFeatured === true || product.isFeatured === 1,
+    tags: [product.year, product.fuel].filter(Boolean),
+});
+
+export const getProductsOrThrow = async (): Promise<Product[]> => {
+    const data = await requestJson<ProductApiRow[]>('/products');
+    if (!Array.isArray(data)) throw new ApiRequestError('Автомашины мэдээлэл буруу байна.');
+    const normalized = data.map(normalizeProduct);
+    cachedProducts = normalized;
+    return normalized;
 };
 
 export const saveProduct = async (product: Omit<Product, 'id'>) => {
@@ -286,7 +332,7 @@ export const getExchangeRate = (): ExchangeRate => {
     try {
         const stored = localStorage.getItem(STORAGE_KEYS.EXCHANGE_RATE);
         return stored ? JSON.parse(stored) : initialExchangeRate;
-    } catch (e) {
+    } catch {
         return initialExchangeRate;
     }
 };
@@ -300,7 +346,7 @@ export const getSavedIds = (): number[] => {
     try {
         const stored = localStorage.getItem(STORAGE_KEYS.SAVED);
         return stored ? JSON.parse(stored) : [];
-    } catch (e) {
+    } catch {
         return [];
     }
 };
@@ -320,7 +366,7 @@ export const getRecentlyViewedIds = (): number[] => {
     try {
         const stored = localStorage.getItem(STORAGE_KEYS.RECENT);
         return stored ? JSON.parse(stored) : [];
-    } catch (e) {
+    } catch {
         return [];
     }
 };

@@ -4,18 +4,33 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 export default function AdminLayout() {
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+    const [isCheckingSession, setIsCheckingSession] = React.useState(true);
 
     useEffect(() => {
-        const isAdmin = localStorage.getItem('isAdmin');
-        if (!isAdmin) {
-            navigate('/admin/login');
-        }
+        let cancelled = false;
+        fetch('/api/admin_session', { headers: { Accept: 'application/json' } })
+            .then((response) => {
+                if (!response.ok) throw new Error('Unauthorized');
+                if (!cancelled) setIsCheckingSession(false);
+            })
+            .catch(() => {
+                if (!cancelled) navigate('/admin/login', { replace: true });
+            });
+        return () => { cancelled = true; };
     }, [navigate]);
 
-    const handleLogout = () => {
-        localStorage.removeItem('isAdmin');
-        navigate('/admin/login');
+    const handleLogout = async () => {
+        await fetch('/api/admin_logout', { method: 'POST' }).catch(() => undefined);
+        navigate('/admin/login', { replace: true });
     };
+
+    if (isCheckingSession) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-100" role="status" aria-live="polite">
+                <div className="w-10 h-10 border-4 border-slate-200 border-t-primary rounded-full animate-spin" aria-label="Нэвтрэх эрхийг шалгаж байна" />
+            </div>
+        );
+    }
 
     return (
         <div className="flex min-h-screen bg-slate-100 dark:bg-slate-900 font-display">

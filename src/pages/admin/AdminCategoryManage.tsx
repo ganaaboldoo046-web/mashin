@@ -73,9 +73,9 @@ export default function AdminCategoryManage() {
             await saveCategory(editingId ? { ...categoryData, id: editingId } : categoryData);
             await fetchCategories();
             handleCancel();
-        } catch (err: any) {
+        } catch (err) {
             console.error('Save failed:', err);
-            alert(`Хадгалахад алдаа гарлаа: ${err.message || 'Тодорхойгүй алдаа'}`);
+            alert(`Хадгалахад алдаа гарлаа: ${err instanceof Error ? err.message : 'Тодорхойгүй алдаа'}`);
         } finally {
             setLoading(false);
         }

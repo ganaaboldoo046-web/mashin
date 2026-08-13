@@ -158,7 +158,7 @@ export default function ProductDetail() {
             } else {
                 setReservationStatus('error');
             }
-        } catch (error) {
+        } catch {
             setReservationStatus('error');
         }
     };

@@ -1,4 +1,8 @@
-export async function onRequestGet(context) {
+import { json, requireAdmin, type FunctionContext } from '../_lib/auth';
+
+export async function onRequestGet(context: FunctionContext) {
+    const authError = await requireAdmin(context);
+    if (authError) return authError;
     const { env } = context;
     const db = env.DB;
 
@@ -51,14 +55,10 @@ export async function onRequestGet(context) {
     const totalVisits = usersResult.count; // Using user count as a proxy for "visits/users"
 
 
-    return new Response(JSON.stringify({
+    return json({
         totalProducts,
         newOrders,
         revenue: revenueFormatted,
         totalVisits
-    }), {
-        headers: {
-            'Content-Type': 'application/json'
-        }
     });
 }

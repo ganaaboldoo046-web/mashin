@@ -44,7 +44,7 @@ export default function AdminExchangeRate() {
             } else {
                 throw new Error('Failed to save');
             }
-        } catch (error) {
+        } catch {
             setMessage({ type: 'error', text: 'Хадгалахад алдаа гарлаа.' });
         } finally {
             setIsLoading(false);

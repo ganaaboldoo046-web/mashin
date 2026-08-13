@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import type { ImgHTMLAttributes } from 'react';
 
 interface ImageProps extends ImgHTMLAttributes<HTMLImageElement> {
@@ -20,7 +20,6 @@ export default function Image({
 }: ImageProps) {
     const [isLoaded, setIsLoaded] = useState(false);
     const [hasError, setHasError] = useState(false);
-    const imgRef = useRef<HTMLImageElement>(null);
 
     // Optimize Unsplash images automatically
     const getOptimizedSrc = (originalSrc: string, targetSize: 'thumbnail' | 'medium' | 'full') => {
@@ -51,16 +50,8 @@ export default function Image({
 
     const optimizedSrc = getOptimizedSrc(src, size);
 
-    // Cached images and data: URIs finish loading before onLoad can attach, which
-    // would leave them stuck at opacity-0. Running before paint also means the
-    // browser never renders the transparent frame, so there is no fade to stall on.
-    useLayoutEffect(() => {
-        if (imgRef.current?.complete) setIsLoaded(true);
-    }, [optimizedSrc]);
-
     return (
         <img
-            ref={imgRef}
             src={hasError ? 'https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png' : optimizedSrc}
             alt={alt}
             loading={priority ? 'eager' : 'lazy'}

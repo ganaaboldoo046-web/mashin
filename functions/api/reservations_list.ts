@@ -1,45 +1,34 @@
 
-interface Env {
-    DB: D1Database;
-}
+import { errorMessage, json, readSession, type FunctionContext } from '../_lib/auth';
 
-export const onRequestGet: PagesFunction<Env> = async (context) => {
+export const onRequestGet = async (context: FunctionContext) => {
     const { request, env } = context;
-    const url = new URL(request.url);
-    const userId = url.searchParams.get('userId'); // If provided, filter by user. If not, return all (admin)
+    const adminSession = await readSession(request, env, 'admin');
+    const userSession = await readSession(request, env, 'user');
+    if (!adminSession && !userSession) return json({ error: 'Authentication required' }, { status: 401 });
 
     try {
-        let query;
-        let results;
-
-        if (userId) {
-            query = `
+        if (userSession && !adminSession) {
+            const query = `
                 SELECT r.*, p.images as product_images, p.name as product_name
                 FROM reservations r
                 LEFT JOIN products p ON r.product_id = p.id
                 WHERE r.user_id = ?
                 ORDER BY r.created_at DESC
             `;
-            const stmt = env.DB.prepare(query).bind(userId);
-            results = await stmt.all();
-        } else {
-            query = `
+            const results = await env.DB.prepare(query).bind(userSession.sub).all();
+            return json(results.results);
+        }
+
+        const query = `
                 SELECT r.*, p.images as product_images, p.name as product_name
                 FROM reservations r
                 LEFT JOIN products p ON r.product_id = p.id
                 ORDER BY r.created_at DESC
             `;
-            const stmt = env.DB.prepare(query);
-            results = await stmt.all();
-        }
-
-        return new Response(JSON.stringify(results.results), {
-            headers: { 'Content-Type': 'application/json' },
-        });
-    } catch (err: any) {
-        return new Response(JSON.stringify({ error: err.message }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        });
+        const results = await env.DB.prepare(query).all();
+        return json(results.results);
+    } catch (error) {
+        return json({ error: errorMessage(error) }, { status: 500 });
     }
 };

@@ -1,19 +1,18 @@
 
-interface Env {
-    DB: D1Database;
-}
+import { errorMessage, json, requireAdmin, rejectCrossOrigin, type FunctionContext } from '../_lib/auth';
 
-export const onRequestDelete: PagesFunction<Env> = async (context) => {
+export const onRequestDelete = async (context: FunctionContext) => {
+    const originError = rejectCrossOrigin(context);
+    if (originError) return originError;
+    const authError = await requireAdmin(context);
+    if (authError) return authError;
     try {
         const { request, env } = context;
         const url = new URL(request.url);
-        const id = url.searchParams.get('id');
+        const id = Number(url.searchParams.get('id'));
 
-        if (!id) {
-            return new Response(JSON.stringify({ error: 'ID is required' }), {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' }
-            });
+        if (!Number.isInteger(id) || id <= 0) {
+            return json({ error: 'Valid ID is required' }, { status: 400 });
         }
 
         const { success } = await env.DB.prepare(
@@ -29,10 +28,7 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
         } else {
             throw new Error('Database delete failed');
         }
-    } catch (err: any) {
-        return new Response(JSON.stringify({ error: err.message }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        });
+    } catch (error) {
+        return json({ error: errorMessage(error) }, { status: 500 });
     }
 };

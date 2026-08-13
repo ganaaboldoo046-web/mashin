@@ -14,11 +14,18 @@ export default function AdminProductList() {
     };
 
     useEffect(() => {
-        loadProducts(); // Initial load
-
-        // Listen for changes in storage
-        window.addEventListener('storageProducts', loadProducts);
-        return () => window.removeEventListener('storageProducts', loadProducts);
+        let cancelled = false;
+        const refresh = () => {
+            getProducts(true).then((data) => {
+                if (!cancelled) setProducts(data);
+            });
+        };
+        refresh();
+        window.addEventListener('storageProducts', refresh);
+        return () => {
+            cancelled = true;
+            window.removeEventListener('storageProducts', refresh);
+        };
     }, []);
 
     const deleteProduct = async (id: number) => {

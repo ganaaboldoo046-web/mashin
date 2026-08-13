@@ -1,15 +1,27 @@
 
 import { useEffect, useState } from 'react';
 
+interface AdminOrder {
+    id: number;
+    product_id: number;
+    product_name: string;
+    product_images?: string;
+    user_name: string;
+    phone: string;
+    facebook_id?: string;
+    created_at: number;
+    status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+}
+
 export default function AdminOrderManage() {
-    const [orders, setOrders] = useState<any[]>([]);
+    const [orders, setOrders] = useState<AdminOrder[]>([]);
     const [loading, setLoading] = useState(true);
 
     const fetchOrders = async () => {
         try {
             const res = await fetch('/api/reservations_list');
             if (res.ok) {
-                const data = await res.json();
+                const data = await res.json() as AdminOrder[];
                 setOrders(data);
             }
         } catch (error) {
@@ -23,7 +35,7 @@ export default function AdminOrderManage() {
         fetchOrders();
     }, []);
 
-    const handleStatusUpdate = async (id: number, newStatus: string) => {
+    const handleStatusUpdate = async (id: number, newStatus: AdminOrder['status']) => {
         if (!confirm('Status-г өөрчлөх үү?')) return;
 
         try {
@@ -39,7 +51,7 @@ export default function AdminOrderManage() {
             } else {
                 alert('Failed to update status');
             }
-        } catch (error) {
+        } catch {
             alert('Error updating status');
         }
     };
@@ -57,7 +69,7 @@ export default function AdminOrderManage() {
             } else {
                 alert('Failed to delete reservation');
             }
-        } catch (error) {
+        } catch {
             alert('Error deleting reservation');
         }
     };
@@ -152,7 +164,7 @@ export default function AdminOrderManage() {
                                             <div className="flex items-center gap-2">
                                                 <select
                                                     value={order.status}
-                                                    onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
+                                                    onChange={(e) => handleStatusUpdate(order.id, e.target.value as AdminOrder['status'])}
                                                     className="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1 text-xs focus:ring-2 focus:ring-primary outline-none"
                                                 >
                                                     <option value="pending">Хүлээгдэж буй</option>

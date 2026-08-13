@@ -1,15 +1,18 @@
 
-interface Env {
-    DB: D1Database;
-}
+import { errorMessage, json, requireAdmin, rejectCrossOrigin, type FunctionContext } from '../_lib/auth';
 
-export const onRequestPost: PagesFunction<Env> = async (context) => {
+export const onRequestPost = async (context: FunctionContext) => {
+    const originError = rejectCrossOrigin(context);
+    if (originError) return originError;
+    const authError = await requireAdmin(context);
+    if (authError) return authError;
     try {
         const { request, env } = context;
         const body = await request.json() as { id: number, status: string };
+        const allowedStatuses = new Set(['pending', 'confirmed', 'completed', 'cancelled']);
 
-        if (!body.id || !body.status) {
-            return new Response(JSON.stringify({ error: 'ID and Status are required' }), { status: 400 });
+        if (!Number.isInteger(body.id) || !allowedStatuses.has(body.status)) {
+            return json({ error: 'Valid ID and status are required' }, { status: 400 });
         }
 
         const { success } = await env.DB.prepare(
@@ -25,10 +28,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         } else {
             throw new Error('Update failed');
         }
-    } catch (err: any) {
-        return new Response(JSON.stringify({ error: err.message }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-        });
+    } catch (error) {
+        return json({ error: errorMessage(error) }, { status: 500 });
     }
 };

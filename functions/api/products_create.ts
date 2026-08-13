@@ -1,10 +1,16 @@
-export async function onRequest(context: any) {
+import { requireAdmin, rejectCrossOrigin, type FunctionContext } from '../_lib/auth';
+
+export async function onRequest(context: FunctionContext) {
     const { env, request } = context;
     const db = env.DB;
 
     if (request.method !== "POST") {
         return new Response("Method Not Allowed", { status: 405 });
     }
+    const originError = rejectCrossOrigin(context);
+    if (originError) return originError;
+    const authError = await requireAdmin(context);
+    if (authError) return authError;
 
     // Defensive: Create table if missing & ensure all columns exist
     try {
@@ -46,6 +52,13 @@ export async function onRequest(context: any) {
             description, categoryId, status, images, isFeatured,
             engine, transmission, drive, color, interiorColor, doors, options
         } = data;
+
+        if (typeof name !== 'string' || name.trim().length < 2 || name.length > 160) {
+            return new Response(JSON.stringify({ error: 'Valid product name is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+        if (!Array.isArray(images) || images.length > 30 || images.some((image) => typeof image !== 'string' || image.length > 500)) {
+            return new Response(JSON.stringify({ error: 'Invalid product images' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
 
         if (id) {
             // Update existing product

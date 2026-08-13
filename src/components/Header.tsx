@@ -41,7 +41,8 @@ export default function Header({ showBack = false, title }: HeaderProps) {
     const userMenuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        setQuery(searchParams.get('q') || '');
+        const nextQuery = searchParams.get('q') || '';
+        queueMicrotask(() => setQuery(nextQuery));
     }, [searchParams]);
 
     useEffect(() => {
@@ -159,7 +160,8 @@ export default function Header({ showBack = false, title }: HeaderProps) {
                                             Хадгалсан зар
                                         </Link>
                                         <button
-                                            onClick={() => {
+                                            onClick={async () => {
+                                                await fetch('/api/user_logout', { method: 'POST' }).catch(() => undefined);
                                                 setUser(null);
                                                 setUserMenuOpen(false);
                                             }}

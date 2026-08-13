@@ -6,19 +6,29 @@ export default function AdminLogin() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setIsSubmitting(true);
 
-        // Simple mock authentication
-        // In a real app, this would verify with a backend
-        if (email === 'admin@temmun.com' && password === 'admin123') {
-            localStorage.setItem('isAdmin', 'true');
-            // Navigate to admin dashboard
+        try {
+            const response = await fetch('/api/admin_login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            if (!response.ok) {
+                const result = await response.json().catch(() => ({})) as { error?: string };
+                throw new Error(result.error || 'Имэйл эсвэл нууц үг буруу байна.');
+            }
             navigate('/admin');
-        } else {
-            setError('Имэйл эсвэл нууц үг буруу байна.'); // Invalid email or password
+        } catch (loginError) {
+            setError(loginError instanceof Error ? loginError.message : 'Нэвтрэх үед алдаа гарлаа.');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -46,7 +56,7 @@ export default function AdminLogin() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium"
-                            placeholder="admin@temmun.com"
+                            placeholder="admin@example.com"
                             required
                         />
                     </div>
@@ -65,9 +75,10 @@ export default function AdminLogin() {
                     </div>
                     <button
                         type="submit"
-                        className="w-full py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 active:scale-95 transition-all"
+                        disabled={isSubmitting}
+                        className="w-full py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 active:scale-95 transition-all disabled:opacity-60"
                     >
-                        Нэвтрэх
+                        {isSubmitting ? 'Шалгаж байна…' : 'Нэвтрэх'}
                     </button>
                 </form>
             </div>

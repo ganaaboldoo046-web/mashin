@@ -8,7 +8,24 @@ const FUEL_LABELS: Record<string, string> = {
     Gas: 'Газ',
 };
 
-export const fuelLabel = (fuel?: string) => (fuel ? FUEL_LABELS[fuel] || fuel : '');
+const FUEL_ALIASES: Record<string, string> = {
+    petrol: 'Бензин',
+    gasoline: 'Бензин',
+    бензин: 'Бензин',
+    diesel: 'Дизель',
+    дизель: 'Дизель',
+    hybrid: 'Хайбрид',
+    хайбрид: 'Хайбрид',
+    electric: 'Цахилгаан',
+    цахилгаан: 'Цахилгаан',
+    gas: 'Газ',
+    газ: 'Газ',
+};
+
+export const fuelLabel = (fuel?: string) => {
+    if (!fuel) return '';
+    return FUEL_LABELS[fuel] || FUEL_ALIASES[fuel.trim().toLocaleLowerCase('mn')] || fuel.trim();
+};
 
 export const STATUS_LABELS: Record<Product['status'], string> = {
     active: 'Бэлэн',
