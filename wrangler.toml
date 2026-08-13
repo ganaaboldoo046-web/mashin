@@ -1,4 +1,4 @@
-name = "temmun-car"
+name = "dt-trading"
 pages_build_output_dir = "dist"
 compatibility_date = "2024-02-14"
 compatibility_flags = ["nodejs_compat"]

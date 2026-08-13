@@ -12,5 +12,5 @@
 /api/*
   Cache-Control: no-store
 
-https://temmun-car.pages.dev/*
+https://dt-trading.pages.dev/*
   X-Robots-Tag: noindex, nofollow
