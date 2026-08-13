@@ -67,7 +67,7 @@ Do not add a redirect URI for the current popup-based Google Sign-In implementat
 Copy the generated Web client ID and set the same value in both places:
 
 - GitHub → repository Settings → Environments → `production` → Variables: `VITE_GOOGLE_CLIENT_ID`
-- Cloudflare → Workers & Pages → `mashin-a6j` → Settings → Variables and Secrets → Production variable: `GOOGLE_CLIENT_ID`
+- Cloudflare → Workers & Pages → `mashin` → Settings → Variables and Secrets → Production variable: `GOOGLE_CLIENT_ID`
 
 `GOOGLE_CLIENT_ID` is public configuration, not a password. `SESSION_SECRET` must remain encrypted and must be at least 32 characters.
 
