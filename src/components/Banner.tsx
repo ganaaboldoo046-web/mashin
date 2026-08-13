@@ -9,20 +9,24 @@ const FALLBACK: BannerType = {
     id: 0,
     title: 'Солонгосоос шууд, шалгагдсан автомашин',
     subtitle: 'Гааль, тээвэр, бүртгэл — бүгд багцад.',
-    image: '',
+    image: '/api/banner_hero',
     active: true,
 };
 
 const SLIDE_MS = 5000;
 
 function useBanners() {
-    const [banners, setBanners] = useState<BannerType[]>([]);
+    const [banners, setBanners] = useState<BannerType[]>([FALLBACK]);
 
     useEffect(() => {
         const load = async () => {
             const all = await getBanners();
             const active = all.filter((b) => b.active !== false);
-            setBanners(active.length > 0 ? active : [FALLBACK]);
+            setBanners(active.length > 0
+                ? active.map((banner, index) => index === 0 && banner.image
+                    ? { ...banner, image: '/api/banner_hero' }
+                    : banner)
+                : [{ ...FALLBACK, image: '' }]);
         };
         load();
         window.addEventListener('storageBanners', load);
@@ -67,8 +71,6 @@ export default function Banner() {
         return () => clearInterval(timer);
     }, [banners.length, scrollToSlide]);
 
-    if (banners.length === 0) return null;
-
     return (
         <section
             className="mt-4 lg:mt-0 lg:mb-10"
@@ -91,7 +93,7 @@ export default function Banner() {
                 {banners.map((banner, i) => (
                     <div
                         key={banner.id}
-                        className={`relative flex-none snap-center w-[calc(100%-56px)] lg:w-[calc(100%-144px)] rounded-[18px] lg:rounded-[20px] overflow-hidden bg-hero-mobile lg:bg-hero-desktop px-[22px] pt-6 pb-[22px] lg:h-[340px] lg:px-[52px] lg:py-12 lg:flex lg:flex-col lg:justify-center transition-opacity duration-300 ${
+                        className={`relative flex-none snap-center w-[calc(100%-56px)] h-[238px] lg:w-[calc(100%-144px)] rounded-[18px] lg:rounded-[20px] overflow-hidden bg-hero-mobile lg:bg-hero-desktop px-[22px] py-[22px] lg:h-[340px] lg:px-[52px] lg:py-12 flex flex-col justify-center transition-opacity duration-300 ${
                             i === slide ? 'opacity-100' : 'opacity-50'
                         }`}
                     >
@@ -109,14 +111,20 @@ export default function Banner() {
                             </>
                         )}
                         <div className="relative flex flex-col items-start">
-                            <span className="text-[10.5px] lg:text-[11.5px] font-extrabold tracking-[0.14em] text-[#FF8A80] bg-primary/20 px-2.5 py-1.5 rounded-md">
+                            <span className="text-[10.5px] lg:text-[11.5px] font-extrabold tracking-[0.14em] text-white bg-black/55 px-2.5 py-1.5 rounded-md">
                                 DT Trading
                             </span>
-                            <h2 className="mt-2.5 lg:mt-5 mb-0 lg:mb-3 text-[22px] lg:text-[42px] font-extrabold leading-[1.3] lg:leading-[1.18] tracking-[-0.02em] lg:tracking-[-0.03em] text-white lg:max-w-[15ch] text-balance">
-                                {banner.title}
-                            </h2>
+                            {i === 0 ? (
+                                <h1 className="mt-2.5 lg:mt-5 mb-0 lg:mb-3 text-[22px] lg:text-[42px] font-extrabold leading-[1.3] lg:leading-[1.18] tracking-[-0.02em] lg:tracking-[-0.03em] text-white lg:max-w-[15ch] text-balance">
+                                    {banner.title}
+                                </h1>
+                            ) : (
+                                <h2 className="mt-2.5 lg:mt-5 mb-0 lg:mb-3 text-[22px] lg:text-[42px] font-extrabold leading-[1.3] lg:leading-[1.18] tracking-[-0.02em] lg:tracking-[-0.03em] text-white lg:max-w-[15ch] text-balance">
+                                    {banner.title}
+                                </h2>
+                            )}
                             {banner.subtitle && (
-                                <p className="mt-2 lg:mt-0 lg:mb-7 text-[12.5px] lg:text-[15px] leading-[1.55] lg:leading-[1.6] text-white/[0.72] lg:max-w-[46ch]">
+                                <p className="mt-2 lg:mt-0 lg:mb-7 text-[12.5px] lg:text-[15px] leading-[1.55] lg:leading-[1.6] text-white/90 lg:max-w-[46ch]">
                                     {banner.subtitle}
                                 </p>
                             )}

@@ -1,39 +1,57 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import CarCard from './CarCard';
-import { getProducts, getSavedIds } from '../utils/storage';
+import { getSavedIds } from '../utils/storage';
 import type { Product } from '../utils/storage';
 
 /** 한 번에 2줄(2열 × 2행)씩 노출하고, 5번째부터는 더보기로 펼친다. */
 const PAGE_SIZE = 4;
 
-export default function FeaturedCars() {
-    const [cars, setCars] = useState<Product[]>([]);
+interface FeaturedCarsProps {
+    cars: Product[];
+    loading?: boolean;
+}
+
+export default function FeaturedCars({ cars, loading = false }: FeaturedCarsProps) {
     const [savedIds, setSavedIds] = useState<number[]>(getSavedIds);
     const [page, setPage] = useState(1);
 
     useEffect(() => {
-        const loadCars = async () => {
-            const all = await getProducts();
-            setCars(all.filter((p) => p.status === 'active'));
-            setPage(1);
-        };
         const loadSaved = () => setSavedIds(getSavedIds());
 
-        loadCars();
-        window.addEventListener('storageProducts', loadCars);
         window.addEventListener('storageSaved', loadSaved);
         return () => {
-            window.removeEventListener('storageProducts', loadCars);
             window.removeEventListener('storageSaved', loadSaved);
         };
     }, []);
 
+    if (loading) {
+        return (
+            <section className="mt-2 lg:mt-0" aria-label="Шинэ зар ачаалж байна" aria-busy="true">
+                <div className="flex items-center justify-between px-4 pt-6 pb-3 lg:px-0 lg:pt-0 lg:pb-4">
+                    <div className="h-6 w-24 rounded-lg bg-surface-3 animate-pulse" />
+                    <div className="h-4 w-28 rounded bg-surface-3 animate-pulse" />
+                </div>
+                <div className="grid grid-cols-2 gap-3 px-4 lg:grid-cols-4 lg:px-0 lg:gap-4">
+                    {[0, 1, 2, 3].map((item) => (
+                        <div key={item} className={item > 1 ? 'hidden lg:block' : ''}>
+                            <div className="aspect-square rounded-xl bg-surface-3 animate-pulse lg:aspect-[16/10]" />
+                            <div className="mt-3 h-4 w-4/5 rounded bg-surface-3 animate-pulse" />
+                            <div className="mt-2 h-3 w-3/5 rounded bg-surface-3 animate-pulse" />
+                            <div className="mt-3 h-5 w-1/2 rounded bg-surface-3 animate-pulse" />
+                        </div>
+                    ))}
+                </div>
+            </section>
+        );
+    }
+
     if (cars.length === 0) return null;
 
     const totalPages = Math.ceil(cars.length / PAGE_SIZE);
-    const visible = cars.slice(0, page * PAGE_SIZE);
-    const hasMore = page < totalPages;
+    const currentPage = Math.min(page, totalPages);
+    const visible = cars.slice(0, currentPage * PAGE_SIZE);
+    const hasMore = currentPage < totalPages;
 
     return (
         <section className="mt-2 lg:mt-0">
@@ -64,7 +82,7 @@ export default function FeaturedCars() {
                     >
                         Дэлгэрэнгүй харах
                         <span className="font-semibold text-muted-faint">
-                            {page} / {totalPages}
+                            {currentPage} / {totalPages}
                         </span>
                     </button>
                 </div>

@@ -133,7 +133,7 @@ export default function AdminProductCreate() {
                 if (image.url) {
                     uploadedImageUrls.push(image.url);
                 } else if (image.file) {
-                    const webpBlob = await convertToWebP(image.file);
+                    const webpBlob = await convertToWebP(image.file, { maxSize: 960, quality: 0.78 });
                     uploadedImageUrls.push(await uploadImage(webpBlob));
                 }
             }

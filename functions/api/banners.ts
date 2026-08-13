@@ -22,7 +22,7 @@ export async function onRequest(context: FunctionContext) {
 
     if (request.method === "GET") {
         try {
-            const { results } = await db.prepare("SELECT * FROM banners").all();
+            const { results } = await db.prepare("SELECT * FROM banners ORDER BY id ASC").all();
             return new Response(JSON.stringify(results || []), {
                 headers: { "Content-Type": "application/json" }
             });

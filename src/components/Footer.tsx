@@ -34,13 +34,13 @@ export default function Footer() {
                     <a href={DT_CONTACT.primary.href} className="block mt-2.5 text-base font-extrabold text-white hover:text-white">
                         {DT_CONTACT.primary.display}
                     </a>
-                    <a href={DT_CONTACT.secondary.href} className="block mt-0.5 text-[13.5px] font-bold text-night-text hover:text-night-text">
+                    <a href={DT_CONTACT.secondary.href} className="block mt-0.5 text-[13.5px] font-bold text-slate-300 hover:text-white">
                         {DT_CONTACT.secondary.display}
                     </a>
-                    <a href={DT_CONTACT.email.href} className="block mt-2 text-[12px] font-medium text-night-text hover:text-white">
+                    <a href={DT_CONTACT.email.href} className="block mt-2 text-[12px] font-medium text-slate-300 hover:text-white">
                         {DT_CONTACT.email.display}
                     </a>
-                    <p className="mt-3 text-xs leading-[1.6] text-night-text">Инчон хот, Ённсү дүүрэг, Нынхөдэ-ро 192</p>
+                    <p className="mt-3 text-xs leading-[1.6] text-slate-300">Инчон хот, Ённсү дүүрэг, Нынхөдэ-ро 192</p>
                 </div>
                 <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2">
                     {COLUMNS.flatMap((col) => col.links).map((link) => (
@@ -60,7 +60,7 @@ export default function Footer() {
             <div className="hidden lg:block px-6 pt-12 pb-14">
                 <div className="max-w-shell mx-auto grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-8">
                     <div>
-                        <img src="/logo.png" alt="DT Trading" className="h-[34px] w-auto block" />
+                        <img src="/logo.webp" alt="DT Trading" width="220" height="117" className="h-[34px] w-auto block" />
                         <div className="mt-3.5 text-[12.5px] leading-[1.7] text-muted">
                             {ADDRESS}
                             <br />

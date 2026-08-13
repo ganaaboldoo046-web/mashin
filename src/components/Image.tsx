@@ -16,9 +16,10 @@ export default function Image({
     className, 
     priority = false, 
     size = 'full',
+    width,
+    height,
     ...props 
 }: ImageProps) {
-    const [isLoaded, setIsLoaded] = useState(false);
     const [hasError, setHasError] = useState(false);
 
     // Optimize Unsplash images automatically
@@ -49,15 +50,23 @@ export default function Image({
     };
 
     const optimizedSrc = getOptimizedSrc(src, size);
+    const intrinsicSize = size === 'thumbnail'
+        ? { width: 400, height: 300 }
+        : size === 'medium'
+            ? { width: 800, height: 500 }
+            : { width: 1200, height: 675 };
 
     return (
         <img
             src={hasError ? 'https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png' : optimizedSrc}
             alt={alt}
             loading={priority ? 'eager' : 'lazy'}
-            onLoad={() => setIsLoaded(true)}
+            fetchPriority={priority ? 'high' : 'auto'}
+            decoding="async"
+            width={width ?? intrinsicSize.width}
+            height={height ?? intrinsicSize.height}
             onError={() => setHasError(true)}
-            className={`${className} transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${hasError ? 'object-contain bg-slate-100 dark:bg-slate-800' : ''}`}
+            className={`${className ?? ''} ${hasError ? 'object-contain bg-slate-100 dark:bg-slate-800' : ''}`}
             {...props}
         />
     );

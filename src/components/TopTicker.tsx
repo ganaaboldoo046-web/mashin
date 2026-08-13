@@ -14,7 +14,7 @@ export default function TopTicker() {
                 {[...ITEMS, ...ITEMS].map((label, i) => (
                     <div
                         key={`${label}-${i}`}
-                        className="flex-1 flex items-center justify-center gap-2 h-[42px] text-muted-strong text-[12.5px] font-bold whitespace-nowrap"
+                        className="flex-1 flex items-center justify-center gap-2 h-[42px] text-slate-300 text-[12.5px] font-bold whitespace-nowrap"
                     >
                         <span className="text-accent-soft">✓</span>
                         {label}

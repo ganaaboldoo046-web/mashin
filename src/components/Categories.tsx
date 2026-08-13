@@ -1,7 +1,7 @@
-import { memo, useEffect, useState } from 'react';
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import Image from './Image';
-import { type Category, getCategories } from '../utils/storage';
+import type { Category } from '../utils/storage';
 
 /** 로고 이미지가 없는 카테고리는 아이콘, 그마저 없으면 머리글자로 대체한다. */
 function CategoryMark({ category }: { category: Category }) {
@@ -31,15 +31,24 @@ function CategoryMark({ category }: { category: Category }) {
     );
 }
 
-const Categories = memo(function Categories() {
-    const [categories, setCategories] = useState<Category[]>([]);
+interface CategoriesProps {
+    categories: Category[];
+    loading?: boolean;
+}
 
-    useEffect(() => {
-        const load = async () => setCategories(await getCategories());
-        load();
-        window.addEventListener('storageCategories', load);
-        return () => window.removeEventListener('storageCategories', load);
-    }, []);
+const Categories = memo(function Categories({ categories, loading = false }: CategoriesProps) {
+    if (loading) {
+        return (
+            <section className="mt-4 lg:mt-0 lg:mb-11" aria-label="Категори ачаалж байна" aria-busy="true">
+                <div className="hidden lg:block h-7 w-28 mb-4 rounded-lg bg-surface-3 animate-pulse" />
+                <div className="flex gap-2.5 overflow-hidden px-4 lg:px-0">
+                    {[88, 104, 92, 110, 96].map((width) => (
+                        <div key={width} className="h-12 flex-none rounded-full bg-surface-3 animate-pulse lg:h-[52px]" style={{ width }} />
+                    ))}
+                </div>
+            </section>
+        );
+    }
 
     if (categories.length === 0) return null;
 

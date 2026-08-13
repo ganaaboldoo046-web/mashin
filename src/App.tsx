@@ -2,9 +2,9 @@ import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom
 import { lazy, Suspense } from 'react';
 import ErrorBoundary from './components/ErrorBoundary';
 import Seo from './components/Seo';
+import Home from './pages/Home';
 
 // Lazy loaded pages for Code Splitting
-const Home = lazy(() => import('./pages/Home'));
 const Search = lazy(() => import('./pages/Search'));
 const Sell = lazy(() => import('./pages/Sell'));
 const Saved = lazy(() => import('./pages/Saved'));

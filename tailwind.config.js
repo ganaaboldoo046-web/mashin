@@ -1,6 +1,5 @@
 /** @type {import('tailwindcss').Config} */
 const sans = [
-  "Manrope",
   "Inter",
   "ui-sans-serif",
   "system-ui",
@@ -20,8 +19,8 @@ export default {
     extend: {
       /* 색상은 index.css의 CSS 변수를 가리킨다 — 테마 전환이 자동으로 따라오게. */
       colors: {
-        "primary": "#FF1A1A",
-        "primary-dark": "#B70000",
+        "primary": "#D60000",
+        "primary-dark": "#A80000",
         "primary-soft": "var(--tint)",
         "accent-soft": "var(--accent-soft)",
         "ink": "var(--text)",

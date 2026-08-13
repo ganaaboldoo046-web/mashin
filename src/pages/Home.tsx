@@ -60,8 +60,8 @@ export default function Home() {
                     />
                 )}
                 <Banner />
-                <Categories />
-                <FeaturedCars />
+                <Categories categories={categories} loading={dataStatus === 'loading'} />
+                <FeaturedCars cars={products.filter((product) => product.status === 'active')} loading={dataStatus === 'loading'} />
 
                 {categories.map((category) => (
                     <CategorySection key={category.id} category={category} products={getCategoryProducts(category.id)} />

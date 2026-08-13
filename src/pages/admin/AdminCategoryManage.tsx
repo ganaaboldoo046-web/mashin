@@ -56,7 +56,7 @@ export default function AdminCategoryManage() {
             let imageUrl = newCategory.image || '';
 
             if (selectedFile) {
-                const webpBlob = await convertToWebP(selectedFile);
+                const webpBlob = await convertToWebP(selectedFile, { maxSize: 128, quality: 0.82 });
                 imageUrl = await uploadImage(webpBlob);
             }
 

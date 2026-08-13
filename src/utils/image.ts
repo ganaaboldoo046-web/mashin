@@ -1,4 +1,10 @@
-export async function convertToWebP(file: File): Promise<Blob> {
+interface ImageConversionOptions {
+    maxSize?: number;
+    quality?: number;
+}
+
+export async function convertToWebP(file: File, options: ImageConversionOptions = {}): Promise<Blob> {
+    const { maxSize = 1200, quality = 0.8 } = options;
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -7,17 +13,15 @@ export async function convertToWebP(file: File): Promise<Blob> {
                 const canvas = document.createElement('canvas');
                 let width = img.width;
                 let height = img.height;
-                const MAX_SIZE = 1200;
-
                 if (width > height) {
-                    if (width > MAX_SIZE) {
-                        height *= MAX_SIZE / width;
-                        width = MAX_SIZE;
+                    if (width > maxSize) {
+                        height *= maxSize / width;
+                        width = maxSize;
                     }
                 } else {
-                    if (height > MAX_SIZE) {
-                        width *= MAX_SIZE / height;
-                        height = MAX_SIZE;
+                    if (height > maxSize) {
+                        width *= maxSize / height;
+                        height = maxSize;
                     }
                 }
 
@@ -35,7 +39,7 @@ export async function convertToWebP(file: File): Promise<Blob> {
                     } else {
                         reject(new Error('Failed to convert to WebP'));
                     }
-                }, 'image/webp', 0.8);
+                }, 'image/webp', quality);
             };
             img.onerror = () => reject(new Error('Failed to load image'));
             img.src = event.target?.result as string;

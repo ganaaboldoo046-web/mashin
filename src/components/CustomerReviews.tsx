@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import GoogleSignInButton from './GoogleSignInButton';
 import { useUser } from '../hooks/useUser';
 
@@ -36,8 +36,6 @@ export default function CustomerReviews() {
     });
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-    const scrollRef = useRef<HTMLDivElement>(null);
-
     const fetchReviews = async (): Promise<Review[]> => {
         try {
             const res = await fetch('/api/reviews_list');
@@ -60,31 +58,6 @@ export default function CustomerReviews() {
         });
         return () => { cancelled = true; };
     }, []);
-
-    // Auto Scroll Animation
-    useEffect(() => {
-        const scrollContainer = scrollRef.current;
-        if (!scrollContainer) return;
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-        let animationId: number;
-        let scrollAmount = 0;
-        const speed = 0.5;
-
-        const step = () => {
-            scrollAmount += speed;
-            if (scrollContainer) {
-                if (scrollAmount >= scrollContainer.scrollWidth / 2) {
-                    scrollAmount = 0;
-                }
-                scrollContainer.scrollLeft = scrollAmount;
-            }
-            animationId = requestAnimationFrame(step);
-        };
-
-        animationId = requestAnimationFrame(step);
-        return () => cancelAnimationFrame(animationId);
-    }, [reviews]); // Restart animation when reviews change
 
     const handleWriteClick = () => {
         if (userInfo) {
@@ -135,22 +108,20 @@ export default function CustomerReviews() {
 
             {/* Scroll Container */}
             <div
-                ref={scrollRef}
-                className="flex gap-4 overflow-x-hidden w-full"
+                className="flex gap-4 overflow-x-auto no-scrollbar w-full snap-x snap-mandatory"
                 style={{ whiteSpace: 'nowrap' }}
             >
-                {/* Double the list to create seamless loop. Use mock if reviews empty */}
-                {[...reviews, ...reviews].map((review, index) => (
+                {reviews.map((review) => (
                     <div
-                        key={`${review.id}-${index}`}
-                        className="min-w-[280px] bg-surface p-4 rounded-2xl border border-line flex flex-col gap-3"
+                        key={review.id}
+                        className="min-w-[280px] snap-start bg-surface p-4 rounded-2xl border border-line flex flex-col gap-3"
                     >
                         <div className="flex items-center gap-3">
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-extrabold ${review.gender === 'male' ? 'bg-primary-soft text-primary' : 'bg-[#d4467f]/20 text-[#e878a6]'}`}>
                                 {review.user_name.slice(0, 1).toUpperCase()}
                             </div>
                             <div>
-                                <h4 className="text-sm font-bold text-ink">{review.user_name}</h4>
+                                <h3 className="text-sm font-bold text-ink">{review.user_name}</h3>
                                 <p className="text-xs text-muted">{review.car_model}</p>
                             </div>
                         </div>

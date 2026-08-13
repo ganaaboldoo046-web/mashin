@@ -53,7 +53,7 @@ export default function AdminBannerManage() {
             let imageUrl = newBanner.image;
 
             if (selectedFile) {
-                const webpBlob = await convertToWebP(selectedFile);
+                const webpBlob = await convertToWebP(selectedFile, { maxSize: 1600, quality: 0.78 });
                 imageUrl = await uploadImage(webpBlob);
             }
 
