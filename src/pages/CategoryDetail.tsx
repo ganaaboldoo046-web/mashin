@@ -6,6 +6,9 @@ import BottomNav from '../components/BottomNav';
 import CarCard from '../components/CarCard';
 import Footer from '../components/Footer';
 import { getCategories, getProducts, getSavedIds, type Category, type Product } from '../utils/storage';
+import { removeJsonLd, setCanonical, setJsonLd, setMeta } from '../utils/seo';
+
+const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://dt-trading.kr').replace(/\/$/, '');
 
 type SortOption = 'newest' | 'price-asc' | 'price-desc' | 'year-desc';
 
@@ -54,6 +57,37 @@ export default function CategoryDetail() {
         window.addEventListener('storageSaved', loadSaved);
         return () => window.removeEventListener('storageSaved', loadSaved);
     }, []);
+
+    useEffect(() => {
+        if (loading) return;
+        if (!category) {
+            setMeta('meta[name="robots"]', { name: 'robots', content: 'noindex, follow' });
+            return;
+        }
+
+        const title = `${category.name} автомашин | DT Trading`;
+        const description = `${category.name} ангиллын Солонгосоос шалгагдсан автомашинууд. Үнэ, он, гүйлтээр харьцуулж захиалаарай.`;
+        const canonicalUrl = `${SITE_URL}/category/${category.id}`;
+        document.title = title;
+        setMeta('meta[name="description"]', { name: 'description', content: description });
+        setMeta('meta[name="robots"]', { name: 'robots', content: 'index, follow' });
+        setMeta('meta[property="og:title"]', { property: 'og:title', content: title });
+        setMeta('meta[property="og:description"]', { property: 'og:description', content: description });
+        setMeta('meta[property="og:url"]', { property: 'og:url', content: canonicalUrl });
+        setMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: title });
+        setMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: description });
+        setCanonical(canonicalUrl);
+        setJsonLd('category-breadcrumbs', {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Нүүр', item: `${SITE_URL}/` },
+                { '@type': 'ListItem', position: 2, name: category.name, item: canonicalUrl },
+            ],
+        });
+
+        return () => removeJsonLd('category-breadcrumbs');
+    }, [category, loading]);
 
     const products = useMemo(() => {
         let result = [...allProducts];

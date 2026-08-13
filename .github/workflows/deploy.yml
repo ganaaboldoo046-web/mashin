@@ -40,6 +40,7 @@ jobs:
       - run: npm run build
         env:
           VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
+          VITE_SITE_URL: https://dt-trading.kr
       - name: Deploy the verified commit
         run: npx wrangler pages deploy dist --project-name=temmun-car --branch=main --commit-hash=${{ github.sha }}
         env:

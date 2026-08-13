@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { setCanonical, setMeta } from '../utils/seo';
 
-const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://www.temmun.mn').replace(/\/$/, '');
+const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://dt-trading.kr').replace(/\/$/, '');
+const DEFAULT_IMAGE = `${SITE_URL}/logo.png`;
 
 const ROUTE_META: Record<string, { title: string; description: string; noIndex?: boolean }> = {
     '/': {
@@ -18,17 +20,11 @@ const ROUTE_META: Record<string, { title: string; description: string; noIndex?:
     },
     '/terms': { title: 'Үйлчилгээний нөхцөл | DT Trading', description: 'DT Trading үйлчилгээний нөхцөл.' },
     '/privacy': { title: 'Нууцлалын бодлого | DT Trading', description: 'DT Trading хувийн мэдээлэл хамгаалах бодлого.' },
+    '/product': { title: 'Автомашины дэлгэрэнгүй | DT Trading', description: 'DT Trading-ийн шалгагдсан автомашины үзүүлэлт, үнэ болон захиалгын мэдээлэл.' },
+    '/category': { title: 'Автомашины ангилал | DT Trading', description: 'DT Trading-ийн автомашинуудыг ангиллаар харах.' },
+    '/sell': { title: 'Машин зарах | DT Trading', description: 'DT Trading машин зарах үйлчилгээ.', noIndex: true },
     '/saved': { title: 'Хадгалсан зар | DT Trading', description: 'Таны хадгалсан автомашинууд.', noIndex: true },
     '/profile': { title: 'Профайл | DT Trading', description: 'DT Trading хэрэглэгчийн профайл.', noIndex: true },
-};
-
-const setMeta = (selector: string, attributes: Record<string, string>) => {
-    let element = document.head.querySelector<HTMLMetaElement>(selector);
-    if (!element) {
-        element = document.createElement('meta');
-        document.head.appendChild(element);
-    }
-    Object.entries(attributes).forEach(([name, value]) => element?.setAttribute(name, value));
 };
 
 export default function Seo() {
@@ -54,16 +50,12 @@ export default function Seo() {
         setMeta('meta[property="og:title"]', { property: 'og:title', content: meta.title });
         setMeta('meta[property="og:description"]', { property: 'og:description', content: meta.description });
         setMeta('meta[property="og:url"]', { property: 'og:url', content: canonicalUrl });
+        setMeta('meta[property="og:image"]', { property: 'og:image', content: DEFAULT_IMAGE });
         setMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: meta.title });
         setMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: meta.description });
+        setMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: DEFAULT_IMAGE });
 
-        let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-        if (!canonical) {
-            canonical = document.createElement('link');
-            canonical.rel = 'canonical';
-            document.head.appendChild(canonical);
-        }
-        canonical.href = canonicalUrl;
+        setCanonical(canonicalUrl);
     }, [location.pathname]);
 
     return null;

@@ -1,7 +1,9 @@
 User-agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /api/
 Disallow: /profile
 Disallow: /saved
+Disallow: /sell
 
-Sitemap: https://www.temmun.mn/sitemap.xml
+Sitemap: https://dt-trading.kr/sitemap.xml

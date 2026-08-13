@@ -12,7 +12,7 @@ export default function About() {
                 {/* Header Removed */}
 
                 <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm overflow-hidden mb-6">
-                    <img src="/about.jpg" alt="About dt-trading" className="w-full h-auto object-cover" />
+                    <img src="/about.jpg" alt="DT Trading" className="w-full h-auto object-cover" />
                     <div className="p-6">
                         {/* Title Removed */}
                         <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-4">
@@ -41,7 +41,7 @@ export default function About() {
                         <div className="flex items-start gap-3">
                             <span className="material-symbols-outlined text-slate-400">location_on</span>
                             <span className="text-slate-600 dark:text-slate-300">
-                                БНСУ, Сөүл хот, Каннам дүүрэг, Техеран-ро 123
+                                192, Neungheodae-ro, Yeonsu-gu, Incheon, Republic of Korea
                             </span>
                         </div>
                         <div className="flex items-center gap-3">
@@ -53,8 +53,8 @@ export default function About() {
                         </div>
                         <div className="flex items-center gap-3">
                             <span className="material-symbols-outlined text-slate-400">mail</span>
-                            <a href="mailto:info@temmuntrading.com" className="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
-                                info@temmuntrading.com
+                            <a href="mailto:temmuntrading@gmail.com" className="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
+                                temmuntrading@gmail.com
                             </a>
                         </div>
                     </div>

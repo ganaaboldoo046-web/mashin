@@ -22,7 +22,7 @@ Configure these Cloudflare Pages variables and secrets:
 - `ADMIN_EMAIL`
 - `ADMIN_PASSWORD_HASH`: lowercase SHA-256 of the administrator password
 - `SESSION_SECRET`: at least 32 random characters
-- `PUBLIC_SITE_URL`: canonical production origin, for example `https://www.temmun.mn`
+- `PUBLIC_SITE_URL`: canonical production origin, `https://dt-trading.kr`
 - `GOOGLE_CLIENT_ID`: Google Web OAuth client ID (a public variable, not a password)
 
 Never commit `.dev.vars` or plaintext administrator credentials.
@@ -32,3 +32,7 @@ Never commit `.dev.vars` or plaintext administrator credentials.
 Pull requests run build and lint checks. A verified push to `main` deploys the exact commit to the `temmun-car` Cloudflare Pages project through `.github/workflows/deploy.yml`.
 
 Add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as secrets and `VITE_GOOGLE_CLIENT_ID` as a variable in the GitHub `production` environment. D1 (`DB`) and R2 (`BUCKET`) bindings and the authentication variables/secrets must also exist in the Cloudflare Pages production environment.
+
+## Google launch
+
+Follow [`docs/google-registration.md`](docs/google-registration.md) to verify `dt-trading.kr` in Search Console, submit the dynamic sitemap, configure OAuth branding, create the Web client and connect the GitHub/Cloudflare variables.

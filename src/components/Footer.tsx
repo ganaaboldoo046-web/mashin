@@ -46,14 +46,18 @@ export default function Footer() {
                         </Link>
                     ))}
                 </div>
-                <p className="mt-5 text-[11px] text-muted-faint">© 2026 dt-trading. All rights reserved.</p>
+                <p className="mt-4 text-[11px] leading-[1.6] text-muted-faint">
+                    Google-ээр нэвтрэхэд нэр, имэйл, профайлын зургийг зөвхөн хэрэглэгчийг таних болон захиалга, сэтгэгдлийг холбох зорилгоор ашиглана.{' '}
+                    <Link to="/privacy" className="font-bold text-muted hover:text-primary">Нууцлалын бодлого</Link>
+                </p>
+                <p className="mt-4 text-[11px] text-muted-faint">© 2026 DT Trading. All rights reserved.</p>
             </div>
 
             {/* 데스크탑: 4열 푸터 */}
             <div className="hidden lg:block px-6 pt-12 pb-14">
                 <div className="max-w-shell mx-auto grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-8">
                     <div>
-                        <img src="/logo.png" alt="dt-trading" className="h-[34px] w-auto block" />
+                        <img src="/logo.png" alt="DT Trading" className="h-[34px] w-auto block" />
                         <div className="mt-3.5 text-[12.5px] leading-[1.7] text-muted">
                             {ADDRESS}
                             <br />
@@ -86,7 +90,11 @@ export default function Footer() {
                     ))}
                 </div>
                 <div className="max-w-shell mx-auto mt-10 pt-[22px] border-t border-line-soft text-xs text-muted-faint">
-                    © 2026 dt-trading. All rights reserved.
+                    <p className="m-0 max-w-[720px] leading-[1.6]">
+                        Google-ээр нэвтрэхэд нэр, имэйл, профайлын зургийг зөвхөн хэрэглэгчийг таних болон захиалга, сэтгэгдлийг холбох зорилгоор ашиглана.{' '}
+                        <Link to="/privacy" className="font-bold text-muted hover:text-primary">Нууцлалын бодлого</Link>
+                    </p>
+                    <p className="mb-0 mt-3">© 2026 DT Trading. All rights reserved.</p>
                 </div>
             </div>
         </footer>

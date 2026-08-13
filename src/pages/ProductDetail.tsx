@@ -11,6 +11,9 @@ import type { Product } from '../utils/storage';
 import { carMeta, formatKRW, fuelLabel, STATUS_LABELS } from '../utils/format';
 import { VEHICLE_OPTIONS } from '../constants/vehicleOptions';
 import { DT_CONTACT } from '../constants/contact';
+import { removeJsonLd, setCanonical, setJsonLd, setMeta } from '../utils/seo';
+
+const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://dt-trading.kr').replace(/\/$/, '');
 
 const OPTION_GROUPS: { key: string; title: string }[] = [
     { key: 'exterior', title: 'Гадаад / Дотоод' },
@@ -62,6 +65,42 @@ export default function ProductDetail() {
             document.body.style.overflow = '';
         };
     }, [isCallModalOpen, isReservationModalOpen]);
+
+    useEffect(() => {
+        if (loading) return;
+        if (!product) {
+            setMeta('meta[name="robots"]', { name: 'robots', content: 'noindex, follow' });
+            return;
+        }
+
+        const title = `${product.name} | DT Trading`;
+        const description = `${product.name} · ${carMeta(product)} · ${product.price}. Солонгосоос шалгагдсан автомашины дэлгэрэнгүй мэдээлэл.`.slice(0, 160);
+        const canonicalUrl = `${SITE_URL}/product/${product.id}`;
+        const imageUrl = product.images?.[0] ? new URL(product.images[0], SITE_URL).toString() : `${SITE_URL}/logo.png`;
+
+        document.title = title;
+        setMeta('meta[name="description"]', { name: 'description', content: description });
+        setMeta('meta[name="robots"]', { name: 'robots', content: 'index, follow' });
+        setMeta('meta[property="og:title"]', { property: 'og:title', content: title });
+        setMeta('meta[property="og:description"]', { property: 'og:description', content: description });
+        setMeta('meta[property="og:url"]', { property: 'og:url', content: canonicalUrl });
+        setMeta('meta[property="og:image"]', { property: 'og:image', content: imageUrl });
+        setMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: title });
+        setMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: description });
+        setMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: imageUrl });
+        setCanonical(canonicalUrl);
+        setJsonLd('product-breadcrumbs', {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Нүүр', item: `${SITE_URL}/` },
+                { '@type': 'ListItem', position: 2, name: 'Автомашин', item: `${SITE_URL}/search` },
+                { '@type': 'ListItem', position: 3, name: product.name, item: canonicalUrl },
+            ],
+        });
+
+        return () => removeJsonLd('product-breadcrumbs');
+    }, [loading, product]);
 
     const optionGroups = useMemo(() => {
         const owned = new Set(product?.options || []);
