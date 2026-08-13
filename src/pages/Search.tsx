@@ -29,6 +29,23 @@ const priceValue = (price: string) => {
     return price.includes('сая') ? n * 1_000_000 : n;
 };
 
+type SortKey = 'recommended' | 'newest' | 'priceAsc' | 'priceDesc' | 'kmAsc';
+type ViewKey = 'grid' | 'list' | 'compact';
+
+const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+    { key: 'recommended', label: 'Санал болгох' },
+    { key: 'newest', label: 'Шинэ зар эхэлж' },
+    { key: 'priceAsc', label: 'Үнэ багаас их рүү' },
+    { key: 'priceDesc', label: 'Үнэ ихээс бага руу' },
+    { key: 'kmAsc', label: 'Гүйлт багатай нь' },
+];
+
+const VIEW_MODES: { key: ViewKey; icon: string }[] = [
+    { key: 'grid', icon: '▦' },
+    { key: 'list', icon: '☰' },
+    { key: 'compact', icon: '▤' },
+];
+
 const mileageValue = (mileage: string) => Number(mileage.replace(/[^0-9]/g, '')) || 0;
 const yearValue = (year: string) => Number(String(year).slice(0, 4)) || 0;
 const brandOf = (product: Product) => product.name.trim().split(' ')[0];
@@ -79,6 +96,9 @@ export default function Search() {
     const [selection, setSelection] = useState<Selection>(EMPTY);
     const [brands, setBrands] = useState<string[]>([]);
     const [panelOpen, setPanelOpen] = useState(false);
+    const [sort, setSort] = useState<SortKey>('recommended');
+    const [sortOpen, setSortOpen] = useState(false);
+    const [view, setView] = useState<ViewKey>('list');
 
     useEffect(() => {
         const load = async () => setProducts(await getProducts());
@@ -93,11 +113,11 @@ export default function Search() {
     }, []);
 
     useEffect(() => {
-        document.body.style.overflow = panelOpen ? 'hidden' : '';
+        document.body.style.overflow = panelOpen || sortOpen ? 'hidden' : '';
         return () => {
             document.body.style.overflow = '';
         };
-    }, [panelOpen]);
+    }, [panelOpen, sortOpen]);
 
     const toggle = (key: GroupKey, value: string) =>
         setSelection((prev) => ({
@@ -121,7 +141,7 @@ export default function Search() {
 
     const results = useMemo(() => {
         const q = query.trim().toLowerCase();
-        return products.filter((product) => {
+        const matched = products.filter((product) => {
             if (q && !`${product.name} ${product.year} ${product.mileage} ${fuelLabel(product.fuel)}`.toLowerCase().includes(q))
                 return false;
             if (brands.length > 0 && !brands.includes(brandOf(product))) return false;
@@ -130,7 +150,26 @@ export default function Search() {
                 return picked.length === 0 || picked.some((value) => matchesGroup(key, value, product));
             });
         });
-    }, [products, query, selection, brands]);
+
+        const sorted = [...matched];
+        switch (sort) {
+            case 'newest':
+                sorted.sort((a, b) => (b.id || 0) - (a.id || 0));
+                break;
+            case 'priceAsc':
+                sorted.sort((a, b) => priceValue(a.price) - priceValue(b.price));
+                break;
+            case 'priceDesc':
+                sorted.sort((a, b) => priceValue(b.price) - priceValue(a.price));
+                break;
+            case 'kmAsc':
+                sorted.sort((a, b) => mileageValue(a.mileage) - mileageValue(b.mileage));
+                break;
+            default:
+                break;
+        }
+        return sorted;
+    }, [products, query, selection, brands, sort]);
 
     const activeChips = [
         ...brands.map((b) => ({ label: b, remove: () => toggleBrand(b) })),
@@ -160,12 +199,7 @@ export default function Search() {
 
     const chipRow = (
         <div className="flex gap-2 overflow-x-auto no-scrollbar px-4 lg:flex-wrap lg:overflow-visible lg:px-0">
-            <button
-                onClick={() => setPanelOpen((v) => !v)}
-                className={`flex-none h-10 px-[15px] rounded-[20px] border border-ink text-[13px] font-bold whitespace-nowrap lg:h-9 lg:rounded-[9px] ${
-                    panelOpen ? 'bg-surface text-ink' : 'bg-ink text-white'
-                }`}
-            >
+            <button onClick={() => setPanelOpen((v) => !v)} className={chipClass(activeChips.length > 0)}>
                 Бүх шүүлтүүр ⇅
             </button>
             {GROUPS.map((group) => (
@@ -176,6 +210,7 @@ export default function Search() {
                 >
                     {group.title.split(' ')[0]}
                     {selection[group.key].length > 0 ? ` ${selection[group.key].length}` : ''}
+                    <span className="ml-1.5 text-[11px] text-muted-soft">⌄</span>
                 </button>
             ))}
         </div>
@@ -257,10 +292,33 @@ export default function Search() {
                         </div>
                     )}
 
-                    <div className="flex items-center justify-between px-4 pt-3 pb-3.5 lg:px-0 lg:pt-0">
-                        <div className="text-[13.5px] font-bold lg:text-sm">
+                    <div className="flex items-center justify-between gap-2.5 px-4 pt-3 pb-3.5 lg:px-0 lg:pt-0">
+                        <div className="flex-none text-[13.5px] font-bold lg:text-sm">
                             {query ? `"${query}" — ` : ''}
                             {results.length} машин
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setSortOpen(true)}
+                                className="flex items-center gap-2.5 h-[42px] px-3.5 rounded-xl border border-line bg-surface text-[13px] font-bold text-ink whitespace-nowrap"
+                            >
+                                {SORT_OPTIONS.find((o) => o.key === sort)?.label}
+                                <span className="text-[11px] text-muted-soft">⌄</span>
+                            </button>
+                            <div className="flex gap-0.5 p-1 rounded-xl border border-line bg-surface flex-none">
+                                {VIEW_MODES.map((mode) => (
+                                    <button
+                                        key={mode.key}
+                                        onClick={() => setView(mode.key)}
+                                        aria-label={mode.key}
+                                        className={`w-10 h-[34px] rounded-[9px] text-sm ${
+                                            view === mode.key ? 'bg-night text-white' : 'text-placeholder'
+                                        }`}
+                                    >
+                                        {mode.icon}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
 
@@ -273,14 +331,67 @@ export default function Search() {
                             </button>
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-3 px-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:px-0">
+                        <div
+                            className={
+                                view === 'grid'
+                                    ? 'grid grid-cols-2 gap-x-3 gap-y-4 px-4 lg:grid-cols-4 lg:gap-4 lg:px-0'
+                                    : 'flex flex-col gap-3 px-4 lg:px-0' +
+                                      (view === 'list' ? ' lg:grid lg:grid-cols-2 lg:gap-4' : '')
+                            }
+                        >
                             {results.map((product, i) => (
-                                <CarCard key={product.id} product={product} savedIds={savedIds} priority={i === 0} />
+                                <CarCard
+                                    key={product.id}
+                                    product={product}
+                                    variant={view === 'grid' ? 'compact' : view === 'compact' ? 'row' : 'grid'}
+                                    savedIds={savedIds}
+                                    priority={i === 0}
+                                />
                             ))}
                         </div>
                     )}
                 </section>
             </main>
+
+            {/* 정렬 바텀시트 */}
+            {sortOpen && (
+                <div
+                    className="fixed inset-0 z-[55] bg-[var(--overlay)] flex items-end justify-center lg:items-center lg:p-6"
+                    onClick={() => setSortOpen(false)}
+                >
+                    <div
+                        className="w-full max-w-app bg-surface rounded-t-[20px] animate-sheet-up lg:max-w-[420px] lg:rounded-[20px] lg:shadow-modal lg:animate-slide-up"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="px-5 pt-[18px] pb-3 flex items-center justify-between border-b border-line-soft">
+                            <div className="text-[17px] font-extrabold tracking-[-0.02em]">Эрэмбэлэх</div>
+                            <button onClick={() => setSortOpen(false)} aria-label="Хаах" className="w-9 h-9 rounded-[10px] bg-line text-muted text-[15px]">
+                                ✕
+                            </button>
+                        </div>
+                        <div className="px-5 pt-1 pb-6 flex flex-col">
+                            {SORT_OPTIONS.map((option) => {
+                                const active = option.key === sort;
+                                return (
+                                    <button
+                                        key={option.key}
+                                        onClick={() => {
+                                            setSort(option.key);
+                                            setSortOpen(false);
+                                        }}
+                                        className={`w-full min-h-[50px] px-1 flex items-center justify-between border-b border-line-soft last:border-b-0 text-[14.5px] ${
+                                            active ? 'font-extrabold text-primary' : 'font-semibold text-ink'
+                                        }`}
+                                    >
+                                        {option.label}
+                                        <span>{active ? '✓' : ''}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* 모바일 필터 바텀시트 */}
             {panelOpen && (
