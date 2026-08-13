@@ -12,7 +12,6 @@ import CategorySection from '../components/CategorySection';
 import DataStatePanel from '../components/DataStatePanel';
 import { getCategoriesOrThrow, getProductsOrThrow } from '../utils/storage';
 import type { Category, Product } from '../utils/storage';
-import { Link } from 'react-router-dom';
 
 export default function Home() {
     const [categories, setCategories] = useState<Category[]>([]);
@@ -61,27 +60,6 @@ export default function Home() {
                     />
                 )}
                 <Banner />
-                <section
-                    aria-labelledby="dt-trading-introduction"
-                    className="mx-4 mt-5 rounded-2xl border border-line bg-surface px-5 py-6 lg:mx-[72px] lg:mt-0 lg:mb-10 lg:px-8 lg:py-7"
-                >
-                    <h1 id="dt-trading-introduction" className="m-0 text-[22px] font-extrabold tracking-[-0.025em] text-ink lg:text-[28px]">
-                        DT Trading
-                    </h1>
-                    <p className="mt-2 mb-0 max-w-[850px] text-[13.5px] leading-[1.7] text-muted lg:text-[15px]">
-                        DT Trading нь БНСУ-аас шалгагдсан автомашин хайх, захиалах, худалдан авахад тусалж, тээвэр, гааль,
-                        бүртгэлийн зөвлөгөө бүхий нэгдсэн үйлчилгээ үзүүлнэ.
-                    </p>
-                    <p className="mt-2 mb-0 max-w-[850px] text-[12.5px] leading-[1.65] text-muted-soft lg:text-[13.5px]">
-                        Google-ээр нэвтрэх мэдээллийг хэрэглэгчийг таних, хадгалсан зар, захиалга болон сэтгэгдлийг хэрэглэгчийн
-                        бүртгэлтэй холбох зорилгоор ашиглана.
-                    </p>
-                    <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[12.5px] font-bold lg:text-[13px]">
-                        <Link to="/about" className="text-primary hover:underline">Бидний тухай</Link>
-                        <Link to="/privacy" className="text-primary hover:underline">Нууцлалын бодлого</Link>
-                        <Link to="/terms" className="text-primary hover:underline">Үйлчилгээний нөхцөл</Link>
-                    </div>
-                </section>
                 <Categories />
                 <FeaturedCars />
 
