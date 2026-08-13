@@ -7,8 +7,8 @@ const DEFAULT_IMAGE = `${SITE_URL}/logo.png`;
 
 const ROUTE_META: Record<string, { title: string; description: string; noIndex?: boolean }> = {
     '/': {
-        title: 'DT Trading — Солонгосоос шалгагдсан автомашин',
-        description: 'Солонгосоос шалгагдсан автомашиныг үнэ, гүйлт, он, түлшээр хайж захиалаарай. Гааль, тээвэр, бүртгэлийн нэгдсэн үйлчилгээ.',
+        title: 'DT Trading',
+        description: 'DT Trading нь БНСУ-аас шалгагдсан автомашин хайх, захиалах, худалдан авахад тусалж, тээвэр, гааль, бүртгэлийн нэгдсэн үйлчилгээ үзүүлнэ.',
     },
     '/search': {
         title: 'Автомашин хайх | DT Trading',
