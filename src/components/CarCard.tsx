@@ -60,7 +60,7 @@ function SaveButton({ id, saved, className }: { id: number; saved: boolean; clas
                 e.stopPropagation();
                 toggleSaved(id);
             }}
-            className={`${className} rounded-full flex items-center justify-center transition-colors ${saved ? 'text-danger' : 'text-[#94a0b2]'}`}
+            className={`${className} rounded-full flex items-center justify-center transition-colors ${saved ? 'text-danger' : 'text-muted'}`}
         >
             <span className="text-[17px] leading-none">{saved ? '♥' : '♡'}</span>
         </button>
@@ -82,7 +82,7 @@ const CarCard = memo(function CarCard({
         return (
             <Link
                 to={`/product/${product.id}`}
-                className="flex gap-3.5 bg-surface border border-line rounded-2xl p-3 text-ink hover:text-ink transition-colors hover:border-[#c9d3e4]"
+                className="flex gap-3.5 bg-surface border border-line rounded-2xl p-3 text-ink hover:text-ink transition-colors hover:border-line-2"
             >
                 <div className="w-[118px] h-[88px] flex-none rounded-xl overflow-hidden bg-photo flex items-center justify-center">
                     {product.images?.[0] ? (
@@ -137,7 +137,7 @@ const CarCard = memo(function CarCard({
         return (
             <Link
                 to={`/product/${product.id}`}
-                className="flex-none w-[190px] lg:w-auto bg-surface border border-line rounded-[14px] overflow-hidden text-ink hover:text-ink transition-colors hover:border-[#c9d3e4]"
+                className="flex-none w-[190px] lg:w-auto bg-surface border border-line rounded-[14px] overflow-hidden text-ink hover:text-ink transition-colors hover:border-line-2"
             >
                 <Photo product={product} variant="mini" />
                 <div className="px-[13px] pt-3 pb-3.5">
@@ -152,7 +152,7 @@ const CarCard = memo(function CarCard({
     return (
         <Link
             to={`/product/${product.id}`}
-            className="block bg-surface border border-line rounded-2xl overflow-hidden text-ink hover:text-ink transition-colors hover:border-[#c9d3e4]"
+            className="block bg-surface border border-line rounded-2xl overflow-hidden text-ink hover:text-ink transition-colors hover:border-line-2"
         >
             <div className="relative">
                 <Photo product={product} variant="grid" priority={priority} />
@@ -160,7 +160,7 @@ const CarCard = memo(function CarCard({
                     <SaveButton
                         id={product.id}
                         saved={saved}
-                        className="absolute top-2.5 right-2.5 w-11 h-11 bg-white/90 backdrop-blur-sm"
+                        className="absolute top-2.5 right-2.5 w-11 h-11 bg-black/55"
                     />
                 )}
             </div>
@@ -170,7 +170,7 @@ const CarCard = memo(function CarCard({
                 <div className="mt-2.5 text-[17px] font-extrabold text-primary lg:text-[18px]">{product.price}</div>
                 {krw && (
                     <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[11.5px] font-bold text-muted-strong bg-[#eef1f6] rounded-[5px] px-[7px] py-[3px] whitespace-nowrap">
+                        <span className="text-[11.5px] font-bold text-muted-strong bg-line rounded-[5px] px-[7px] py-[3px] whitespace-nowrap">
                             Солонгост
                         </span>
                         <span className="text-[13.5px] font-extrabold whitespace-nowrap">{krw}</span>

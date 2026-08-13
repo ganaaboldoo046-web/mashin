@@ -164,7 +164,7 @@ export default function Profile() {
                                 className="flex items-center justify-between min-h-[52px] px-[18px] border-b border-line-soft last:border-b-0 text-sm font-bold text-ink hover:text-ink"
                             >
                                 <span>{item.label}</span>
-                                <span className="text-[#c3c9d2] text-[15px]">›</span>
+                                <span className="text-[color:var(--muted-4)] text-[15px]">›</span>
                             </Link>
                         ))}
                     </div>
@@ -323,10 +323,10 @@ function OrderList({ orders, emptyMessage }: { orders: any[], emptyMessage: stri
                 <div key={order.id} className="bg-surface border border-line rounded-2xl p-4">
                     <div className="flex justify-between items-start gap-3 mb-2">
                         <h3 className="text-sm font-extrabold text-ink">{order.product_name}</h3>
-                        <span className={`text-[11px] font-bold px-2 py-1 rounded-[5px] whitespace-nowrap ${order.status === 'pending' ? 'bg-[#fff4e0] text-[#b26a00]' :
+                        <span className={`text-[11px] font-bold px-2 py-1 rounded-[5px] whitespace-nowrap ${order.status === 'pending' ? 'bg-[#f5a524]/20 text-[#f5a524]' :
                             order.status === 'confirmed' ? 'bg-primary-soft text-primary' :
-                                order.status === 'completed' ? 'bg-[#e6f6ec] text-[#1a7f45]' :
-                                    'bg-[#fdeaea] text-danger'
+                                order.status === 'completed' ? 'bg-[#2ea36a]/20 text-[#2ea36a]' :
+                                    'bg-danger/20 text-danger'
                             }`}>
                             {order.status === 'pending' ? 'Хүлээгдэж буй' :
                                 order.status === 'confirmed' ? 'Баталгаажсан' :

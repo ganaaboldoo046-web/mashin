@@ -167,7 +167,7 @@ export default function CustomerReviews() {
                         className="min-w-[280px] bg-surface p-4 rounded-2xl border border-line flex flex-col gap-3"
                     >
                         <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-extrabold ${review.gender === 'male' ? 'bg-primary-soft text-primary' : 'bg-[#fdeaf1] text-[#d4467f]'}`}>
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-extrabold ${review.gender === 'male' ? 'bg-primary-soft text-primary' : 'bg-[#d4467f]/20 text-[#e878a6]'}`}>
                                 {review.user_name.slice(0, 1).toUpperCase()}
                             </div>
                             <div>

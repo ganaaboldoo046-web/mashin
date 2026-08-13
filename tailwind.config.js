@@ -32,6 +32,7 @@ export default {
         "muted-faint": "var(--muted-2)",
         "placeholder": "var(--muted-3)",
         "line": "var(--line)",
+        "line-2": "var(--line-2)",
         "line-strong": "var(--line)",
         "line-soft": "var(--surface-2)",
         "canvas": "var(--bg)",

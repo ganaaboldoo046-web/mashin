@@ -55,7 +55,7 @@ const Categories = memo(function Categories() {
                     <Link
                         key={category.id}
                         to={`/category/${category.id}`}
-                        className="flex-none inline-flex items-center gap-2.5 h-12 px-4 lg:h-[52px] lg:px-5 rounded-full border border-line bg-surface text-ink hover:text-ink hover:border-[#c9d3e4] transition-colors"
+                        className="flex-none inline-flex items-center gap-2.5 h-12 px-4 lg:h-[52px] lg:px-5 rounded-full border border-line bg-surface text-ink hover:text-ink hover:border-line-2 transition-colors"
                     >
                         <CategoryMark category={category} />
                         <span className="text-[13.5px] lg:text-[14.5px] font-bold whitespace-nowrap">{category.name}</span>

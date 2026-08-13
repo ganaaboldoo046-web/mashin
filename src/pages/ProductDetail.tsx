@@ -215,7 +215,7 @@ export default function ProductDetail() {
             <h1 className="mt-3 mb-0 text-[21px] font-extrabold tracking-[-0.025em] leading-[1.3] lg:text-2xl">{product.name}</h1>
             <div className="mt-1.5 text-[13px] font-medium text-muted lg:mt-2 lg:text-[13.5px]">{meta}</div>
 
-            <div className="mt-[18px] lg:mt-[22px] lg:pt-5 lg:border-t lg:border-[#eef0f3]">
+            <div className="mt-[18px] lg:mt-[22px] lg:pt-5 lg:border-t lg:border-line">
                 <div className="text-[12.5px] font-bold text-muted-soft">Машины үнэ</div>
                 <div className="mt-1 text-[28px] font-extrabold text-primary tracking-[-0.03em] lg:mt-1.5 lg:text-[32px]">{product.price}</div>
                 {krw && (
@@ -303,7 +303,7 @@ export default function ProductDetail() {
                         )}
 
                         {/* 모바일 가격 블록 */}
-                        <div className="lg:hidden bg-surface px-4 pt-5 pb-[22px] border-b border-[#e9ebef]">{priceBlock}</div>
+                        <div className="lg:hidden bg-surface px-4 pt-5 pb-[22px] border-b border-line">{priceBlock}</div>
 
                         {/* 주요 사양 */}
                         <h2 className="hidden lg:block m-0 mt-9 mb-3.5 text-[19px] font-extrabold tracking-[-0.02em]">Үндсэн үзүүлэлт</h2>
@@ -347,14 +347,14 @@ export default function ProductDetail() {
                                                     <div key={item.label} className="flex items-center gap-2 min-w-0 py-1 lg:py-[7px] lg:gap-2.5">
                                                         <span
                                                             className={`flex-none w-[17px] h-[17px] rounded-full flex items-center justify-center text-[9.5px] font-bold lg:w-[18px] lg:h-[18px] lg:text-[10px] ${
-                                                                item.on ? 'bg-primary text-white' : 'bg-[#eef0f4] text-[#c3c9d2]'
+                                                                item.on ? 'bg-primary text-white' : 'bg-line text-[color:var(--muted-4)]'
                                                             }`}
                                                         >
                                                             ✓
                                                         </span>
                                                         <span
                                                             className={`text-[12.5px] truncate lg:text-[13.5px] ${
-                                                                item.on ? 'font-semibold text-[#1f2937]' : 'font-medium text-[#b6bcc6]'
+                                                                item.on ? 'font-semibold text-ink' : 'font-medium text-placeholder'
                                                             }`}
                                                         >
                                                             {item.label}
@@ -451,7 +451,7 @@ export default function ProductDetail() {
                     onClick={handleToggleSave}
                     aria-label="Хадгалах"
                     className={`w-14 h-[52px] flex-none rounded-[13px] border border-line-strong bg-surface text-[19px] ${
-                        isProductSaved ? 'text-danger' : 'text-[#94a0b2]'
+                        isProductSaved ? 'text-danger' : 'text-muted'
                     }`}
                 >
                     {isProductSaved ? '♥' : '♡'}

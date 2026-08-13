@@ -51,7 +51,7 @@ export default function Saved() {
                     </>
                 ) : (
                     <div className="bg-surface border border-line rounded-2xl px-5 py-16 text-center">
-                        <div className="text-[26px] text-[#cbd2dc]">♡</div>
+                        <div className="text-[26px] text-[color:var(--muted-4)]">♡</div>
                         <div className="mt-3 text-[15px] font-extrabold">Хадгалсан зар байхгүй</div>
                         <div className="mt-1.5 text-[13px] text-muted">Таалагдсан машиныг ♡ дарж хадгална уу.</div>
                         <Link

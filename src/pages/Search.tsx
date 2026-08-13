@@ -67,7 +67,7 @@ const chipClass = (active: boolean) =>
 
 const pillClass = (active: boolean) =>
     `h-10 px-[15px] rounded-[10px] border text-[13px] whitespace-nowrap transition-colors ${
-        active ? 'border-primary bg-primary-soft text-primary font-bold' : 'border-[#e2e5ea] bg-surface-2 text-[#4b5563] font-semibold'
+        active ? 'border-primary bg-primary-soft text-primary font-bold' : 'border-line bg-surface-2 text-muted-strong font-semibold'
     }`;
 
 export default function Search() {
@@ -205,11 +205,11 @@ export default function Search() {
                                 <button
                                     key={brand}
                                     onClick={() => toggleBrand(brand)}
-                                    className="flex items-center gap-2.5 px-1 py-[11px] border-b border-[#ebedf1] text-left"
+                                    className="flex items-center gap-2.5 px-1 py-[11px] border-b border-line text-left"
                                 >
                                     <span
                                         className={`w-[22px] h-[22px] flex-none rounded-full flex items-center justify-center text-[11px] font-extrabold text-white ${
-                                            active ? 'bg-primary' : 'bg-[#eef0f4]'
+                                            active ? 'bg-primary' : 'bg-line'
                                         }`}
                                     >
                                         {active ? '✓' : ''}
