@@ -22,7 +22,7 @@ Because `www.dt-trading.kr` currently resolves, create a Cloudflare Redirect Rul
 - Status: `301`
 - Preserve query string: enabled
 
-Also redirect `dt-trading.pages.dev` to the custom domain in the Cloudflare Pages custom-domain settings. Until that redirect is enabled, the project sends `X-Robots-Tag: noindex, nofollow` on the Pages subdomain.
+Also redirect `mashin-a6j.pages.dev` to the custom domain in the Cloudflare Pages custom-domain settings. Until that redirect is enabled, the project sends `X-Robots-Tag: noindex, nofollow` on the Pages subdomain.
 
 ## 2. Google Search Console
 
@@ -58,7 +58,7 @@ Authorized JavaScript origins:
 
 - `https://dt-trading.kr`
 - `https://www.dt-trading.kr` (only if the `www` hostname is configured)
-- `https://dt-trading.pages.dev`
+- `https://mashin-a6j.pages.dev`
 - `http://localhost:5173`
 - `http://127.0.0.1:5173`
 
@@ -67,7 +67,7 @@ Do not add a redirect URI for the current popup-based Google Sign-In implementat
 Copy the generated Web client ID and set the same value in both places:
 
 - GitHub → repository Settings → Environments → `production` → Variables: `VITE_GOOGLE_CLIENT_ID`
-- Cloudflare → Workers & Pages → `dt-trading` → Settings → Variables and Secrets → Production variable: `GOOGLE_CLIENT_ID`
+- Cloudflare → Workers & Pages → `mashin-a6j` → Settings → Variables and Secrets → Production variable: `GOOGLE_CLIENT_ID`
 
 `GOOGLE_CLIENT_ID` is public configuration, not a password. `SESSION_SECRET` must remain encrypted and must be at least 32 characters.
 

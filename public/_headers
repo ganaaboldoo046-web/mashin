@@ -12,5 +12,5 @@
 /api/*
   Cache-Control: no-store
 
-https://dt-trading.pages.dev/*
+https://mashin-a6j.pages.dev/*
   X-Robots-Tag: noindex, nofollow

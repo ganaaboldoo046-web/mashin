@@ -29,7 +29,7 @@ Never commit `.dev.vars` or plaintext administrator credentials.
 
 ## Deployment
 
-Pull requests run build and lint checks. A verified push to `main` deploys the exact commit to the `dt-trading` Cloudflare Pages project through `.github/workflows/deploy.yml`.
+Pull requests run build and lint checks. A verified push to `main` deploys the exact commit to the `mashin-a6j` Cloudflare Pages project through `.github/workflows/deploy.yml`.
 
 Add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` as secrets and `VITE_GOOGLE_CLIENT_ID` as a variable in the GitHub `production` environment. D1 (`DB`) and R2 (`BUCKET`) bindings and the authentication variables/secrets must also exist in the Cloudflare Pages production environment.
 
